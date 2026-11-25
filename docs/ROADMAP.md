@@ -1,7 +1,7 @@
 # Roadmap
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
-2. Unity XR rig, passthrough, repositionable world-space panels and physical Quest 3 test.
+2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.
 3. Localization and international font/RTL validation; avatars, local speech and hand gestures.
 4. Challenge and hackathon source adapters, browser and document import with provenance.
 5. Local AI adapter and budget enforcement; job checkpointing and research evidence review; optional commercial providers.
