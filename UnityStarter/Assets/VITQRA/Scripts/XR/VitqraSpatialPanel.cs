@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Vitqra
 {
-    public sealed class VitqraSpatialPanel : MonoBehaviour
+    public class VitqraSpatialPanel : MonoBehaviour
     {
         public const float Width = 0.64f;
         public const float Height = 0.34f;
@@ -60,11 +60,11 @@ namespace Vitqra
             action.fontSize = 21;
         }
 
-        public void Highlight(bool value) { if (background != null) background.color = value ? Hover : Normal; }
-        public void InvokeAction(int region) { if (region == 1) activate?.Invoke(); else if (region == 2) secondaryActivate?.Invoke(); }
+        public virtual void Highlight(bool value) { if (background != null) background.color = value ? Hover : Normal; }
+        public virtual void InvokeAction(int region) { if (region == 1) activate?.Invoke(); else if (region == 2) secondaryActivate?.Invoke(); }
 
         // Intersect the finite panel rectangle; no physics layer or collider required.
-        public bool Intersect(Ray ray, out float distance, out int actionRegion)
+        public virtual bool Intersect(Ray ray, out float distance, out int actionRegion)
         {
             distance = 0;
             actionRegion = 0;
@@ -81,7 +81,7 @@ namespace Vitqra
             return true;
         }
 
-        private static RectTransform Child(string name, Transform parent, Vector2 position, Vector2 size)
+        protected static RectTransform Child(string name, Transform parent, Vector2 position, Vector2 size)
         {
             var obj = new GameObject(name, typeof(RectTransform));
             var rect = (RectTransform)obj.transform;
@@ -91,14 +91,14 @@ namespace Vitqra
             rect.sizeDelta = size;
             return rect;
         }
-        private static Image Box(string name, Transform parent, Vector2 position, Vector2 size, Color color)
+        protected static Image Box(string name, Transform parent, Vector2 position, Vector2 size, Color color)
         {
             var image = Child(name, parent, position, size).gameObject.AddComponent<Image>();
             image.color = color;
             image.raycastTarget = false;
             return image;
         }
-        private static Text Label(string name, Transform parent, Vector2 position, Vector2 size, string content, int fontSize, Color color)
+        protected static Text Label(string name, Transform parent, Vector2 position, Vector2 size, string content, int fontSize, Color color)
         {
             var text = Child(name,parent,position,size).gameObject.AddComponent<Text>();
             text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");

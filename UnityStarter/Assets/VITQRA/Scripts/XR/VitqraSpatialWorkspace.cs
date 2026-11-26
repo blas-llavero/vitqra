@@ -11,9 +11,9 @@ namespace Vitqra
         [SerializeField] private Transform trackingSpace;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
-        private VitqraSpatialPanel research, advice, notes, configuration, assistant, subtitles, grabbed;
-        private bool settingsOpen;
-        private float subtitleUntil;
+        private VitqraSpatialPanel research, advice, notes, configuration, assistant, grabbed;
+        private VitqraConversationPanel conversation;
+        private bool settingsOpen, conversationOpen = true;
         private VitqraAvatarPreview avatar;
         private bool reviewPending, reviewCompleted;
         public bool ReviewPending => reviewPending;
@@ -49,7 +49,12 @@ namespace Vitqra
             configuration.SetSecondaryAction(T(K.ToggleResearch), () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
             assistant = AddPanel(T(K.Assistant), Violet, ChooseNextAvatar);
             assistant.SetSecondaryAction(T(K.Close), CloseAvatarSettings);
-            subtitles = AddPanel(T(K.Subtitles), Cyan, HideSubtitle);
+            advice.SetSecondaryAction(VitqraChatStrings.Get(settings.language, VitqraChatStrings.Key.Open), OpenConversation);
+            var chatObject = new GameObject("Conversation");
+            chatObject.transform.SetParent(transform,false);
+            conversation = chatObject.AddComponent<VitqraConversationPanel>();
+            conversation.InitializeChat(settings.language, MinimizeConversation);
+            panels.Add(conversation);
             assistant.ReserveAvatarSpace();
             avatar = assistant.gameObject.AddComponent<VitqraAvatarPreview>();
             avatar.SetProfile(settings.avatarProfile);
@@ -90,26 +95,36 @@ namespace Vitqra
             configuration.gameObject.SetActive(true);
         }
 
-        // Main-thread entry point for future speech playback; use actual playback duration
-        // once available. The preview uses a reading-time estimate, not audio timing.
-        public void ShowSubtitle(string message, float seconds)
+        private void OpenConversation()
         {
-            if (!initialized || subtitles == null || string.IsNullOrWhiteSpace(message)) return;
-            subtitles.SetContent(message, T(K.Close));
-            subtitleUntil = Time.unscaledTime + Mathf.Max(0.5f, seconds);
-            subtitles.gameObject.SetActive(true);
+            conversationOpen = true;
+            if (grabbed == advice) grabbed = null;
+            advice.gameObject.SetActive(false);
+            conversation.gameObject.SetActive(true);
         }
 
-        public void HideSubtitle()
+        private void MinimizeConversation()
         {
-            subtitleUntil = 0;
-            if (grabbed == subtitles) grabbed = null;
-            if (subtitles != null) subtitles.gameObject.SetActive(false);
+            conversationOpen = false;
+            if (grabbed == conversation) grabbed = null;
+            conversation.gameObject.SetActive(false);
+            advice.gameObject.SetActive(true);
+        }
+
+        // Adapter hooks: subscribe directly to the panel, after initialization, on the main thread.
+        public VitqraConversationPanel Conversation => conversation;
+
+        public void AddAssistantMessage(string message)
+        {
+            if (conversation == null || string.IsNullOrWhiteSpace(message)) return;
+            conversation.AddAssistantMessage(message);
+            if (initialized) OpenConversation();
         }
 
         private void PresentTip()
         {
-            ShowSubtitle(Tip, Mathf.Clamp(4f + Tip.Length * 0.10f, 8f, 18f));
+            conversation.AddAssistantMessage(Tip, true);
+            if (initialized) OpenConversation();
             AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
         }
 
@@ -176,10 +191,13 @@ namespace Vitqra
             PlacePanel(advice, center, right, columnOffset, upperRow);
             PlacePanel(configuration, center, right, columnOffset, lowerRow);
             PlacePanel(assistant, center, right, columnOffset, lowerRow);
-            PlacePanel(subtitles, center, right, columnOffset, 0.66f);
+            // The larger conversation occupies the upper right slot instead of Smart Advice.
+            // Its lower edge is 0.11 m below eye level, above AI Settings.
+            PlacePanel(conversation, center, right, 1.00f, 0.34f);
             settingsOpen = false;
             assistant.gameObject.SetActive(false);
-            subtitles.gameObject.SetActive(subtitleUntil > Time.unscaledTime);
+            advice.gameObject.SetActive(!conversationOpen);
+            conversation.gameObject.SetActive(conversationOpen);
             initialized = true;
         }
 
@@ -215,8 +233,6 @@ namespace Vitqra
                 PlacePanels();
                 PresentTip();
             }
-
-            if (subtitles.gameObject.activeSelf && Time.unscaledTime >= subtitleUntil) HideSubtitle();
 
             var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             if (!ReadPose(device, out Vector3 localPosition, out Quaternion localRotation))
