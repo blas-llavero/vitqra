@@ -46,8 +46,9 @@ No APK or public release is available at this milestone. Clone this repository o
 | OK gesture with XR Hands | Optional source adapter; package/feature setup and device testing pending |
 | Conversation history and text composer | Source implemented; keyboard and Quest testing pending |
 | Optional persistent single-conversation history | Source implemented; device storage tests pending |
-| Local microphone and transcription bridge | Source implemented; no native model backend |
-| Natural speech, dictation backend and browser | Planned |
+| Local microphone and Sherpa-ONNX STT/TTS adapters | Source implemented; native build, model provisioning and device tests pending |
+| Natural speech and dictation | Requires reviewed native binaries and models; not verified |
+| Browser | Planned |
 | Research and hackathon discovery, data import and research pipeline | Planned |
 | Patient community and remote avatar presence | Planned; security and clinical governance gates apply |
 | About and Help videos, branding and store screenshots | Pending author review; no media distributed |
@@ -72,9 +73,9 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.3.3)
+## Mixed reality prototype (v0.3.4)
 
-Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history, supports optional unencrypted local history with deletion controls, and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. A local microphone/transcription bridge is provided but no native engine or AI provider is connected. See [voice setup](docs/VOICE_SETUP.md). Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No speech engine or APK is provided.
+Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history, supports optional unencrypted local history with deletion controls, and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. A local microphone and Sherpa-ONNX STT/TTS adapter are provided as source; no native libraries or models are bundled and no AI provider is connected. See [voice setup](docs/VOICE_SETUP.md). Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No compiled speech engine or APK is provided.
 
 ## Build from source
 

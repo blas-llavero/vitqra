@@ -31,6 +31,7 @@ namespace Vitqra
             language=locale;
             configured=true;
             // Do not attach the microphone button until a concrete engine is supplied.
+            if(engine==null) engine=GetComponent<VitqraOfflineSpeechEngine>();
             if(engine==null) return;
             panel.VoiceRequested+=Toggle;
             panel.VoiceCanceled+=Cancel;
@@ -50,6 +51,8 @@ namespace Vitqra
                 return;
             }
 #endif
+            var playback=GetComponent<VitqraSpeechPlayback>();
+            if(playback!=null)playback.Stop();
             try
             {
                 if(Microphone.devices.Length==0){panel.SetVoiceState(false,false,true);return;}

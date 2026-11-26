@@ -13,6 +13,7 @@ namespace Vitqra
         private VitqraSettings settings;
         private VitqraSpatialPanel research, advice, notes, configuration, assistant, grabbed;
         private VitqraConversationPanel conversation;
+        private VitqraSpeechPlayback playback;
         private bool settingsOpen, conversationOpen = true;
         private VitqraAvatarPreview avatar;
         private bool reviewPending, reviewCompleted;
@@ -58,6 +59,9 @@ namespace Vitqra
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
             speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));
+            playback=GetComponent<VitqraSpeechPlayback>();
+            var backend=GetComponent<VitqraSherpaSpeechEngine>();
+            if(playback!=null&&backend!=null)playback.Configure(backend);
             assistant.ReserveAvatarSpace();
             avatar = assistant.gameObject.AddComponent<VitqraAvatarPreview>();
             avatar.SetProfile(settings.avatarProfile);
@@ -111,6 +115,7 @@ namespace Vitqra
             conversationOpen = false;
             if (grabbed == conversation) grabbed = null;
             conversation.gameObject.SetActive(false);
+            if(playback!=null)playback.Stop();
             advice.gameObject.SetActive(true);
         }
 
@@ -122,6 +127,7 @@ namespace Vitqra
             if (conversation == null || string.IsNullOrWhiteSpace(message)) return;
             conversation.AddAssistantMessage(message);
             if (initialized) OpenConversation();
+            if(playback!=null)playback.Speak(message,VitqraStrings.ResolveLanguage(settings.language),settings.avatarProfile);
         }
 
         private void PresentTip()
@@ -129,6 +135,7 @@ namespace Vitqra
             conversation.AddAssistantMessage(Tip, true);
             if (initialized) OpenConversation();
             AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
+            if(playback!=null)playback.Speak(Tip,VitqraStrings.ResolveLanguage(settings.language),settings.avatarProfile);
         }
 
         private void ChooseNextAvatar()
