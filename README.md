@@ -7,7 +7,7 @@ VITQRA is an open-source research assistant project for mixed reality, intended 
 ## Installation location
 
 - Planned APK downloads: https://github.com/blas-llavero/vitqra/releases (not published yet).
-- Suggested Windows source location: `C:\Projectes\vitqra\`.
+- Suggested source location: a local development folder named `vitqra`.
 - Android application ID (planned): `com.blasllavero.vitqra`.
 
 ## Author and mission
@@ -19,6 +19,11 @@ VITQRA is open source: everyone may use, study, modify and redistribute its own 
 ## Download and installation
 
 No APK or public release is available at this milestone. Clone this repository or download its source ZIP. To run the preview, follow Build from source at the end of this README. Do not install an APK from an unverified source.
+
+### Development integration status (v0.9.0 initial)
+
+The development branch includes synthetic research, review, privacy, avatar, telepresence and geometry-recognition demonstrations. The integration runner and evidence-chain checks are prepared, but no Unity suite has been executed in the development environment. This is still a source overlay, not a complete Unity project or installable APK. See [integration and release gates](docs/INTEGRATION_AND_RELEASE_GATES.md). Real clinical intake, certification, live telepresence and real-object recognition remain disabled.
+
 
 ## How to use
 

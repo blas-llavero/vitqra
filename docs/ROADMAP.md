@@ -63,3 +63,5 @@ v0.7.0 initial: fictional avatar meeting with scoped room grants, muted-by-defau
 v0.7.1 initial: local synthetic telepresence, per-channel consent, fictional bounded poses, stale/replay rejection and editor projection. No hardware capture, transport or live holograms. See [SYNTHETIC_TELEPRESENCE.md](SYNTHETIC_TELEPRESENCE.md).
 
 v0.8.0 initial: opt-in closed synthetic geometric recognition using in-memory raster templates, explicit unknown rejection, corruption stress tests and localized editor preview. No camera, learned model, real-object recognition or clinical use. See [SYNTHETIC_OBJECT_RECOGNITION.md](SYNTHETIC_OBJECT_RECOGNITION.md).
+
+v0.9.0 initial: 35-suite editor integration runner, ten-locale synthetic evidence-chain test and release gates. Compilation, actual suite execution, full audits and device tests pending. See [INTEGRATION_AND_RELEASE_GATES.md](INTEGRATION_AND_RELEASE_GATES.md).
