@@ -112,9 +112,7 @@ namespace Vitqra
         }
         private string ResolveModel(VitqraChatAccount.Model[] models)
         {
-            if(models.Length==0)return "";
-            if(string.IsNullOrEmpty(selectedSlug))return models[0].slug;
-            return Array.Exists(models,m=>m.slug==selectedSlug)?selectedSlug:"";
+            return VitqraResearchModelSelector.Resolve(models,selectedSlug);
         }
         private void TestModel()
         {
@@ -126,7 +124,8 @@ namespace Vitqra
             var models=VitqraChatAccount.Catalog;
             string slug=ResolveModel(models);
             var model=Array.Find(models,m=>m.slug==slug);
-            modelChoice.text=(string.IsNullOrEmpty(selectedSlug)?T(K.AutoModel)+": ":"")+(model==null?T(K.NoModels):model.name);
+            bool unranked=string.IsNullOrEmpty(selectedSlug)&&models.Length>0&&string.IsNullOrEmpty(slug);
+            modelChoice.text=(string.IsNullOrEmpty(selectedSlug)?T(K.AutoModel)+": ":"")+(model==null?T(unranked?K.UnrankedModels:K.NoModels):model.name);
             modelLimit.text=T(K.DailyAttempts)+": "+VitqraChatAccount.Used+" / "+VitqraChatAccount.DailyLimit+" (UTC)";
             int test=VitqraChatAccount.TestState;
             K state=test==1?K.TestRunning:test==2?K.TestPassed:test==4?K.ProviderLimit:test==5?K.LocalLimit:test==3?K.TestFailed:
