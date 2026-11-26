@@ -28,7 +28,14 @@ namespace Vitqra
         private IntPtr job;
         private float startedAt;
         private bool destroying;
-        public bool Configured=>enableReviewedModel&&ValidHash(reviewedModelSha256)&&
+        private bool providerSelected=true;
+        public void SetProviderSelected(bool selected)
+        {
+            if(providerSelected==selected)return;
+            providerSelected=selected;
+            ClearContext();
+        }
+        public bool Configured=>providerSelected&&enableReviewedModel&&ValidHash(reviewedModelSha256)&&
             !string.IsNullOrWhiteSpace(modelLicenseSpdx)&&!string.IsNullOrWhiteSpace(modelProvenance)&&
             !string.IsNullOrEmpty(modelPath)&&File.Exists(modelPath);
         [DllImport("vitqra_llm",CallingConvention=CallingConvention.Cdecl)] private static extern int vitqra_llm_abi();

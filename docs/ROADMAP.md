@@ -11,3 +11,5 @@
 7. Multiplayer avatar presence and optional video.
 8. Author-reviewed logo, five store visuals, English About and Help videos (max 30 seconds each), then nine localized versions of each, narration and subtitles. No publication before approval.
 9. Quest build, physical device testing, accessibility and store requirements review.
+
+Configuration extension: two provider choices in the initial XR settings panel; local remains default and the ChatGPT preference is pending official account connection. Model listing, authorized account usage, translation execution and headset validation remain pending. See [AI_PROVIDER_SETTINGS.md](AI_PROVIDER_SETTINGS.md).

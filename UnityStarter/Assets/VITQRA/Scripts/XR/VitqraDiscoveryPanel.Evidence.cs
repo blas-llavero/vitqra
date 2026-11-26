@@ -36,7 +36,13 @@ namespace Vitqra
             finally{if(ReferenceEquals(packageCancel,token))packageCancel=null;token.Dispose();}
         }
         private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchDrafts");
-        public void ConfigureResearchAi(VitqraLocalAi ai){researchAi=ai;}
+        private bool localResearchSelected=true;
+        public void ConfigureResearchAi(VitqraLocalAi ai,bool localSelected=true)
+        {
+            if(localResearchSelected!=localSelected)CancelEvidence();
+            localResearchSelected=localSelected;
+            researchAi=localSelected?ai:null;
+        }
         private async Task<bool> GenerateDraft(VitqraChallengeDirectory.Item item)
         {
             var cancel=new CancellationTokenSource();
@@ -94,7 +100,7 @@ namespace Vitqra
         }
         private void UpdateEvidence()
         {
-            if((activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if(!localResearchSelected||(activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {

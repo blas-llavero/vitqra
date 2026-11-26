@@ -53,3 +53,7 @@ Preserve the approved UI design: central view clear; Research Challenges and My 
 ## Repository and application language
 
 English is the canonical repository language; the app automatically follows the supported device locale with English fallback. See [LOCALIZATION.md](LOCALIZATION.md).
+
+## Optional account-provider preference
+
+The author has requested a voluntary ChatGPT choice inspired by BIOQRA. A persisted UI preference is now available, but the external provider is not connected and the effective local-only inference gate remains in force. Any future official plan-usage connector requires explicit consent, eligibility, privacy and security review. No paid API billing fallback is authorized. See [AI_PROVIDER_SETTINGS.md](AI_PROVIDER_SETTINGS.md).

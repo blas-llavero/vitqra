@@ -13,7 +13,8 @@ namespace Vitqra
         [SerializeField] private bool allowPublicSearchTerms;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
-        private VitqraSpatialPanel advice, notes, configuration, assistant, grabbed;
+        private VitqraSpatialPanel advice, notes, assistant, grabbed;
+        private VitqraAiSettingsPanel configuration;
         private VitqraDiscoveryPanel research;
         private VitqraConversationPanel conversation;
         private VitqraSpeechPlayback playback;
@@ -62,7 +63,12 @@ namespace Vitqra
             panels.Add(research);
             advice = AddPanel(T(K.Advice), Violet, ReviewAction);
             notes = AddPanel(T(K.Notes), Cyan, Refresh);
-            configuration = AddPanel(T(K.Settings), Violet, OpenAvatarSettings);
+            var configurationObject=new GameObject("AI Settings");
+            configurationObject.transform.SetParent(transform,false);
+            configuration=configurationObject.AddComponent<VitqraAiSettingsPanel>();
+            configuration.InitializeSettings(settings.language,SelectAi,ToggleTranslation,OpenAvatarSettings);
+            configuration.InitializeResizeControls(l[21]);
+            panels.Add(configuration);
             // The research list owns the manual/automatic selector.
             assistant = AddPanel(T(K.Assistant), Violet, ChooseNextAvatar);
             assistant.SetSecondaryAction(T(K.Close), CloseAvatarSettings);
@@ -75,7 +81,8 @@ namespace Vitqra
             panels.Add(conversation);
             localAi=GetComponent<VitqraLocalAi>();
             if(localAi!=null)localAi.Configure(conversation,settings.language,AddAssistantMessage);
-            research.ConfigureResearchAi(localAi);
+            if(localAi!=null)localAi.SetProviderSelected(settings.LocalAiSelected);
+            research.ConfigureResearchAi(localAi,settings.LocalAiSelected);
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
             speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));
@@ -106,6 +113,16 @@ namespace Vitqra
 
         private string T(K key) => VitqraAssistantStrings.Get(settings.language, key);
         private string Tip => T((K)((int)K.Tip1 + adviceIndex));
+
+        private void SelectAi(string value)
+        {
+            if(settings.preferredAi==value)return;
+            settings.SelectAi(value);settings.Save();
+            research.ConfigureResearchAi(localAi,settings.LocalAiSelected);
+            if(localAi!=null)localAi.SetProviderSelected(settings.LocalAiSelected);
+            Refresh();
+        }
+        private void ToggleTranslation(){settings.automaticTranslation=!settings.automaticTranslation;settings.Save();Refresh();}
 
         private void OpenAvatarSettings()
         {
@@ -204,7 +221,7 @@ namespace Vitqra
             if (note.Length > 180) note = note.Substring(0,180) + "...";
             notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
             research.SyncMode(settings.automaticResearch);
-            configuration.SetContent(l[19] + "\n" + VitqraChatStrings.Get(settings.language,localAi!=null&&localAi.Configured?VitqraChatStrings.Key.AiConfigured:VitqraChatStrings.Key.AiNotConfigured) + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
+            configuration.RefreshSettings(settings,localAi!=null&&localAi.Configured);
             int profile = settings.avatarProfile;
             string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
             assistant.SetContent(profileName + "\n" + T(K.NoSpeech), T(K.NextAvatar));

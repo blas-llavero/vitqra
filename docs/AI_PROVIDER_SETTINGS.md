@@ -1,0 +1,18 @@
+# AI provider settings — v0.5.3 configuration extension
+
+The existing initial workspace settings panel now presents two explicit provider choices: Local AI (default) and ChatGPT (own account). It stays in the same movable, resizable slot below Conversation and retains Avatar settings. Provider preference and the automatic translation preference are saved locally. One preference applies globally to conversation and all challenges. Translation is a stored preference only; this milestone does not add a translation engine. The existing local reviewed GGUF configuration remains an Inspector/provisioning step. The model status indicates configured, not proof of successful inference.
+
+Selecting ChatGPT displays a pending connection status. It does not sign in, open a login page, register a client, request credentials, list models, make network inference requests or enable a commercial billing path. The previous local conversation is canceled and its short inference context cleared; research acquisition/AI/package work is canceled cooperatively, and new queue work is blocked until the local provider is selected again. The browser and challenge list remain available. Existing jobs may take time to unwind. Completed jobs are not automatically reset. The effective provider and zero-budget guard are retained independently from the UI preference.
+
+## BIOQRA-inspired future integration
+
+BIOQRA's AiSettingsActivity and ChatGptConnection at revision cc87138d652c843bf909d47e65755cd1d38d3bf6 provide the reference UX: account selection, authorized login, model list, default selection, apply to all, automatic translation and daily attempts. Do not copy account credentials or private identity fields. The official Sign in with ChatGPT open-source flow supports eligible ChatGPT plan usage without a developer API key. It is optional, not open-source inference; provider terms, usage limits and credits apply. The author requested this optional provider choice. The prior local-only runtime policy remains enforced until a separately audited implementation is available.
+
+Before enabling ChatGPT, review the official current registration, OAuth PKCE, callback, scope, identity validation, encrypted Android Keystore session storage, refresh/revocation, multiple accounts, model listing, Responses admission and usage errors, rate limits, and explicit consent for external transfer of public research excerpts. Do not reuse another app's client identity or session. No API-key billing fallback, automatic credit purchase, browser scraping, hidden account automation or transmission of patient data, notes or conversation history by default. Stop on unavailable entitlement or exhausted permitted usage. A plan may consume existing paid subscription benefits or credits, not guaranteed free unlimited usage; the local alternative remains available. Add explicit model selection and an adjustable request allowance only when the official connection is validated. Other providers require separate review of cost, privacy, licensing and authorization.
+
+All source and docs remain English with ten localized UI variants. No new library, model, multimedia or credentials distributed. Existing dependency notices unchanged. Run VITQRA > Run Provider Settings Checks and test selection, persistence, cancellation, disabled remote path, localization and Quest layout. Tests not executed in Unity; no runtime integration or APK has been validated.
+
+References:
+- https://developers.openai.com/siwc/quickstart
+- https://developers.openai.com/siwc/token-sharing-open-source
+- https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery
