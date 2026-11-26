@@ -57,4 +57,4 @@ Set the headset device language, then restart VITQRA. The app automatically uses
 
 ## Resizing windows
 
-Every visible panel has a small size toolbar above it. Trigger minus or plus to change its scale by 10 percentage points, or press the percentage to reset that panel to 100%. A/X resets all panel sizes and positions. See [WINDOW_RESIZING.md](WINDOW_RESIZING.md) and run the editor smoke checks before device testing.
+Every panel has a normally hidden size toolbar above it. Aim at any edge for 0.5 seconds to reveal it. It hides after 1.5 seconds away from the edge and buttons, or immediately on tracking loss or grip movement. Trigger minus or plus to change its scale by 10 percentage points, or press the percentage to reset that panel to 100%. A/X resets all panel sizes and positions. See [WINDOW_RESIZING.md](WINDOW_RESIZING.md) and run the editor smoke checks before device testing.

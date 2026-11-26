@@ -21,6 +21,9 @@ namespace Vitqra
                 chat.transform.position = new Vector3(1,0,1.65f);
                 regular.InitializeResizeControls("Size");
                 chat.InitializeResizeControls("Size");
+                Check(!regular.ResizeControlsVisible,"Initially hidden");
+                Check(!regular.TryResizeAction(VitqraSpatialPanel.GrowAction),"Hidden action blocked");
+                Reveal(regular);
                 regular.TryResizeAction(VitqraSpatialPanel.GrowAction);
                 Check(Mathf.Approximately(regular.SizeScale,1.1f),"Grow");
                 Check(Mathf.Approximately(chat.SizeScale,1f),"Independent scale");
@@ -30,11 +33,18 @@ namespace Vitqra
                 Check(Mathf.Approximately(regular.SizeScale,.7f),"Lower bound");
                 foreach(var panel in new VitqraSpatialPanel[]{regular,chat})
                 {
+                    panel.ClearResizeHover();
+                    Reveal(panel);
                     foreach(float scale in new[]{.7f,1f,1.5f})
                     {
                         panel.SetSizeScale(scale);
                         panel.transform.rotation=Quaternion.Euler(0,25,0);
                         float y=panel.BaseHeight*.5f+.034f;
+                        Check(panel.IsResizeEdge(RayAt(panel,0,panel.BaseHeight*.5f-.01f)),"Top edge");
+                        Check(panel.IsResizeEdge(RayAt(panel,0,-panel.BaseHeight*.5f+.01f)),"Bottom edge");
+                        Check(panel.IsResizeEdge(RayAt(panel,panel.BaseWidth*.5f-.01f,0)),"Right edge");
+                        Check(panel.IsResizeEdge(RayAt(panel,-panel.BaseWidth*.5f+.01f,0)),"Left edge");
+                        Check(!panel.IsResizeEdge(RayAt(panel,0,0)),"Center not edge");
                         CheckHit(panel,-.12f,y,VitqraSpatialPanel.ShrinkAction);
                         CheckHit(panel,0,y,VitqraSpatialPanel.ResetSizeAction);
                         CheckHit(panel,.12f,y,VitqraSpatialPanel.GrowAction);
@@ -46,12 +56,33 @@ namespace Vitqra
                     Check(Mathf.Approximately(panel.SizeScale,1f),"Reset");
                     panel.SetSizeScale(float.NaN);
                     Check(Mathf.Approximately(panel.SizeScale,1f),"Reject invalid scale");
+                    for(int i=0;i<20;i++)panel.UpdateResizeHover(false,true,.1f);
+                    Check(panel.ResizeControlsVisible,"Toolbar hover keeps visible");
+                    for(int i=0;i<14;i++)panel.UpdateResizeHover(false,false,.1f);
+                    Check(panel.ResizeControlsVisible,"Grace period");
+                    panel.UpdateResizeHover(false,false,.1f);
+                    Check(!panel.ResizeControlsVisible,"Auto hide");
+                    Check(!panel.TryIntersectResize(RayAt(panel,0,panel.BaseHeight*.5f+.034f),out _,out _),"Hidden toolbar cannot be hit");
+                    Reveal(panel);
                     panel.gameObject.SetActive(false);
                     Check(!panel.TryIntersectResize(RayAt(panel,0,panel.BaseHeight*.5f+.034f),out _,out _),"Hidden toolbar");
                 }
                 Debug.Log("VITQRA window resize checks passed.");
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
+        }
+        private static void Reveal(VitqraSpatialPanel panel)
+        {
+            panel.ClearResizeHover();
+            for(int i=0;i<4;i++)panel.UpdateResizeHover(true,false,.1f);
+            Check(!panel.ResizeControlsVisible,"Before dwell threshold");
+            panel.UpdateResizeHover(false,false,.1f);
+            panel.UpdateResizeHover(true,false,.1f);
+            Check(!panel.ResizeControlsVisible,"Interrupted dwell resets");
+            for(int i=0;i<3;i++)panel.UpdateResizeHover(true,false,.1f);
+            Check(!panel.ResizeControlsVisible,"Before half second");
+            panel.UpdateResizeHover(true,false,.1f);
+            Check(panel.ResizeControlsVisible,"Half-second dwell reveals");
         }
         private static Ray RayAt(VitqraSpatialPanel panel,float x,float y)
         {

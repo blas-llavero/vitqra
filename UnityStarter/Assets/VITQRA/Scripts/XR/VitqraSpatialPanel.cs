@@ -19,6 +19,12 @@ namespace Vitqra
         private string sizeTitle;
         private float resizeY;
         private bool resizeReady;
+        private GameObject resizeToolbar;
+        public const float ResizeRevealSeconds = .5f;
+        public const float ResizeHideSeconds = 1.5f;
+        private const float ResizeEdgeWidth = .025f;
+        private float edgeDwell, awayTime;
+        public bool ResizeControlsVisible => resizeToolbar != null && resizeToolbar.activeSelf;
         public float SizeScale { get; private set; } = 1f;
         public virtual float BaseWidth => Width;
         public virtual float BaseHeight => Height;
@@ -58,6 +64,8 @@ namespace Vitqra
             sizeTitle = localizedSizeTitle;
             resizeY = BaseHeight * .5f + ResizeGap + ResizeHeight * .5f;
             var obj = new GameObject("Resize Toolbar", typeof(RectTransform), typeof(Canvas));
+            resizeToolbar = obj;
+            obj.SetActive(false);
             var rect = (RectTransform)obj.transform;
             rect.SetParent(transform, false);
             rect.localPosition = new Vector3(0, resizeY, 0);
@@ -84,8 +92,59 @@ namespace Vitqra
                 scaleLabel.text=sizeTitle+"\n"+Mathf.RoundToInt(SizeScale*100f)+"%";
         }
 
+        // Called once per tracked-controller frame; only the nearest panel may accumulate dwell.
+        public void UpdateResizeHover(bool onEdge, bool onToolbar, float elapsed)
+        {
+            if (!resizeReady || !gameObject.activeInHierarchy)
+            {
+                ClearResizeHover();
+                return;
+            }
+            // A stalled frame alone cannot reveal the toolbar.
+            float dt = Mathf.Clamp(elapsed,0f,.1f);
+            if (!ResizeControlsVisible)
+            {
+                awayTime=0f;
+                edgeDwell=onEdge?edgeDwell+dt:0f;
+                if(edgeDwell+0.00001f>=ResizeRevealSeconds)
+                {
+                    resizeToolbar.SetActive(true);
+                    edgeDwell=0f;
+                }
+                return;
+            }
+            if(onEdge || onToolbar) awayTime=0f;
+            else
+            {
+                awayTime+=dt;
+                if(awayTime+0.00001f>=ResizeHideSeconds) ClearResizeHover();
+            }
+        }
+
+        public void ClearResizeHover()
+        {
+            edgeDwell=0f;
+            awayTime=0f;
+            if(resizeToolbar!=null) resizeToolbar.SetActive(false);
+        }
+
+        protected virtual void OnDisable() { ClearResizeHover(); }
+
+        // The activation strip is inside all four edges and scales with the panel.
+        public bool IsResizeEdge(Ray ray)
+        {
+            if(!resizeReady || !gameObject.activeInHierarchy ||
+               Vector3.Dot(ray.direction,transform.forward)<=.0001f) return false;
+            if(!new Plane(transform.forward,transform.position).Raycast(ray,out float distance)||distance>4f) return false;
+            Vector3 local=transform.InverseTransformPoint(ray.GetPoint(distance));
+            float dx=BaseWidth*.5f-Mathf.Abs(local.x);
+            float dy=BaseHeight*.5f-Mathf.Abs(local.y);
+            return dx>=0f && dy>=0f && Mathf.Min(dx,dy)<=ResizeEdgeWidth;
+        }
+
         public bool TryResizeAction(int region)
         {
+            if(!ResizeControlsVisible || !gameObject.activeInHierarchy) return false;
             switch(region)
             {
                 case ShrinkAction: SetSizeScale(Mathf.Round((SizeScale-.1f)*10f)/10f); return true;
@@ -98,7 +157,7 @@ namespace Vitqra
         public bool TryIntersectResize(Ray ray, out float distance, out int region)
         {
             distance=0; region=0;
-            if(!resizeReady || !gameObject.activeInHierarchy ||
+            if(!resizeReady || !ResizeControlsVisible || !gameObject.activeInHierarchy ||
                 Vector3.Dot(ray.direction,transform.forward)<=.0001f) return false;
             if(!new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f) return false;
             Vector3 local=transform.InverseTransformPoint(ray.GetPoint(distance));

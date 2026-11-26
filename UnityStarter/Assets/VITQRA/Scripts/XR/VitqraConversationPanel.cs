@@ -379,8 +379,9 @@ namespace Vitqra
             MessageSubmitted.Invoke(message);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
             deleteArmed=false;

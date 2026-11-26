@@ -255,7 +255,7 @@ namespace Vitqra
                 {
                     grabbed = null;
                     hasController = false;
-                    foreach (var panel in panels) panel.Highlight(false);
+                    foreach (var panel in panels) { panel.Highlight(false); panel.ClearResizeHover(); }
                     return;
                 }
             }
@@ -267,6 +267,7 @@ namespace Vitqra
             {
                 activeDevice = device.deviceId;
                 grabbed = null;
+                foreach(var panel in panels) panel.ClearResizeHover();
                 previousGrip = grip;
                 previousTrigger = trigger;
                 previousPrimary = primary;
@@ -279,7 +280,7 @@ namespace Vitqra
             if (primary && !previousPrimary)
             {
                 grabbed = null;
-                foreach(var panel in panels) panel.SetSizeScale(1f);
+                foreach(var panel in panels) { panel.SetSizeScale(1f); panel.ClearResizeHover(); }
                 PlacePanels();
             }
             VitqraSpatialPanel closest = null;
@@ -293,6 +294,15 @@ namespace Vitqra
                 {
                     closest = panel; nearest = distance; onAction = region;
                 }
+            }
+            foreach(var panel in panels)
+            {
+                if(grip || grabbed!=null) { panel.ClearResizeHover(); continue; }
+                bool selected=panel==closest;
+                bool toolbar=selected && onAction>=VitqraSpatialPanel.ShrinkAction &&
+                    onAction<=VitqraSpatialPanel.GrowAction;
+                bool edge=selected && !toolbar && !trigger && panel.IsResizeEdge(ray);
+                panel.UpdateResizeHover(edge,toolbar,Time.unscaledDeltaTime);
             }
             if (grip && !previousGrip && closest != null)
             {
