@@ -51,3 +51,5 @@ v0.6.1 initial: fictional previsit summary with current authorization and separa
 v0.6.2 initial: fixed fictional aggregate collaboration, exact purpose and resource permissions, group/cell/complement suppression, shared release digest and localized editor preview. No real disclosure, patient education delivery, clinical claims or live collaboration. See [SYNTHETIC_AGGREGATE_COLLABORATION.md](SYNTHETIC_AGGREGATE_COLLABORATION.md).
 
 v0.6.2a initial: author-requested data completeness and informative sampling quality gate, strict synthetic scheduled coverage, separate event entries, cutoff and missingness audit. Ready for review is not research authorization. Future authorized dataset integration pending. See [DATA_QUALITY_AND_BIAS.md](DATA_QUALITY_AND_BIAS.md).
+
+v0.6.2b initial: interactive fictional six-state daily diary, scheduled/extra distinction, voluntary simulated reminder and device authorization, separate coverage counts and preserved prevalence. No actual intake, device integration or OS notifications. See [SYNTHETIC_DAILY_DIARY.md](SYNTHETIC_DAILY_DIARY.md).

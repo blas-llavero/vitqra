@@ -70,3 +70,5 @@ The v0.6.1 synthetic previsit prototype adds an unsigned descriptive summary und
 The v0.6.2 prototype demonstrates authorization and withholding of small fictional aggregate groups. No real data, treatment evidence or patient education delivery. See [SYNTHETIC_AGGREGATE_COLLABORATION.md](SYNTHETIC_AGGREGATE_COLLABORATION.md).
 
 Author requirement v0.6.2a: account for fragmentary and symptom-triggered sampling before using clinical/research datasets. Require prespecified schedule and quality review, preserve explicit no-symptom and missing states, assess representativeness and observation-process bias. See [DATA_QUALITY_AND_BIAS.md](DATA_QUALITY_AND_BIAS.md).
+
+The v0.6.2b editor diary implements six fictional self-report choices and voluntary simulated reminder/device authorization. Actual patient intake, device connection, OS reminders and clinical release remain blocked. See [SYNTHETIC_DAILY_DIARY.md](SYNTHETIC_DAILY_DIARY.md).

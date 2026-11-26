@@ -1,0 +1,58 @@
+{
+  "scope": "fictional reference simulation only",
+  "checks": 79,
+  "report": {
+    "expected": 7,
+    "responded": 6,
+    "known": 4,
+    "unknown": 1,
+    "unable": 1,
+    "unanswered": 1,
+    "extras": 1,
+    "device": 1,
+    "distribution": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "stable": {
+    "expected": 30,
+    "responded": 30,
+    "known": 30,
+    "unknown": 0,
+    "unable": 0,
+    "unanswered": 0,
+    "extras": 0,
+    "device": 0,
+    "distribution": [
+      30,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "alternate": {
+    "expected": 15,
+    "responded": 0,
+    "known": 0,
+    "unknown": 0,
+    "unable": 0,
+    "unanswered": 15,
+    "extras": 1,
+    "device": 0,
+    "distribution": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}
