@@ -26,7 +26,7 @@ No APK or public release is available at this milestone. Clone this repository o
 2. Review automatic research and translation settings (enabled by default).
 3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
 4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
-5. Select a research topic or type a search query. The preview deliberately returns no results because a live source adapter is not implemented.
+5. In XR, use Scientific challenges to refresh public notices and filter downloaded titles locally. Open the original source to verify rules and dates. The older desktop preview remains offline.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
 
@@ -37,7 +37,7 @@ No APK or public release is available at this milestone. Clone this repository o
 | Settings persistence, default automatic research and translation | Source implemented; Unity execution not verified |
 | Ten-language core preview UI | Source implemented; translations need review |
 | Non-sensitive note storage | Source implemented; Unity execution not verified |
-| Topic selection and editable search | Preview only; no live search |
+| XR public-notice discovery and local keyword filtering | Source implemented; live API and device tests pending |
 | Local-only AI and zero paid API policy | Preview guard implemented; no inference backend or network calls |
 | Unity/OpenXR development platform | Retained by author decision; compilation and physical tests pending |
 | World-space panels and controller movement | Source implemented; physical testing pending |
@@ -51,7 +51,7 @@ No APK or public release is available at this milestone. Clone this repository o
 | Local microphone and Sherpa-ONNX STT/TTS adapters | Source implemented; native build, model provisioning and device tests pending |
 | Natural speech and dictation | Requires reviewed native binaries and models; not verified |
 | Browser | Planned |
-| Research and hackathon discovery, data import and research pipeline | Planned |
+| Additional biomedical/hackathon adapters, data import and research pipeline | Planned |
 | Patient community and remote avatar presence | Planned; security and clinical governance gates apply |
 | About and Help videos, branding and store screenshots | Pending author review; no media distributed |
 
@@ -75,7 +75,7 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.3.6)
+## Mixed reality prototype (v0.4.0)
 
 Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history, supports optional unencrypted local history with deletion controls, and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. A local microphone and Sherpa-ONNX STT/TTS adapter are provided as source; no native libraries or models are bundled and no AI provider is connected. See [voice setup](docs/VOICE_SETUP.md). Panels face the user at placement. Each window has normally hidden minus, percentage-reset and plus controls (70–150%); pointing at any edge for 0.5 seconds reveals them, and they hide after 1.5 seconds away from the edge and toolbar; A/X resets sizes and default positions relative to the current view. See [window resizing](docs/WINDOW_RESIZING.md). Positions, orientations, sizes and conversation visibility are saved locally and restored relative to the next session's initial head pose. Avatar settings remain closed at startup. See [persistent workspace](docs/SPATIAL_WORKSPACE.md). Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No compiled speech engine or APK is provided.
 
@@ -103,3 +103,5 @@ Switch the build profile to Android. Install XR Plug-in Management, OpenXR, Unit
 ### 5. Verification
 
 Unity and the headset have not been available to test this source package. Do not treat a successful import or desktop preview as Quest compatibility. Record editor version, package versions, build logs and physical-device results for subsequent milestones.
+
+See [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the bounded public-notice adapter, official portals and verification limits.

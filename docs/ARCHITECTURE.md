@@ -8,3 +8,7 @@
 - Media: independent review gate before publishing any asset. Use compatible open licenses and record provenance.
 
 The desktop preview has no network implementation and no research job runner. Its settings model defines a readiness check but does not connect to providers. Live search adapters must honor website terms, rate limits and source freshness. No invented challenges or fabricated scientific results.
+
+## Public notice discovery
+
+The XR discovery panel queries a fixed public government endpoint with three public search terms. It validates source links and filters user keywords locally. No patient or conversation data is sent. Notices are unverified opportunities until official eligibility and deadlines are checked. See [SCIENTIFIC_DISCOVERY.md](SCIENTIFIC_DISCOVERY.md).

@@ -11,7 +11,8 @@ namespace Vitqra
         [SerializeField] private Transform trackingSpace;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
-        private VitqraSpatialPanel research, advice, notes, configuration, assistant, grabbed;
+        private VitqraSpatialPanel advice, notes, configuration, assistant, grabbed;
+        private VitqraDiscoveryPanel research;
         private VitqraConversationPanel conversation;
         private VitqraSpeechPlayback playback;
         private bool settingsOpen, conversationOpen = true;
@@ -29,7 +30,7 @@ namespace Vitqra
         private bool assistantPositionCustomized;
         private VitqraSpatialPanel[] LayoutPanels =>
             new VitqraSpatialPanel[]{research,notes,advice,configuration,assistant,conversation};
-        private int topicIndex, adviceIndex;
+        private int adviceIndex;
         private static readonly Color Cyan = new Color(.24f,.95f,.92f);
         private static readonly Color Violet = new Color(.75f,.64f,1f);
 
@@ -49,7 +50,12 @@ namespace Vitqra
             }
             settings = VitqraSettings.Load();
             var l = VitqraStrings.Get(settings.language);
-            research = AddPanel(l[7], Cyan, () => { topicIndex = (topicIndex + 1) % 5; Refresh(); });
+            var researchObject=new GameObject("Scientific Discovery");
+            researchObject.transform.SetParent(transform,false);
+            research=researchObject.AddComponent<VitqraDiscoveryPanel>();
+            research.InitializeDiscovery(settings.language);
+            research.InitializeResizeControls(l[21]);
+            panels.Add(research);
             advice = AddPanel(T(K.Advice), Violet, ReviewAction);
             notes = AddPanel(T(K.Notes), Cyan, Refresh);
             configuration = AddPanel(T(K.Settings), Violet, OpenAvatarSettings);
@@ -185,7 +191,6 @@ namespace Vitqra
         private void Refresh()
         {
             var l = VitqraStrings.Get(settings.language);
-            research.SetContent(l[14 + topicIndex] + "\n" + l[9], T(K.NextTopic));
             string status = reviewPending ? "\n" + T(K.PendingReview) : reviewCompleted ? "\n" + T(K.Reviewed) : "";
             advice.SetContent(Tip + status, T(reviewPending ? K.ConfirmReview : reviewCompleted ? K.NextTip : K.ReviewTip));
             string note = PlayerPrefs.GetString("vitqra.preview.note", "");
@@ -316,6 +321,7 @@ namespace Vitqra
                 if (!head.isValid || !head.TryGetFeatureValue(CommonUsages.isTracked, out bool tracked) || !tracked) return;
                 PlacePanels();
                 RestoreLayout();
+                research.RefreshSources();
                 // Do not reopen a deliberately minimized conversation on startup.
                 if(conversationOpen&&conversation.MessageCount==0) PresentTip();
             }
