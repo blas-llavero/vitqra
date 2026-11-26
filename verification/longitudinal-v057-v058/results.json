@@ -1,0 +1,55 @@
+{
+  "scope": "synthetic only; no clinical validation",
+  "cutoff_checks": 543,
+  "future_perturbation_checks": 120,
+  "threshold": 2,
+  "split": {
+    "development": {
+      "assigned": 80,
+      "censored": 8,
+      "missing": 6
+    },
+    "holdout": {
+      "assigned": 40,
+      "censored": 5,
+      "missing": 0
+    }
+  },
+  "development": {
+    "TP": 26,
+    "FP": 4,
+    "TN": 26,
+    "FN": 10,
+    "n": 66,
+    "sensitivity": 0.7222222222222222,
+    "specificity": 0.8666666666666667,
+    "ppv": 0.8666666666666667,
+    "npv": 0.7222222222222222,
+    "balanced_accuracy": 0.7944444444444445
+  },
+  "holdout": {
+    "TP": 7,
+    "FP": 6,
+    "TN": 15,
+    "FN": 7,
+    "n": 35,
+    "sensitivity": 0.5,
+    "specificity": 0.7142857142857143,
+    "ppv": 0.5384615384615384,
+    "npv": 0.6818181818181818,
+    "balanced_accuracy": 0.6071428571428572
+  },
+  "always_negative_baseline": {
+    "TP": 0,
+    "FP": 0,
+    "TN": 21,
+    "FN": 14,
+    "n": 35,
+    "sensitivity": 0.0,
+    "specificity": 1.0,
+    "ppv": null,
+    "npv": 0.6,
+    "balanced_accuracy": 0.5
+  },
+  "cohort_sha256": "f18ee7c934ed0c1b88cbda3c259226c4241ab9b701eb2da47fd86f1c1a8d67b1"
+}
