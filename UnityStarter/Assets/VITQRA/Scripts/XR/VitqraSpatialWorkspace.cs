@@ -179,7 +179,7 @@ namespace Vitqra
             string note = PlayerPrefs.GetString("vitqra.preview.note", "");
             if (note.Length > 180) note = note.Substring(0,180) + "...";
             notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
-            configuration.SetContent(settings.provider + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
+            configuration.SetContent(l[19] + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
             int profile = settings.avatarProfile;
             string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
             assistant.SetContent(profileName + "\n" + T(K.NoSpeech), T(K.NextAvatar));

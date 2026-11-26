@@ -49,3 +49,7 @@ Preserve the approved UI design: central view clear; Research Challenges and My 
 - https://github.com/ggml-org/llama.cpp
 - https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/LICENSING.md
 - https://unity.com/legal/terms-of-service
+
+## Repository and application language
+
+English is the canonical repository language; the app automatically follows the supported device locale with English fallback. See [LOCALIZATION.md](LOCALIZATION.md).

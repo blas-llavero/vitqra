@@ -39,6 +39,8 @@ namespace Vitqra
             // Migrate old preferences, including a previously selected commercial provider.
             provider = "local";
             dailyBudgetCents = 0;
+            // Ignore legacy manual language overrides.
+            language = "device";
         }
 
         // Readiness only; a future inference adapter must independently enforce

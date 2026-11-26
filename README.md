@@ -24,7 +24,7 @@ No APK or public release is available at this milestone. Clone this repository o
 
 1. Open the generated preview scene and press Play in Unity.
 2. Review automatic research and translation settings (enabled by default).
-3. Select a language or use the device language; English is the fallback.
+3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
 4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
 5. Select a research topic or type a search query. The preview deliberately returns no results because a live source adapter is not implemented.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
@@ -55,7 +55,7 @@ No APK or public release is available at this milestone. Clone this repository o
 
 ## Supported languages
 
-English (en), Spanish (es), Catalan (ca), Simplified Chinese (zh), Hindi (hi), French (fr), German (de), Portuguese (pt), Arabic (ar), Japanese (ja). Core strings are included. Arabic shaping, right-to-left layout and international font coverage require testing. Full research translation is not implemented yet.
+English (en), Spanish (es), Catalan (ca), Simplified Chinese (zh), Hindi (hi), French (fr), German (de), Portuguese (pt), Arabic (ar), Japanese (ja). English is the canonical language of code, identifiers, comments, documentation, GitHub metadata and default interface strings. Localized resource values are the deliberate exception. On launch, the app selects the device language if supported; otherwise it uses English. Regional variants share base translations (Chinese currently uses Simplified Chinese). Arabic shaping, right-to-left layout and international font coverage require testing. Full research translation and language-controlled generated AI responses are not implemented yet. See [localization policy](docs/LOCALIZATION.md).
 
 ## Open-source and zero-paid-API policy
 
@@ -73,7 +73,7 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.3.4)
+## Mixed reality prototype (v0.3.4 — localization update)
 
 Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history, supports optional unencrypted local history with deletion controls, and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. A local microphone and Sherpa-ONNX STT/TTS adapter are provided as source; no native libraries or models are bundled and no AI provider is connected. See [voice setup](docs/VOICE_SETUP.md). Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No compiled speech engine or APK is provided.
 

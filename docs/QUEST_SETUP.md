@@ -50,3 +50,7 @@ See [ASSISTANT_SETUP.md](ASSISTANT_SETUP.md) for enabling the gesture adapter an
 - https://developers.meta.com/vr/documentation/unity/unity-and-openxr-compatibility/
 - https://docs.unity.com/en-us/engine/6000.0/manual/xr/configuring-project-for/meta-quest-develop
 - https://docs.unity.com/en-us/engine/6000.7/manual/xr/configuring-project-for/meta-quest-develop/packages
+
+## Language selection
+
+Set the headset device language, then restart VITQRA. The app automatically uses one of the ten supported base languages or English for unsupported languages. Test Catalan if the device exposes that locale, and verify glyphs, shaping and layout. See [LOCALIZATION.md](LOCALIZATION.md).
