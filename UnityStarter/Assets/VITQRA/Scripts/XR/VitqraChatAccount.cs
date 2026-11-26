@@ -114,7 +114,7 @@ namespace Vitqra
 #endif
         }
         [Serializable] public sealed class ResearchReply{public string model,alternatives,critique;}
-        public static async Task<ResearchReply> Research(string slug,string id,string language,CancellationToken token)
+        public static async Task<ResearchReply> Research(string slug,string id,string language,CancellationToken token,VitqraMotifBenchmark.Trial training=null)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
@@ -123,7 +123,7 @@ namespace Vitqra
                 using(var player=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
                 using(var activity=player.GetStatic<AndroidJavaObject>("currentActivity"))
                 using(var api=new AndroidJavaClass("com.blasllavero.vitqra.account.VitqraChatAccount"))
-                    if(!api.CallStatic<bool>("startResearch",activity,slug,id,language))return null;
+                    if(!api.CallStatic<bool>("startResearch",activity,slug,id,language,training==null?0:training.baselineComparisons,training==null?0:training.kmpComparisons))return null;
                 bool canceled=false;
                 while(Read("getResearchState",3)==1)
                 {

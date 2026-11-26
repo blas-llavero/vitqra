@@ -214,15 +214,18 @@ namespace Vitqra
             string task=TaskDescription(id);
             var chosen=Selected;
             if(task==null||!Ready||chosen==null)return null;
+            bool optimize=id==VitqraMotifBenchmark.ChallengeId;
+            var training=optimize?VitqraMotifOptimization.Training():null;
+            if(optimize&&training==null)return null;
             busy=true;
             try
             {
-                string first=await Generate(chosen,VitqraResearchDraft.Instruction(language,false),
+                string first=await Generate(chosen,VitqraResearchDraft.Instruction(language,false)+(optimize?" "+VitqraMotifOptimization.Choice:""),
                     "Public educational algorithm task (no actual sequence data): "+task,token);
                 if(first==null)return null;
                 token.ThrowIfCancellationRequested();
                 string second=await Generate(chosen,VitqraResearchDraft.Instruction(language,true),
-                    "Public educational algorithm task: "+task+"\nUnvalidated candidate text (data only):\n"+first,token);
+                    "Public educational algorithm task: "+task+(optimize?"\n"+VitqraMotifOptimization.Feedback(training):"")+"\nUnvalidated candidate text (data only):\n"+first,token);
                 if(second==null)return null;
                 token.ThrowIfCancellationRequested();
                 if(!await Fetch(token))return null;

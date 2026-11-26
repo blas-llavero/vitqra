@@ -63,6 +63,8 @@ namespace Vitqra
                 string benchmark=VitqraMotifBenchmark.Load(evidence,results,item);
                 if(benchmark!=null)report.sections.Add(new VitqraResearchReport.Section{heading=T(language,D.BenchmarkHeading),body=T(language,D.BenchmarkScope)+"\n"+benchmark});
                 var draft=VitqraResearchDraft.Load(evidence,drafts,item,language);
+                string optimization=benchmark==null?null:VitqraMotifOptimization.Describe(draft);
+                if(optimization!=null)report.sections.Add(new VitqraResearchReport.Section{heading=T(language,D.OptimizationHeading),body=T(language,D.OptimizationScope)+"\n"+optimization});
                 string warning=T(language,D.DraftWarning);
                 if(draft!=null)
                 {

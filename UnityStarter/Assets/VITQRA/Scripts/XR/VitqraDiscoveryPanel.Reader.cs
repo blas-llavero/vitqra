@@ -112,6 +112,8 @@ namespace Vitqra
             if(benchmark!=null)report+="\n\n"+T(D.BenchmarkHeading)+"\n"+T(D.BenchmarkScope)+"\n"+benchmark;
             var draft=VitqraResearchDraft.Load(EvidenceRoot,DraftRoot,item,locale);
             if(draft==null)return report;
+            string optimization=benchmark==null?null:VitqraMotifOptimization.Describe(draft);
+            if(optimization!=null)report+="\n\n"+T(D.OptimizationHeading)+"\n"+T(D.OptimizationScope)+"\n"+optimization;
             // Keep the reviewed report distinct from unvalidated AI-generated text.
             return report+"\n\n"+T(D.DraftWarning)+"\n"+T(D.DraftAlternatives)+"\n"+draft.alternatives+
                 "\n\n"+T(D.DraftImpact)+"\n"+draft.critique+"\n\n"+T(D.DraftWarning)+
