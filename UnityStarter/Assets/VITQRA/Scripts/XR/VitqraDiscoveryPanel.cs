@@ -125,7 +125,8 @@ namespace Vitqra
                 {
                     success++;partial|=batch.limited;
                     foreach(var n in batch.items)next.Add(new VitqraChallengeDirectory.Item {
-                        id="fr-"+n.document_number,title=n.title,url=n.html_url,keywords="",educational=false});
+                        id="fr-"+n.document_number,title=n.title,url=n.html_url,keywords="",educational=false,
+                        officialPdf=n.pdf_url,publicationDate=n.publication_date});
                     // Publish results as each source query returns, without waiting for all queries.
                     all=next;ApplyFilter();
                 }
@@ -135,6 +136,7 @@ namespace Vitqra
         }
         private void SelectArea(int selected)
         {
+            CancelEvidence();manualEvidence=null;
             area=selected;query="";QueueWebSearch();ApplyFilter();
         }
         private void ApplyFilter()
@@ -175,7 +177,7 @@ namespace Vitqra
             if(revision==searchRevision){webFailed|=success==0;Render();}
         }
         public void SyncMode(bool value){automatic=value;Render();}
-        private void SetMode(bool value){SyncMode(value);modeChanged?.Invoke(value);}
+        private void SetMode(bool value){if(automatic!=value)CancelEvidence();SyncMode(value);modeChanged?.Invoke(value);}
         public void Scroll(float y)
         {
             if(Mathf.Abs(y)<.55f||Time.unscaledTime<nextScroll)return;
@@ -202,7 +204,8 @@ namespace Vitqra
                 if(!exists)continue;
                 var item=filtered[n];
                 string name=item.title.Length>110?item.title.Substring(0,110)+"…":item.title;
-                rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.webCandidate?D.WebCandidate:item.educational?D.Educational:D.Candidate);
+                rowLabels[i].supportRichText=false;
+                rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.webCandidate?D.WebCandidate:item.educational?D.Educational:D.Candidate)+EvidenceSuffix(item);
             }
             string summary=filtered.Count==0?T(loading?D.Searching:D.NoChallenges):
                 (first+1)+"–"+Mathf.Min(first+VisibleRows,filtered.Count)+" / "+filtered.Count+" · "+T(D.Scroll);
@@ -211,13 +214,14 @@ namespace Vitqra
             if(webLoading||webQueued)summary+=" · "+T(D.WebSearching);
             else if(webFailed)summary+=" · "+T(D.WebUnavailable);
             else if(!webEnabled)summary+=" · "+T(D.WebNotConfigured);
-            status.text=summary+"\n"+T(D.EnginePending)+" · "+T(D.OriginalTitles);
+            status.text=summary+"\n"+T(D.EnginePending)+(evidenceBusy?" · "+T(D.EvidenceLoading):" · "+T(D.OriginalTitles));
         }
         private void OpenRow(int slot)
         {
             int n=first+slot;
             if(n>=filtered.Count)return;
             var item=filtered[n];
+            if(!automatic)QueueManualEvidence(item);
             if(VitqraChallengeDirectory.ValidLink(item)&&!TryOpenGraphic(item))OpenReader(item);
         }
         private void EditQuery()
@@ -236,6 +240,7 @@ namespace Vitqra
         }
         private void SetQuery(string value)
         {
+            CancelEvidence();manualEvidence=null;
             query=(value??"").Trim();
             if(query.Length>120)query=query.Substring(0,120);
             area=-1;
@@ -248,6 +253,7 @@ namespace Vitqra
         private void Update()
         {
             UpdateGraphic();
+            UpdateEvidence();
             if(webQueued&&!webLoading&&Time.unscaledTime>=searchAt)
             {
                 webQueued=false;
@@ -276,6 +282,7 @@ namespace Vitqra
             base.OnDisable();
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
+            CancelEvidence();
             CloseGraphic();
             CloseReader();
             StopAllCoroutines();loading=false;webLoading=false;webQueued=false;searchRevision++;
