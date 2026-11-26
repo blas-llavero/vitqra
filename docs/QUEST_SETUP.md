@@ -1,4 +1,4 @@
-# VITQRA 0.3.2 — Meta Quest spatial prototype
+# VITQRA 0.3.5 — Meta Quest spatial prototype
 
 This source overlay adds four main world-space Unity UI panels, an on-demand avatar configuration panel and a larger conversation panel. It does not include a configured Unity project, an XR scene, an APK, a production avatar model, or a passthrough camera implementation. The Unity Mixed Reality template and its supported packages provide the XR rig and passthrough. Unity and headset testing are pending.
 
@@ -9,7 +9,7 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 3. Copy UnityStarter/Assets/VITQRA into Assets. The source uses Unity UI (com.unity.ugui) and UnityEngine.XR input. Install Unity UI from Package Manager if absent.
 4. Select Android/Meta Quest build profile. Confirm XR Plug-in Management > Android > OpenXR, Meta Quest features, controller interaction profiles and passthrough settings. Resolve validation errors and select ARM64/IL2CPP. Use the template's existing passthrough setup (AR Camera Manager on the XR camera where required). Do not enable camera image capture or request camera access for this prototype.
 5. In the template scene select the tracked Main Camera under XR Origin and choose **VITQRA > Add Spatial Workspace to Selected XR Camera**. Confirm that the serialized Tracking Space is the transform corresponding to the origin of controller tracking poses, normally the camera's Camera Offset parent. Keep the workspace root at world scale (1,1,1), outside the camera hierarchy.
-6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.3.2. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
+6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.3.5. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
 
 ## Initial panel layout
 
@@ -54,3 +54,7 @@ See [ASSISTANT_SETUP.md](ASSISTANT_SETUP.md) for enabling the gesture adapter an
 ## Language selection
 
 Set the headset device language, then restart VITQRA. The app automatically uses one of the ten supported base languages or English for unsupported languages. Test Catalan if the device exposes that locale, and verify glyphs, shaping and layout. See [LOCALIZATION.md](LOCALIZATION.md).
+
+## Resizing windows
+
+Every visible panel has a small size toolbar above it. Trigger minus or plus to change its scale by 10 percentage points, or press the percentage to reset that panel to 100%. A/X resets all panel sizes and positions. See [WINDOW_RESIZING.md](WINDOW_RESIZING.md) and run the editor smoke checks before device testing.

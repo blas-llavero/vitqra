@@ -8,6 +8,20 @@ namespace Vitqra
     {
         public const float Width = 0.64f;
         public const float Height = 0.34f;
+        public const float MinScale = .7f;
+        public const float MaxScale = 1.5f;
+        public const int ShrinkAction = 1001, ResetSizeAction = 1002, GrowAction = 1003;
+        private const float ResizeGap = .008f;
+        private const float ResizeHeight = .052f;
+        private const float ResizeButtonWidth = .11f;
+        private const float ResizePitch = .12f;
+        private Text scaleLabel;
+        private string sizeTitle;
+        private float resizeY;
+        private bool resizeReady;
+        public float SizeScale { get; private set; } = 1f;
+        public virtual float BaseWidth => Width;
+        public virtual float BaseHeight => Height;
         private Image background;
         private Text body;
         private Text action;
@@ -34,6 +48,65 @@ namespace Vitqra
             body = Label("Body", rect, new Vector2(0, 16), new Vector2(590, 170), message, 24, Color.white);
             actionBackground = Box("Action", rect, new Vector2(0, -131), new Vector2(590, 50), new Color(0.10f, 0.27f, 0.31f, 1)).rectTransform;
             action = Label("Action label", rect, new Vector2(0, -131), new Vector2(570, 48), actionLabel, 24, Color.white);
+        }
+
+        // A small separate toolbar avoids changing the existing content or button layout.
+        // All hit regions use panel-local coordinates, including after uniform scaling.
+        public void InitializeResizeControls(string localizedSizeTitle)
+        {
+            if (resizeReady) return;
+            sizeTitle = localizedSizeTitle;
+            resizeY = BaseHeight * .5f + ResizeGap + ResizeHeight * .5f;
+            var obj = new GameObject("Resize Toolbar", typeof(RectTransform), typeof(Canvas));
+            var rect = (RectTransform)obj.transform;
+            rect.SetParent(transform, false);
+            rect.localPosition = new Vector3(0, resizeY, 0);
+            rect.sizeDelta = new Vector2(350, 52);
+            rect.localScale = Vector3.one * .001f;
+            obj.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            var color = new Color(.10f,.27f,.31f,.98f);
+            Box("Shrink",rect,new Vector2(-120,0),new Vector2(110,52),color);
+            Label("Shrink label",rect,new Vector2(-120,0),new Vector2(100,48),"-",32,Color.white);
+            Box("Reset size",rect,Vector2.zero,new Vector2(110,52),color);
+            scaleLabel=Label("Scale label",rect,Vector2.zero,new Vector2(106,48),"",17,Color.white);
+            Box("Grow",rect,new Vector2(120,0),new Vector2(110,52),color);
+            Label("Grow label",rect,new Vector2(120,0),new Vector2(100,48),"+",32,Color.white);
+            resizeReady=true;
+            SetSizeScale(SizeScale);
+        }
+
+        public void SetSizeScale(float scale)
+        {
+            if (float.IsNaN(scale) || float.IsInfinity(scale)) return;
+            SizeScale=Mathf.Clamp(scale,MinScale,MaxScale);
+            transform.localScale=Vector3.one*SizeScale;
+            if(scaleLabel!=null)
+                scaleLabel.text=sizeTitle+"\n"+Mathf.RoundToInt(SizeScale*100f)+"%";
+        }
+
+        public bool TryResizeAction(int region)
+        {
+            switch(region)
+            {
+                case ShrinkAction: SetSizeScale(Mathf.Round((SizeScale-.1f)*10f)/10f); return true;
+                case ResetSizeAction: SetSizeScale(1f); return true;
+                case GrowAction: SetSizeScale(Mathf.Round((SizeScale+.1f)*10f)/10f); return true;
+                default: return false;
+            }
+        }
+
+        public bool TryIntersectResize(Ray ray, out float distance, out int region)
+        {
+            distance=0; region=0;
+            if(!resizeReady || !gameObject.activeInHierarchy ||
+                Vector3.Dot(ray.direction,transform.forward)<=.0001f) return false;
+            if(!new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f) return false;
+            Vector3 local=transform.InverseTransformPoint(ray.GetPoint(distance));
+            if(Mathf.Abs(local.y-resizeY)>ResizeHeight*.5f) return false;
+            if(Mathf.Abs(local.x+ResizePitch)<=ResizeButtonWidth*.5f) region=ShrinkAction;
+            else if(Mathf.Abs(local.x)<=ResizeButtonWidth*.5f) region=ResetSizeAction;
+            else if(Mathf.Abs(local.x-ResizePitch)<=ResizeButtonWidth*.5f) region=GrowAction;
+            return region!=0;
         }
 
         public void SetContent(string message, string actionLabel)

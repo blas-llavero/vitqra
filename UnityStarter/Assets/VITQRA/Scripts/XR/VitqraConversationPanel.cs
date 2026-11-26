@@ -12,6 +12,8 @@ namespace Vitqra
     {
         public const float ChatWidth = .86f;
         public const float ChatHeight = .90f;
+        public override float BaseWidth => ChatWidth;
+        public override float BaseHeight => ChatHeight;
         private const int Rows = 4;
         private const int MaxCharacters = 1000;
         private const int MaxMessages = 200;

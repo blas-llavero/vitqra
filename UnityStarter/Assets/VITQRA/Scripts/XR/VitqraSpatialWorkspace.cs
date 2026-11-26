@@ -55,6 +55,7 @@ namespace Vitqra
             chatObject.transform.SetParent(transform,false);
             conversation = chatObject.AddComponent<VitqraConversationPanel>();
             conversation.InitializeChat(settings.language, MinimizeConversation);
+            conversation.InitializeResizeControls(l[21]);
             panels.Add(conversation);
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
@@ -74,10 +75,12 @@ namespace Vitqra
 
         private VitqraSpatialPanel AddPanel(string title, Color accent, System.Action callback)
         {
-            var obj = new GameObject(title);
+            // Internal GameObject names are stable English identifiers; titles are localized.
+            var obj = new GameObject("Spatial Panel");
             obj.transform.SetParent(transform, false);
             var panel = obj.AddComponent<VitqraSpatialPanel>();
             panel.Initialize(title, "", "", callback, accent);
+            panel.InitializeResizeControls(VitqraStrings.Get(settings.language)[21]);
             panels.Add(panel);
             return panel;
         }
@@ -273,13 +276,20 @@ namespace Vitqra
             Quaternion rotation = trackingSpace.rotation * localRotation;
             Ray ray = new Ray(origin, rotation * Vector3.forward);
 
-            if (primary && !previousPrimary) { grabbed = null; PlacePanels(); }
+            if (primary && !previousPrimary)
+            {
+                grabbed = null;
+                foreach(var panel in panels) panel.SetSizeScale(1f);
+                PlacePanels();
+            }
             VitqraSpatialPanel closest = null;
             float nearest = float.PositiveInfinity;
             int onAction = 0;
             foreach (var panel in panels)
             {
-                if (panel.Intersect(ray, out float distance, out int region) && distance < nearest)
+                bool hit=panel.TryIntersectResize(ray,out float distance,out int region);
+                if(!hit) hit=panel.Intersect(ray,out distance,out region);
+                if (hit && distance < nearest)
                 {
                     closest = panel; nearest = distance; onAction = region;
                 }
@@ -298,7 +308,10 @@ namespace Vitqra
                     grabbed.transform.position = headCamera.transform.position + delta.normalized * Mathf.Clamp(delta.magnitude, .75f, 3f);
                 FaceUser(grabbed.transform);
             }
-            else if (!grip && trigger && !previousTrigger && closest != null && onAction != 0) closest.InvokeAction(onAction);
+            else if (!grip && trigger && !previousTrigger && closest != null && onAction != 0)
+            {
+                if(!closest.TryResizeAction(onAction)) closest.InvokeAction(onAction);
+            }
             foreach (var panel in panels) panel.Highlight(panel == grabbed || (grabbed == null && panel == closest));
             previousGrip = grip; previousTrigger = trigger; previousPrimary = primary;
         }
