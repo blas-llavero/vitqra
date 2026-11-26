@@ -15,6 +15,8 @@ namespace Vitqra
         private string locale,query="",editBuffer="";
         private Text searchLabel,status,manualLabel,automaticLabel,resultCount,pageLabel,previousLabel,nextLabel;
         private Image previousBox,nextBox;
+        private Text pauseLabel,stopLabel;
+        private Image pauseBox,stopBox;
         private Image background,manualBox,automaticBox;
         private readonly Text[] areaLabels=new Text[11];
         private readonly Image[] areaBoxes=new Image[11];
@@ -79,7 +81,10 @@ namespace Vitqra
             previousLabel=Button(rect,-25,-338,170,40,T(D.ResultPrevious),()=>TurnResultPage(-1),out previousBox);
             pageLabel=Label("Results page",rect,new Vector2(145,-338),new Vector2(150,40),"",18,Color.white);
             nextLabel=Button(rect,315,-338,170,40,T(D.ResultNext),()=>TurnResultPage(1),out nextBox);
-            status=Label("Status",rect,new Vector2(0,-403),new Vector2(810,72),"",19,Color.white);
+            status=Label("Status",rect,new Vector2(0,-380),new Vector2(810,38),"",16,Color.white);
+            pauseLabel=Button(rect,-205,-426,390,34,T(D.RunPause),ToggleRunPause,out pauseBox);
+            stopLabel=Button(rect,205,-426,390,34,T(D.RunStop),StopRun,out stopBox);
+            RestoreRunControl();
             InitializeReader();
             all=VitqraChallengeDirectory.Educational();
             ApplyFilter();
@@ -236,7 +241,9 @@ namespace Vitqra
             if(webLoading||webQueued)summary+=" · "+T(D.WebSearching);
             else if(webFailed)summary+=" · "+T(D.WebUnavailable);
             else if(!webEnabled)summary+=" · "+T(D.WebNotConfigured);
-            status.text=summary+"\n"+T(D.EnginePending)+(evidenceBusy?" · "+T(D.EvidenceLoading):" · "+T(D.OriginalTitles));
+            RenderRunControls();
+            status.text=summary+"\n"+T(runStopped?D.RunStopped:runPaused?D.RunPaused:D.ResearchGateClosed)+
+                (evidenceBusy?" · "+T(D.EvidenceLoading):"");
         }
         private void OpenRow(int slot)
         {

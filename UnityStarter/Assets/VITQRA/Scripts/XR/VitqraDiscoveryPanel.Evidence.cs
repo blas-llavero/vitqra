@@ -14,7 +14,9 @@ namespace Vitqra
         private VitqraChallengeDirectory.Item manualEvidence;
         private UnityWebRequest evidenceRequest;
         private Coroutine evidenceRoutine;
-        private bool evidenceBusy,evidencePaused;
+        private bool evidenceBusy,evidencePaused,runPaused,runStopped;
+        private const string RunPreference="vitqra.research.run.v1";
+        private string ResultRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","EducationalResults");
         private int evidenceJobs;
         private float evidenceNext;
         private string EvidenceRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchEvidence");
@@ -27,9 +29,37 @@ namespace Vitqra
         {
             if(VitqraEvidence.Eligible(item)&&!evidenceStates.ContainsKey(EvidenceKey(item)))manualEvidence=item;
         }
+        private void RestoreRunControl()
+        {
+            int value=PlayerPrefs.GetInt(RunPreference,0);
+            runPaused=value==1;runStopped=value==2;
+        }
+        private void SaveRunControl()
+        {
+            PlayerPrefs.SetInt(RunPreference,runStopped?2:runPaused?1:0);
+            PlayerPrefs.Save();
+        }
+        private void RenderRunControls()
+        {
+            pauseLabel.text=T(runPaused||runStopped?D.RunResume:D.RunPause);
+            SetPageButton(pauseLabel,pauseBox,true);
+            SetPageButton(stopLabel,stopBox,!runStopped);
+        }
+        private void ToggleRunPause()
+        {
+            if(runPaused||runStopped){runPaused=false;runStopped=false;}
+            else{runPaused=true;CancelEvidence();}
+            SaveRunControl();Render();
+        }
+        private void StopRun()
+        {
+            if(runStopped)return;
+            runStopped=true;runPaused=false;CancelEvidence();
+            SaveRunControl();Render();
+        }
         private void UpdateEvidence()
         {
-            if(evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if(runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {
@@ -52,9 +82,16 @@ namespace Vitqra
             if(result!=null&&result.success)
             {
                 var review=VitqraEvidenceReview.Inspect(EvidenceRoot,item);
-                evidenceStates[EvidenceKey(item)]=review.state==VitqraEvidenceReview.State.DocumentChecksPassed?
+                D state=review.state==VitqraEvidenceReview.State.DocumentChecksPassed?
                     D.DocumentChecksPassed:review.state==VitqraEvidenceReview.State.Partial?
                     D.DocumentReviewPartial:D.DocumentReviewFailed;
+                if(item.educational&&VitqraSampleSolver.Supports(item.id)&&review.state==VitqraEvidenceReview.State.DocumentChecksPassed)
+                {
+                    var check=VitqraSampleSolver.Run(EvidenceRoot,ResultRoot,item);
+                    state=check==VitqraSampleSolver.State.Checked?D.SampleChecked:
+                        check==VitqraSampleSolver.State.Mismatch?D.SampleMismatch:D.SamplePending;
+                }
+                evidenceStates[EvidenceKey(item)]=state;
             }
             else evidenceStates[EvidenceKey(item)]=D.EvidenceFailed;
             evidenceBusy=false;evidenceRoutine=null;evidenceNext=Time.unscaledTime+2f;Render();

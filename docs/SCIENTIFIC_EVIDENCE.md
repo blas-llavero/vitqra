@@ -28,3 +28,5 @@ References:
 ## Documentary review
 
 After acquisition or cache reuse, v0.4.4 checks source identity and consistency of the stored evidence. See [EVIDENCE_REVIEW.md](EVIDENCE_REVIEW.md). Scientific validation and autonomous research remain unavailable.
+
+See [RESEARCH_QUEUE.md](RESEARCH_QUEUE.md) for the v0.5.1 queue controls and educational-only sample checks.
