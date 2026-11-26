@@ -26,7 +26,7 @@ No APK or public release is available at this milestone. Clone this repository o
 2. Review automatic research and translation settings (enabled by default).
 3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
 4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
-5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. An optional authorized self-hosted SearXNG instance can discover web candidates automatically. Choose Manual or Automatic research mode. Select a result to open its integrated text reader; an explicit external browser action opens the original page. The local research engine is not connected yet. The older desktop preview remains offline.
+5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. An optional authorized self-hosted SearXNG instance can discover web candidates automatically. Choose Manual or Automatic research mode. Select a result to open the integrated browser when enabled, or its text reader fallback; an explicit external browser action opens the original page. The local research engine is not connected yet. The older desktop preview remains offline.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
 
@@ -50,7 +50,7 @@ No APK or public release is available at this milestone. Clone this repository o
 | Optional persistent single-conversation history | Source implemented; device storage tests pending |
 | Local microphone and Sherpa-ONNX STT/TTS adapters | Source implemented; native build, model provisioning and device tests pending |
 | Natural speech and dictation | Requires reviewed native binaries and models; not verified |
-| Integrated read-only web reader | Source implemented; graphical browser and device tests pending |
+| Graphical browser and text fallback | Optional restricted OpenWebView adapter source; local package installation, compilation and device tests pending |
 | Additional biomedical/hackathon adapters, data import and research pipeline | Planned |
 | Patient community and remote avatar presence | Planned; security and clinical governance gates apply |
 | About and Help videos, branding and store screenshots | Pending author review; no media distributed |
@@ -107,3 +107,5 @@ Unity and the headset have not been available to test this source package. Do no
 See [optional web search setup](docs/WEB_DISCOVERY.md) and [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the numbered directory, curated direct problems, public notices and verification limits.
 
 See [integrated web reader](docs/WEB_READER.md) for supported routes, security limits and graphical browser plans.
+
+See [graphical browser setup](docs/GRAPHICAL_BROWSER.md) for the optional restricted OpenWebView integration.

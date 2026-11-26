@@ -38,6 +38,9 @@ namespace Vitqra
             readerAddress=Label("Original address",rect,new Vector2(0,221),new Vector2(810,42),"",18,Color.cyan);
             readerBody=Label("Page text",rect,new Vector2(0,-37),new Vector2(810,460),"",25,Color.white);
             readerBody.alignment=TextAnchor.UpperLeft;
+            readerTitle.supportRichText=false;
+            readerAddress.supportRichText=false;
+            readerBody.supportRichText=false;
             readerStatus=Label("Reader status",rect,new Vector2(0,-307),new Vector2(810,65),"",19,Color.white);
             ReaderButton(rect,-205,-389,390,54,T(D.PreviousPage),()=>TurnReaderPage(-1));
             ReaderButton(rect,205,-389,390,54,T(D.NextPage),()=>TurnReaderPage(1));

@@ -19,3 +19,7 @@ Unity Editor > VITQRA > Run Web Reader Checks covers URL allowlisting, text extr
 References:
 - https://github.com/TLabAltoh/TLabWebView
 - https://github.com/rwpersson/OpenWebView-Unity
+
+## Graphical update
+
+An optional graphical OpenWebView adapter is now implemented in source. See [GRAPHICAL_BROWSER.md](GRAPHICAL_BROWSER.md). This read-only reader remains the fallback when the graphical package is not installed or enabled.

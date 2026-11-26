@@ -17,3 +17,5 @@ References:
 - https://docs.searxng.org/dev/search_api.html
 - https://docs.searxng.org/admin/installation.html
 - https://github.com/searxng/searxng
+
+The optional graphical browser can load user-selected candidate pages after local installation and enabling its restricted adapter. No result is fetched automatically by the graphical browser. See [GRAPHICAL_BROWSER.md](GRAPHICAL_BROWSER.md).

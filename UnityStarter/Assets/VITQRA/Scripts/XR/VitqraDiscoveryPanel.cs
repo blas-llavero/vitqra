@@ -96,14 +96,14 @@ namespace Vitqra
             if(!new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f)return false;
             var p=transform.InverseTransformPoint(ray.GetPoint(distance));
             if(Mathf.Abs(p.x)>BaseWidth*.5f||Mathf.Abs(p.y)>BaseHeight*.5f)return false;
-            var hitTargets=readerOpen?readerTargets:targets;
+            var hitTargets=graphicOpen?graphicTargets:readerOpen?readerTargets:targets;
             for(int i=0;i<hitTargets.Count;i++)
                 if(hitTargets[i].Contains(new Vector2(p.x,p.y))){region=i+1;break;}
             return true;
         }
         public override void InvokeAction(int region)
         {
-            var hitActions=readerOpen?readerActions:actions;
+            var hitActions=graphicOpen?graphicActions:readerOpen?readerActions:actions;
             if(region>0&&region<=hitActions.Count)hitActions[region-1]?.Invoke();
         }
         public void RefreshSources()
@@ -180,6 +180,7 @@ namespace Vitqra
         {
             if(Mathf.Abs(y)<.55f||Time.unscaledTime<nextScroll)return;
             nextScroll=Time.unscaledTime+.22f;
+            if(graphicOpen)return;
             if(readerOpen){TurnReaderPage(y<0?1:-1);return;}
             first=Mathf.Clamp(first+(y<0?1:-1),0,Mathf.Max(0,filtered.Count-VisibleRows));Render();
         }
@@ -217,7 +218,7 @@ namespace Vitqra
             int n=first+slot;
             if(n>=filtered.Count)return;
             var item=filtered[n];
-            if(VitqraChallengeDirectory.ValidLink(item))OpenReader(item);
+            if(VitqraChallengeDirectory.ValidLink(item)&&!TryOpenGraphic(item))OpenReader(item);
         }
         private void EditQuery()
         {
@@ -246,6 +247,7 @@ namespace Vitqra
         }
         private void Update()
         {
+            UpdateGraphic();
             if(webQueued&&!webLoading&&Time.unscaledTime>=searchAt)
             {
                 webQueued=false;
@@ -274,6 +276,7 @@ namespace Vitqra
             base.OnDisable();
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
+            CloseGraphic();
             CloseReader();
             StopAllCoroutines();loading=false;webLoading=false;webQueued=false;searchRevision++;
         }

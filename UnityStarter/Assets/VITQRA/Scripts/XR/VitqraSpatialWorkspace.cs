@@ -293,7 +293,7 @@ namespace Vitqra
 
         private void OnApplicationPause(bool paused)
         {
-            if(paused){ReleaseGrab();foreach(var panel in panels)panel.ClearResizeHover();}
+            if(paused){ReleaseGrab();if(research!=null)research.CancelGraphicPointer();foreach(var panel in panels)panel.ClearResizeHover();}
         }
 
         private void PlacePanel(VitqraSpatialPanel panel, Vector3 center, Vector3 right, float x, float y)
@@ -339,6 +339,7 @@ namespace Vitqra
                 if (!ReadPose(device, out localPosition, out localRotation))
                 {
                     ReleaseGrab();
+                    research.CancelGraphicPointer();
                     hasController = false;
                     foreach (var panel in panels) { panel.Highlight(false); panel.ClearResizeHover(); }
                     return;
@@ -351,6 +352,7 @@ namespace Vitqra
             if (!hasController || device.deviceId != activeDevice)
             {
                 activeDevice = device.deviceId;
+                research.CancelGraphicPointer();
                 ReleaseGrab();
                 foreach(var panel in panels) panel.ClearResizeHover();
                 previousGrip = grip;
@@ -381,7 +383,10 @@ namespace Vitqra
                     closest = panel; nearest = distance; onAction = region;
                 }
             }
-            if(closest==research&&!grip&&!trigger&&grabbed==null&&device.TryGetFeatureValue(CommonUsages.primary2DAxis,out Vector2 scrollAxis))
+            device.TryGetFeatureValue(CommonUsages.primary2DAxis,out Vector2 scrollAxis);
+            research.ProcessGraphicPointer(ray,closest==research&&onAction==0&&!grip&&grabbed==null,
+                trigger,previousTrigger,scrollAxis.y);
+            if(closest==research&&!grip&&!trigger&&grabbed==null)
                 research.Scroll(scrollAxis.y);
             foreach(var panel in panels)
             {
