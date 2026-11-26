@@ -25,6 +25,7 @@ namespace Vitqra
         {
             public int version=1;
             public bool conversationOpen=true;
+            public bool expandedDiscovery;
             public Entry[] panels;
         }
 

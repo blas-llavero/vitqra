@@ -1,21 +1,24 @@
-# Scientific challenge discovery (v0.4.0)
+# Scientific challenge discovery (v0.4.0 — directory redesign)
 
-The XR research window now has a bounded public-notice discovery adapter. On startup after valid headset tracking, it requests three fixed English terms (prize competition, challenge, hackathon) from the FederalRegister.gov public API. No API key or payment is required. The service is operated by the U.S. government; its web edition is an informational rendition, and the official publication should be consulted for legal rules. The endpoint schema was reviewed, but live API response and Unity runtime verification remain pending.
+The research panel now uses a BIOQRA-style numbered directory: a search field at the top, a single manual/automatic resolution preference, ten scientific areas plus All topics on the left, and a numbered list on the right. It has no refresh, next-result, source, portal or separate search buttons. Select an area or finish entering search text to filter immediately. Aim at the panel and use the controller thumbstick to scroll results; select a numbered row to open the original page in the platform browser. The panel is 0.86 × 0.90 m by default; older stored research positions are skipped once to avoid overlapping My Notes. Other layout preferences are preserved.
 
-Each query requests up to 40 recent records, with a 15-second timeout, no redirects, a 2 MiB response limit and a 30-second manual refresh cooldown. Only Notice records with challenge-related titles, valid dates, identifiers and HTTPS links to the expected host are accepted. Duplicate document identifiers are removed. Results are public announcements, not a verified list of open competitions. Some notices are unrelated, expired, cancellations or corrections. The user must check official rules, current dates, eligibility and the original announcement. The publication date is NOT a submission deadline. No application, registration or submission is automated.
+## Data and coverage
 
-Search keywords are matched locally against the downloaded original titles (all words required, case and accent insensitive). Keywords, conversations, notes and patient information are never sent to the endpoint. The first page per fixed query is a limited sample, not comprehensive global coverage. No data is fabricated. Empty results, source failure and limited results are distinct states. Refresh replaces the previous in-memory results; no disk cache is included. Source titles are retained in the original language, with localized UI labels; automatic translation and multilingual synonym expansion are pending. Search in the source language for best results.
+- Twelve direct Rosalind educational problem links are reused from BIOQRA's reviewed snapshot (data/challenges.json, commit cc87138d652c843bf909d47e65755cd1d38d3bf6; reviewed date 2026-11-14). They are labeled educational, not live research competitions. Generic benchmark index links are excluded.
+- The existing Federal Register public API fetches three fixed terms at startup, up to 40 records per query. Incoming results appear progressively. Its records are explicitly labeled unverified notices; they are not established open competitions or ready-to-run scientific tasks. Dates and eligibility require official verification.
+- The ten areas use English source keywords with localized area labels. Typing a matching localized area name selects that area. Arbitrary keywords filter the loaded titles and tags locally; they do not trigger a general web search or send personal text to an external service. No matching result means an empty list, not an invented challenge. A source failure is distinct from an empty filter.
+- Source names and URLs are not shown in the main list; validated original links and IDs remain internal. Row selection opens the original page. Translation of source content and an embedded browser are pending.
+- Additional direct challenge sources (including live Grand Challenge, Sage/DREAM, NASA and general STEM sources), keyword-driven broad web discovery, verified deadlines, challenge statements and open datasets are future integration work. No automatic scraping outside the implemented public endpoint.
 
-The official portals control opens a separate view of three verified portal links (NIH, Sage/DREAM and NASA Space Apps). These are navigation links, NOT automatically retrieved challenges. Do not scrape portals or bypass access restrictions. Review documented interfaces and terms before adding more adapters. Opening a link launches the platform browser via Application.OpenURL, not an embedded browser. No public datasets are downloaded yet.
+## Manual and automatic mode
 
-## Controls and tests
+Both modes share the same persisted automaticResearch preference, automatic by default. Selection takes effect immediately and the AI Settings panel reflects it; no extra Save button. The research engine is not connected yet, so neither mode claims to solve challenges. The automatic runner must eventually consume only verified challenge records, retrieve the statement and datasets, generate research artifacts, pause/resume/cancel and continue to the next challenge after successful completion or an explicit recorded failure. Unverified notices and educational exercises require separate handling. No commercial AI API, application submission or fabricated solution is allowed.
 
-Search keywords opens the supported keyboard; Refresh updates the public notices; Next cycles the current results or portal; Open source opens its validated official link; Official portals toggles navigation; All topics clears the local filter. The window retains resize, grip movement and saved layout behavior. No new paid API or media is used. Public network access is required for discovery; AI remains local only.
+## Validation
 
-Run VITQRA > Run Discovery Checks in Unity Editor for synthetic parsing and URL validation checks. Fixtures are not real notices and are never inserted into the application results. Pending: compile in Unity, verify actual endpoint response, Android Internet permission and keyboard, test timeout and interrupted requests on Quest, inspect current eligibility/deadlines, translate original content using reviewed local models, add authorized biomedical and hackathon data sources, and build an embedded browser.
+Compile in Unity and verify controller scrolling, keyboard, six numbered visible rows, area switching, empty results, startup refresh, mode persistence, legacy layout migration and original link selection on Quest. Existing parser checks remain applicable. New directory checks exercise local filtering, direct links, deduplication and classification; not executed in Unity. No native APK or real scientific resolution is provided.
 
 References:
+- https://github.com/blas-llavero/bioqra/blob/cc87138d652c843bf909d47e65755cd1d38d3bf6/data/challenges.json
+- https://rosalind.info/problems/list-view/
 - https://www.federalregister.gov/developers/documentation/api/v1
-- https://www.nih.gov/challenges
-- https://challenges.synapse.org/OpenChallenges
-- https://www.spaceappschallenge.org/

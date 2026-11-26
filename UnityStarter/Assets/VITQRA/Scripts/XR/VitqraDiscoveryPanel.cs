@@ -9,47 +9,69 @@ namespace Vitqra
 {
     public sealed class VitqraDiscoveryPanel : VitqraSpatialPanel
     {
+        public override float BaseWidth => .86f;
+        public override float BaseHeight => .90f;
+        private const int VisibleRows=6;
         private string locale,query="",editBuffer="";
-        private Text title,body,footer;
-        private Image background;
+        private Text searchLabel,status,manualLabel,automaticLabel;
+        private Image background,manualBox,automaticBox;
+        private readonly Text[] areaLabels=new Text[11];
+        private readonly Image[] areaBoxes=new Image[11];
+        private readonly Text[] rowLabels=new Text[VisibleRows];
+        private readonly Image[] rowBoxes=new Image[VisibleRows];
         private readonly List<Rect> targets=new List<Rect>();
         private readonly List<Action> actions=new List<Action>();
-        private List<VitqraDiscovery.Notice> all=new List<VitqraDiscovery.Notice>(),filtered=new List<VitqraDiscovery.Notice>();
-        private int index,portal;
-        private bool loading,unavailable,partial,portalMode,desktopEditing;
-        private bool refreshed;
+        private List<VitqraChallengeDirectory.Item> all=new List<VitqraChallengeDirectory.Item>();
+        private List<VitqraChallengeDirectory.Item> filtered=new List<VitqraChallengeDirectory.Item>();
+        private int area=-1,first;
+        private bool automatic,loading,partial,unavailable,desktopEditing;
         private TouchScreenKeyboard keyboard;
-        private float lastRefresh=-1000f;
+        private float lastRefresh=-1000f,nextScroll;
+        private Action<bool> modeChanged;
         private string T(D key)=>VitqraDiscoveryStrings.Get(locale,key);
+        private static readonly Color Normal=new Color(.10f,.20f,.28f,1);
+        private static readonly Color Selected=new Color(.12f,.40f,.42f,1);
 
-        public void InitializeDiscovery(string language)
+        public void InitializeDiscovery(string language,bool automaticResearch,Action<bool> changeMode)
         {
-            locale=language;
+            locale=language;automatic=automaticResearch;modeChanged=changeMode;
             var obj=new GameObject("Discovery Canvas",typeof(RectTransform),typeof(Canvas));
             var rect=(RectTransform)obj.transform;
             rect.SetParent(transform,false);
-            rect.sizeDelta=new Vector2(640,340);
+            rect.sizeDelta=new Vector2(860,900);
             rect.localScale=Vector3.one*.001f;
             obj.GetComponent<Canvas>().renderMode=RenderMode.WorldSpace;
-            background=Box("Background",rect,Vector2.zero,new Vector2(640,340),new Color(.025f,.065f,.10f,.97f));
-            Box("Accent",rect,new Vector2(0,166),new Vector2(640,8),Color.cyan);
-            title=Label("Heading",rect,new Vector2(0,135),new Vector2(610,44),T(D.Title),28,Color.cyan);
-            body=Label("Result",rect,new Vector2(0,43),new Vector2(600,124),"",23,Color.white);
-            footer=Label("Status",rect,new Vector2(0,-36),new Vector2(600,36),"",17,Color.white);
-            Button(rect,-200,-80,T(D.Keywords),EditQuery);
-            Button(rect,0,-80,T(D.Refresh),RefreshSources);
-            Button(rect,200,-80,T(D.Next),Next);
-            Button(rect,-200,-132,T(D.Open),OpenCurrent);
-            Button(rect,0,-132,T(D.Portals),TogglePortals);
-            Button(rect,200,-132,T(D.All),()=>{query="";portalMode=false;ApplyFilter();});
-            Render();
+            background=Box("Background",rect,Vector2.zero,new Vector2(860,900),new Color(.025f,.065f,.10f,.97f));
+            Box("Accent",rect,new Vector2(0,446),new Vector2(860,8),Color.cyan);
+            Label("Heading",rect,new Vector2(0,405),new Vector2(820,48),T(D.Title),31,Color.cyan);
+            searchLabel=Button(rect,0,343,810,56,T(D.SearchAreas),EditQuery,out _);
+            manualLabel=Button(rect,-205,277,390,50,T(D.Manual),()=>SetMode(false),out manualBox);
+            automaticLabel=Button(rect,205,277,390,50,T(D.Automatic),()=>SetMode(true),out automaticBox);
+            Label("Areas heading",rect,new Vector2(-266,222),new Vector2(280,45),T(D.Areas),23,Color.cyan);
+            Label("Results heading",rect,new Vector2(145,222),new Vector2(515,45),T(D.Title),23,Color.cyan);
+            for(int i=0;i<areaLabels.Length;i++)
+            {
+                int selected=i-1;
+                var label=i==0?T(D.All):T((D)((int)D.Bioinformatics+i-1));
+                areaLabels[i]=Button(rect,-266,174-i*49,280,45,label,()=>SelectArea(selected),out areaBoxes[i]);
+            }
+            for(int i=0;i<VisibleRows;i++)
+            {
+                int slot=i;
+                rowLabels[i]=Button(rect,145,160-i*86,510,80,"",()=>OpenRow(slot),out rowBoxes[i]);
+                rowLabels[i].alignment=TextAnchor.MiddleLeft;
+            }
+            status=Label("Status",rect,new Vector2(0,-388),new Vector2(810,78),"",19,Color.white);
+            all=VitqraChallengeDirectory.Educational();
+            ApplyFilter();
         }
-        private void Button(RectTransform rect,float x,float y,string label,Action callback)
+        private Text Button(RectTransform rect,float x,float y,float width,float height,string label,Action callback,out Image box)
         {
-            Box("Button",rect,new Vector2(x,y),new Vector2(190,48),new Color(.10f,.27f,.31f,1));
-            Label("Button label",rect,new Vector2(x,y),new Vector2(184,44),label,19,Color.white);
-            targets.Add(new Rect((x-95)*.001f,(y-24)*.001f,.19f,.048f));
+            box=Box("Button",rect,new Vector2(x,y),new Vector2(width,height),Normal);
+            var text=Label("Button label",rect,new Vector2(x,y),new Vector2(width-16,height-6),label,20,Color.white);
+            targets.Add(new Rect((x-width*.5f)*.001f,(y-height*.5f)*.001f,width*.001f,height*.001f));
             actions.Add(callback);
+            return text;
         }
         public override void Highlight(bool value)
         {
@@ -61,7 +83,7 @@ namespace Vitqra
             if(!gameObject.activeInHierarchy||Vector3.Dot(ray.direction,transform.forward)<=.0001f)return false;
             if(!new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f)return false;
             var p=transform.InverseTransformPoint(ray.GetPoint(distance));
-            if(Mathf.Abs(p.x)>Width*.5f||Mathf.Abs(p.y)>Height*.5f)return false;
+            if(Mathf.Abs(p.x)>BaseWidth*.5f||Mathf.Abs(p.y)>BaseHeight*.5f)return false;
             for(int i=0;i<targets.Count;i++)
                 if(targets[i].Contains(new Vector2(p.x,p.y))){region=i+1;break;}
             return true;
@@ -78,8 +100,8 @@ namespace Vitqra
         }
         private IEnumerator RefreshRoutine()
         {
-            loading=true;portalMode=false;unavailable=false;partial=false;
-            all.Clear();filtered.Clear();index=0;Render();
+            loading=true;unavailable=false;partial=false;Render();
+            var next=VitqraChallengeDirectory.Educational();
             int success=0;
             foreach(var term in VitqraDiscovery.Topics)
             {
@@ -87,72 +109,89 @@ namespace Vitqra
                 yield return VitqraDiscovery.Fetch(term,b=>batch=b);
                 if(batch!=null&&batch.success)
                 {
-                    success++;all.AddRange(batch.items);partial|=batch.limited;
+                    success++;partial|=batch.limited;
+                    foreach(var n in batch.items)next.Add(new VitqraChallengeDirectory.Item {
+                        id="fr-"+n.document_number,title=n.title,url=n.html_url,keywords="",educational=false});
+                    // Publish results as each source query returns, without waiting for all queries.
+                    all=next;ApplyFilter();
                 }
                 else partial=true;
             }
-            loading=false;refreshed=true;unavailable=success==0;
-            ApplyFilter();
+            all=next;loading=false;unavailable=success==0;ApplyFilter();
+        }
+        private void SelectArea(int selected)
+        {
+            area=selected;query="";ApplyFilter();
         }
         private void ApplyFilter()
         {
-            filtered=VitqraDiscovery.Filter(all,query);index=0;Render();
+            filtered=VitqraChallengeDirectory.Filter(all,area,query);first=0;Render();
+        }
+        public void SyncMode(bool value){automatic=value;Render();}
+        private void SetMode(bool value){SyncMode(value);modeChanged?.Invoke(value);}
+        public void Scroll(float y)
+        {
+            if(Mathf.Abs(y)<.55f||Time.unscaledTime<nextScroll)return;
+            nextScroll=Time.unscaledTime+.22f;
+            first=Mathf.Clamp(first+(y<0?1:-1),0,Mathf.Max(0,filtered.Count-VisibleRows));Render();
         }
         private void Render()
         {
-            if(title==null)return;
-            title.text=T(portalMode?D.Portals:D.Title);
-            if(portalMode)
+            if(status==null)return;
+            searchLabel.text=string.IsNullOrWhiteSpace(query)?T(D.SearchAreas):query;
+            manualBox.color=automatic?Normal:Selected;
+            automaticBox.color=automatic?Selected:Normal;
+            manualLabel.text=(automatic?"":"● ")+T(D.Manual);
+            automaticLabel.text=(automatic?"● ":"")+T(D.Automatic);
+            for(int i=0;i<areaLabels.Length;i++)areaBoxes[i].color=area==i-1?Selected:Normal;
+            for(int i=0;i<VisibleRows;i++)
             {
-                body.text=T((D)((int)D.Nih+portal));
-                footer.text=(portal+1)+" / "+VitqraDiscovery.PortalUrls.Length;
+                int n=first+i;
+                bool exists=n<filtered.Count;
+                rowBoxes[i].gameObject.SetActive(exists);
+                rowLabels[i].gameObject.SetActive(exists);
+                if(!exists)continue;
+                var item=filtered[n];
+                string name=item.title.Length>110?item.title.Substring(0,110)+"…":item.title;
+                rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.educational?D.Educational:D.Candidate);
             }
-            else if(loading){body.text=T(D.Searching);footer.text="";}
-            else if(unavailable){body.text=T(D.Unavailable);footer.text="";}
-            else if(filtered.Count==0)
-            {
-                body.text=T(refreshed?D.Empty:D.Notices);
-                footer.text=partial?T(D.Limited):"";
-            }
-            else
-            {
-                var n=filtered[index];
-                body.text=n.title.Length>180?n.title.Substring(0,180)+"…":n.title;
-                footer.text=(index+1)+" / "+filtered.Count+" · "+n.publication_date+"\n"+T(D.Unverified);
-            }
+            string summary=filtered.Count==0?T(loading?D.Searching:D.NoChallenges):
+                (first+1)+"–"+Mathf.Min(first+VisibleRows,filtered.Count)+" / "+filtered.Count+" · "+T(D.Scroll);
+            if(unavailable)summary+=" · "+T(D.Unavailable);
+            else if(partial)summary+=" · "+T(D.Limited);
+            status.text=summary+"\n"+T(D.EnginePending)+" · "+T(D.OriginalTitles);
         }
-        private void Next()
+        private void OpenRow(int slot)
         {
-            if(portalMode)portal=(portal+1)%VitqraDiscovery.PortalUrls.Length;
-            else if(filtered.Count>0)index=(index+1)%filtered.Count;
-            Render();
-        }
-        private void TogglePortals(){portalMode=!portalMode;Render();}
-        private void OpenCurrent()
-        {
-            if(portalMode){Application.OpenURL(VitqraDiscovery.PortalUrls[portal]);return;}
-            if(filtered.Count>0&&VitqraDiscovery.ValidSource(filtered[index].html_url))
-                Application.OpenURL(filtered[index].html_url);
+            int n=first+slot;
+            if(n>=filtered.Count)return;
+            var item=filtered[n];
+            if(VitqraChallengeDirectory.ValidLink(item))Application.OpenURL(item.url);
         }
         private void EditQuery()
         {
             if(keyboard!=null||desktopEditing)return;
             if(TouchScreenKeyboard.isSupported)
             {
-                keyboard=TouchScreenKeyboard.Open(query,TouchScreenKeyboardType.Default,false,false,false,false,T(D.LocalSearch),120);
+                keyboard=TouchScreenKeyboard.Open(query,TouchScreenKeyboardType.Default,false,false,false,false,T(D.SearchAreas),120);
                 if(keyboard!=null)return;
             }
 #if UNITY_EDITOR || UNITY_STANDALONE
             editBuffer=query;desktopEditing=true;
 #else
-            footer.text=T(D.KeyboardUnavailable);
+            status.text=T(D.KeyboardUnavailable);
 #endif
         }
         private void SetQuery(string value)
         {
             query=(value??"").Trim();
             if(query.Length>120)query=query.Substring(0,120);
-            portalMode=false;ApplyFilter();
+            area=-1;
+            // A localized area name typed in the search field selects that area.
+            for(int i=0;i<10;i++)
+                if(string.Equals(query,T((D)((int)D.Bioinformatics+i)),StringComparison.OrdinalIgnoreCase))
+                {area=i;query="";break;}
+            ApplyFilter();
         }
         private void Update()
         {
@@ -165,7 +204,7 @@ namespace Vitqra
 #if UNITY_EDITOR || UNITY_STANDALONE
             if(!desktopEditing)return;
             GUILayout.BeginArea(new Rect(20,20,Mathf.Max(100,Mathf.Min(560,Screen.width-40)),150),GUI.skin.box);
-            GUILayout.Label(T(D.LocalSearch));
+            GUILayout.Label(T(D.SearchAreas));
             editBuffer=GUILayout.TextField(editBuffer,120);
             if(GUILayout.Button(T(D.Done))){SetQuery(editBuffer);desktopEditing=false;}
             if(GUILayout.Button(T(D.Cancel)))desktopEditing=false;

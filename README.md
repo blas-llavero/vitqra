@@ -26,7 +26,7 @@ No APK or public release is available at this milestone. Clone this repository o
 2. Review automatic research and translation settings (enabled by default).
 3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
 4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
-5. In XR, use Scientific challenges to refresh public notices and filter downloaded titles locally. Open the original source to verify rules and dates. The older desktop preview remains offline.
+5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. Choose Manual or Automatic research mode. Select a result to view its original page. The local research engine is not connected yet. The older desktop preview remains offline.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
 
@@ -37,7 +37,7 @@ No APK or public release is available at this milestone. Clone this repository o
 | Settings persistence, default automatic research and translation | Source implemented; Unity execution not verified |
 | Ten-language core preview UI | Source implemented; translations need review |
 | Non-sensitive note storage | Source implemented; Unity execution not verified |
-| XR public-notice discovery and local keyword filtering | Source implemented; live API and device tests pending |
+| XR numbered challenge directory, area/keyword filters and resolution mode | Source implemented; live API and device tests pending |
 | Local-only AI and zero paid API policy | Preview guard implemented; no inference backend or network calls |
 | Unity/OpenXR development platform | Retained by author decision; compilation and physical tests pending |
 | World-space panels and controller movement | Source implemented; physical testing pending |
@@ -104,4 +104,4 @@ Switch the build profile to Android. Install XR Plug-in Management, OpenXR, Unit
 
 Unity and the headset have not been available to test this source package. Do not treat a successful import or desktop preview as Quest compatibility. Record editor version, package versions, build logs and physical-device results for subsequent milestones.
 
-See [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the bounded public-notice adapter, official portals and verification limits.
+See [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the numbered directory, curated direct problems, public notices and verification limits.

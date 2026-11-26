@@ -53,13 +53,13 @@ namespace Vitqra
             var researchObject=new GameObject("Scientific Discovery");
             researchObject.transform.SetParent(transform,false);
             research=researchObject.AddComponent<VitqraDiscoveryPanel>();
-            research.InitializeDiscovery(settings.language);
+            research.InitializeDiscovery(settings.language,settings.automaticResearch,value=>{settings.automaticResearch=value;settings.Save();Refresh();});
             research.InitializeResizeControls(l[21]);
             panels.Add(research);
             advice = AddPanel(T(K.Advice), Violet, ReviewAction);
             notes = AddPanel(T(K.Notes), Cyan, Refresh);
             configuration = AddPanel(T(K.Settings), Violet, OpenAvatarSettings);
-            configuration.SetSecondaryAction(T(K.ToggleResearch), () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
+            // The research list owns the manual/automatic selector.
             assistant = AddPanel(T(K.Assistant), Violet, ChooseNextAvatar);
             assistant.SetSecondaryAction(T(K.Close), CloseAvatarSettings);
             advice.SetSecondaryAction(VitqraChatStrings.Get(settings.language, VitqraChatStrings.Key.Open), OpenConversation);
@@ -196,6 +196,7 @@ namespace Vitqra
             string note = PlayerPrefs.GetString("vitqra.preview.note", "");
             if (note.Length > 180) note = note.Substring(0,180) + "...";
             notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
+            research.SyncMode(settings.automaticResearch);
             configuration.SetContent(l[19] + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
             int profile = settings.avatarProfile;
             string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
@@ -216,7 +217,7 @@ namespace Vitqra
             const float columnOffset = 0.85f;
             const float upperRow = 0.12f;
             const float lowerRow = -0.42f;
-            PlacePanel(research, center, right, -columnOffset, upperRow);
+            PlacePanel(research, center, right, -1.00f, 0.34f);
             PlacePanel(notes, center, right, -columnOffset, lowerRow);
             PlacePanel(advice, center, right, columnOffset, upperRow);
             PlacePanel(configuration, center, right, columnOffset, lowerRow);
@@ -240,6 +241,8 @@ namespace Vitqra
             {
                 int index=System.Array.IndexOf(VitqraLayoutStore.PanelIds,entry.id);
                 if(index<0)continue;
+                // Older layouts used a smaller research window. Keep its default new placement once.
+                if(windows[index]==research&&!saved.expandedDiscovery)continue;
                 if(VitqraLayoutStore.Apply(entry,layoutOrigin,layoutHeading,windows[index]) &&
                     windows[index]==assistant)assistantPositionCustomized=true;
             }
@@ -276,7 +279,7 @@ namespace Vitqra
                 entries[4].rotation=entries[3].rotation;
             }
             if(VitqraLayoutStore.Save(new VitqraLayoutStore.Layout {
-                conversationOpen=conversationOpen,panels=entries}))layoutDirty=false;
+                conversationOpen=conversationOpen,expandedDiscovery=true,panels=entries}))layoutDirty=false;
         }
 
         private void ReleaseGrab()
@@ -375,6 +378,8 @@ namespace Vitqra
                     closest = panel; nearest = distance; onAction = region;
                 }
             }
+            if(closest==research&&!grip&&!trigger&&grabbed==null&&device.TryGetFeatureValue(CommonUsages.primary2DAxis,out Vector2 scrollAxis))
+                research.Scroll(scrollAxis.y);
             foreach(var panel in panels)
             {
                 if(grip || grabbed!=null) { panel.ClearResizeHover(); continue; }
