@@ -1,0 +1,28 @@
+{
+  "scope": "fictional reference simulation only",
+  "checks": 34,
+  "example_history": [
+    {
+      "rev": 1,
+      "r": "domain",
+      "v": "revise",
+      "why": "data"
+    },
+    {
+      "rev": 2,
+      "r": "domain",
+      "v": "yes",
+      "why": "check"
+    },
+    {
+      "rev": 2,
+      "r": "methods",
+      "v": "yes",
+      "why": "check"
+    }
+  ],
+  "final_example": "favorable",
+  "clinical_release": false,
+  "scientific_approval": false,
+  "certificate": false
+}

@@ -53,3 +53,5 @@ v0.6.2 initial: fixed fictional aggregate collaboration, exact purpose and resou
 v0.6.2a initial: author-requested data completeness and informative sampling quality gate, strict synthetic scheduled coverage, separate event entries, cutoff and missingness audit. Ready for review is not research authorization. Future authorized dataset integration pending. See [DATA_QUALITY_AND_BIAS.md](DATA_QUALITY_AND_BIAS.md).
 
 v0.6.2b initial: interactive fictional six-state daily diary, scheduled/extra distinction, voluntary simulated reminder and device authorization, separate coverage counts and preserved prevalence. No actual intake, device integration or OS notifications. See [SYNTHETIC_DAILY_DIARY.md](SYNTHETIC_DAILY_DIARY.md).
+
+v0.6.3 initial: closed fictional validation center with data-quality gate, two assigned reviewers, conflict and expiry checks, revision-bound unsigned decisions and preserved in-memory history. No actual approval, signature or clinical release. See [SYNTHETIC_VALIDATION_CENTER.md](SYNTHETIC_VALIDATION_CENTER.md).
