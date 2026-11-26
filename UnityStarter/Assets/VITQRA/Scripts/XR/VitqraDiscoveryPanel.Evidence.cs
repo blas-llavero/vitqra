@@ -35,11 +35,12 @@ namespace Vitqra
             try{return await VitqraResearchPackage.Save(PackageRoot,VitqraResearchPackage.Build(EvidenceRoot,ResultRoot,ReportRoot,DraftRoot,item,locale),token.Token);}
             finally{if(ReferenceEquals(packageCancel,token))packageCancel=null;token.Dispose();}
         }
-        private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchDrafts");
+        private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA",localResearchSelected?"ResearchDrafts":"ChatGptResearchDrafts");
+        private bool EligibleForProvider(VitqraChallengeDirectory.Item item)=>VitqraEvidence.Eligible(item)&&(localResearchSelected||VitqraResearchDraft.SupportsExternal(item));
         private bool localResearchSelected=true;
         public void ConfigureResearchAi(VitqraLocalAi ai,bool localSelected=true)
         {
-            if(localResearchSelected!=localSelected)CancelEvidence();
+            if(localResearchSelected!=localSelected){CancelEvidence();evidenceStates.Clear();draftStates.Clear();packageStates.Clear();reportStates.Clear();}
             localResearchSelected=localSelected;
             researchAi=localSelected?ai:null;
         }
@@ -47,7 +48,11 @@ namespace Vitqra
         {
             var cancel=new CancellationTokenSource();
             draftCancel=cancel;
-            try{return await VitqraResearchDraft.Generate(researchAi,EvidenceRoot,DraftRoot,item,locale,cancel.Token);}
+            try
+            {
+                return localResearchSelected?await VitqraResearchDraft.Generate(researchAi,EvidenceRoot,DraftRoot,item,locale,cancel.Token):
+                    await VitqraResearchDraft.GenerateExternal(EvidenceRoot,DraftRoot,item,locale,cancel.Token);
+            }
             finally
             {
                 if(ReferenceEquals(draftCancel,cancel))draftCancel=null;
@@ -68,7 +73,7 @@ namespace Vitqra
         }
         private void QueueManualEvidence(VitqraChallengeDirectory.Item item)
         {
-            if(VitqraEvidence.Eligible(item)&&!evidenceStates.ContainsKey(EvidenceKey(item)))manualEvidence=item;
+            if(EligibleForProvider(item)&&!evidenceStates.ContainsKey(EvidenceKey(item)))manualEvidence=item;
         }
         private void RestoreRunControl()
         {
@@ -100,13 +105,13 @@ namespace Vitqra
         }
         private void UpdateEvidence()
         {
-            if(!localResearchSelected||(activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if((!localResearchSelected&&!VitqraChatAccount.ResearchReady)||(activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {
                 manualEvidence=null;
                 foreach(var candidate in filtered)
-                    if(VitqraEvidence.Eligible(candidate)&&!evidenceStates.ContainsKey(EvidenceKey(candidate)))
+                    if(EligibleForProvider(candidate)&&!evidenceStates.ContainsKey(EvidenceKey(candidate)))
                     {item=candidate;break;}
             }
             else if(manualEvidence!=null){item=manualEvidence;manualEvidence=null;}
@@ -134,7 +139,7 @@ namespace Vitqra
                 }
                 if(review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)
                     reportStates[EvidenceKey(item)]=VitqraResearchReport.Save(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
-                if((review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)&&researchAi!=null&&researchAi.Configured)
+                if((review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)&&(localResearchSelected?researchAi!=null&&researchAi.Configured:VitqraChatAccount.ResearchReady))
                 {
                     string key=EvidenceKey(item);
                     draftStates[key]=D.DraftGenerating;Render();
@@ -142,6 +147,8 @@ namespace Vitqra
                     while(!activeDraft.IsCompleted)yield return null;
                     draftStates[key]=activeDraft.Status==TaskStatus.RanToCompletion&&activeDraft.Result?D.DraftSaved:D.DraftUnavailable;
                     activeDraft=null;
+                    if(!localResearchSelected&&draftStates[key]!=D.DraftSaved)
+                    {runPaused=true;SaveRunControl();}
                 }
                 if(VitqraResearchPackage.Available&&reportStates.TryGetValue(EvidenceKey(item),out var reportSaved)&&reportSaved)
                 {
@@ -159,6 +166,7 @@ namespace Vitqra
         {
             if(packageCancel!=null)packageCancel.Cancel();
             if(draftCancel!=null)draftCancel.Cancel();
+            if(!localResearchSelected)VitqraChatAccount.CancelResearch();
             if(evidenceRequest!=null)evidenceRequest.Abort();
             if(evidenceRoutine!=null)StopCoroutine(evidenceRoutine);
             evidenceRequest=null;evidenceRoutine=null;evidenceBusy=false;manualEvidence=null;

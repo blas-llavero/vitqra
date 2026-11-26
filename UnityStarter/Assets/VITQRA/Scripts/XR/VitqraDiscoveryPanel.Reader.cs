@@ -113,7 +113,7 @@ namespace Vitqra
             // Keep the reviewed report distinct from unvalidated AI-generated text.
             return report+"\n\n"+T(D.DraftWarning)+"\n"+T(D.DraftAlternatives)+"\n"+draft.alternatives+
                 "\n\n"+T(D.DraftImpact)+"\n"+draft.critique+"\n\n"+T(D.DraftWarning)+
-                "\nSHA-256 (model): "+draft.modelSha256+"\nSHA-256 (source): "+draft.sourceSha256;
+                "\n"+draft.ModelIdentity+"\nSHA-256 (source): "+draft.sourceSha256;
         }
         private void ShowReaderReport()
         {

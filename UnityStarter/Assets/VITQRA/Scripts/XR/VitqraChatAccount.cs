@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Vitqra
@@ -88,6 +90,55 @@ namespace Vitqra
                     api.CallStatic("testConnection",activity,slug);
             }
             catch(Exception){}
+#endif
+        }
+        // Model preference is shared by the settings panel and research queue.
+        // The manual choice remains session-only; the default is automatic.
+        public static string ManualModel {get;set;}="";
+        public static string ResearchModel=>CatalogState==2?VitqraResearchModelSelector.Resolve(Catalog,ManualModel):"";
+        public static bool ResearchConsent=>Read("getResearchConsent",false);
+        public static bool ResearchReady=>ResearchConsent&&Status==State.PlanGranted&&CatalogState==2&&
+            !string.IsNullOrEmpty(ResearchModel)&&DailyLimit-Used>=2;
+        public static void SetResearchConsent(bool enabled)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try{using(var api=new AndroidJavaClass("com.blasllavero.vitqra.account.VitqraChatAccount"))api.CallStatic("setResearchConsent",enabled);}
+            catch(Exception){}
+#endif
+        }
+        public static void CancelResearch()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try{using(var api=new AndroidJavaClass("com.blasllavero.vitqra.account.VitqraChatAccount"))api.CallStatic("cancelResearch");}
+            catch(Exception){}
+#endif
+        }
+        [Serializable] public sealed class ResearchReply{public string model,alternatives,critique;}
+        public static async Task<ResearchReply> Research(string slug,string id,string language,CancellationToken token)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                using(var player=new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using(var activity=player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using(var api=new AndroidJavaClass("com.blasllavero.vitqra.account.VitqraChatAccount"))
+                    if(!api.CallStatic<bool>("startResearch",activity,slug,id,language))return null;
+                bool canceled=false;
+                while(Read("getResearchState",3)==1)
+                {
+                    if(token.IsCancellationRequested&&!canceled){CancelResearch();canceled=true;}
+                    await Task.Delay(200);
+                }
+                token.ThrowIfCancellationRequested();
+                if(Read("getResearchState",3)!=2||!ResearchConsent)return null;
+                var result=JsonUtility.FromJson<ResearchReply>(Read("getResearchResult",""));
+                CancelResearch(); // clear result from the Java bridge
+                return result;
+            }
+            catch(Exception){CancelResearch();return null;}
+#else
+            await Task.Yield();return null;
 #endif
         }
         public static void SignIn(){try{Invoke("signIn");}catch(Exception){}}

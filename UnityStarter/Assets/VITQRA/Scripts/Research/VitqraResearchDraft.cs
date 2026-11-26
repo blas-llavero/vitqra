@@ -22,6 +22,8 @@ namespace Vitqra
             public int version=1;
             public string scope="unvalidated_research_hypothesis";
             public string id,url,language,modelSha256,sourceSha256,createdUtc,alternatives,critique,draftSha256;
+            public string provider,modelSlug;
+            public string ModelIdentity=>version==2?"ChatGPT: "+modelSlug:"SHA-256 (model): "+modelSha256;
         }
         public static string Instruction(string language,bool critique)
         {
@@ -49,6 +51,7 @@ namespace Vitqra
             string[] fields={draft.scope,draft.id,draft.url,draft.language,draft.modelSha256,draft.sourceSha256,
                 draft.createdUtc,draft.alternatives,draft.critique};
             var b=new StringBuilder();
+            if(draft.version==2)fields=fields.Concat(new[]{draft.provider,draft.modelSlug}).ToArray();
             foreach(string f in fields){if(f==null)throw new InvalidDataException();b.Append(f.Length.ToString(CultureInfo.InvariantCulture)).Append(':').Append(f);}
             return Hash(b.ToString());
         }
@@ -71,8 +74,8 @@ namespace Vitqra
                 var info=new FileInfo(path);
                 if(!info.Exists||info.Length<=0||info.Length>MaxRecord)return null;
                 var d=JsonUtility.FromJson<Draft>(Utf8.GetString(File.ReadAllBytes(path)));
-                if(d==null||d.version!=1||d.scope!="unvalidated_research_hypothesis"||d.id!=item.id||d.url!=item.url||
-                    d.language!=VitqraStrings.ResolveLanguage(language)||!VitqraLocalAi.ValidHash(d.modelSha256)||
+                if(d==null||d.scope!="unvalidated_research_hypothesis"||d.id!=item.id||d.url!=item.url||
+                    d.language!=VitqraStrings.ResolveLanguage(language)||!ValidModelIdentity(d)||
                     !manifest.assets.Any(a=>a.name=="source.html.txt"&&a.sha256==d.sourceSha256)||
                     string.IsNullOrWhiteSpace(d.alternatives)||d.alternatives.Length>6000||
                     string.IsNullOrWhiteSpace(d.critique)||d.critique.Length>6000||
@@ -80,6 +83,48 @@ namespace Vitqra
                 return d;
             }
             catch(Exception){return null;}
+        }
+        private static bool ValidModelIdentity(Draft d)
+        {
+            if(d.version==1)return VitqraLocalAi.ValidHash(d.modelSha256);
+            return d.version==2&&d.provider=="chatgpt"&&d.modelSha256==""&&
+                !string.IsNullOrEmpty(d.modelSlug)&&d.modelSlug.Length<=128&&
+                d.modelSlug.All(c=>(c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||"._:-".Contains(c.ToString()));
+        }
+        public static bool SupportsExternal(VitqraChallengeDirectory.Item item)
+        {
+            return item!=null&&item.educational&&!item.webCandidate&&VitqraSampleSolver.Supports(item.id)&&
+                VitqraEvidenceReview.SourceIdentityMatches(item);
+        }
+        public static async Task<bool> GenerateExternal(string evidenceRoot,string draftRoot,
+            VitqraChallengeDirectory.Item item,string language,CancellationToken token)
+        {
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                if(!SupportsExternal(item)||!VitqraChatAccount.ResearchReady)return false;
+                var m=Manifest(evidenceRoot,item);if(m==null)return false;
+                string path=PathFor(draftRoot,item,language),slug=VitqraChatAccount.ResearchModel;
+                if(File.Exists(path))
+                {
+                    var old=Load(evidenceRoot,draftRoot,item,language);
+                    return old!=null&&old.version==2&&old.modelSlug==slug;
+                }
+                var source=m.assets.Single(a=>a.name=="source.html.txt");
+                var response=await VitqraChatAccount.Research(slug,item.id,VitqraStrings.ResolveLanguage(language),token);
+                token.ThrowIfCancellationRequested();
+                if(response==null||response.model!=slug||VitqraChatAccount.ResearchModel!=slug||!VitqraChatAccount.ResearchConsent||
+                    string.IsNullOrWhiteSpace(response.alternatives)||response.alternatives.Length>6000||
+                    string.IsNullOrWhiteSpace(response.critique)||response.critique.Length>6000)return false;
+                var current=Manifest(evidenceRoot,item);
+                if(current==null||!current.assets.Any(a=>a.name=="source.html.txt"&&a.sha256==source.sha256))return false;
+                var draft=new Draft{version=2,provider="chatgpt",modelSlug=slug,modelSha256="",id=item.id,url=item.url,
+                    language=VitqraStrings.ResolveLanguage(language),sourceSha256=source.sha256,
+                    createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),
+                    alternatives=response.alternatives,critique=response.critique};
+                return SaveDraft(draftRoot,path,draft,token);
+            }
+            catch(Exception){return false;}
         }
         public static async Task<bool> Generate(VitqraLocalAi ai,string evidenceRoot,string draftRoot,
             VitqraChallengeDirectory.Item item,string language,CancellationToken token)
@@ -116,6 +161,14 @@ namespace Vitqra
                 var draft=new Draft{id=item.id,url=item.url,language=VitqraStrings.ResolveLanguage(language),modelSha256=model,
                     sourceSha256=sourceAsset.sha256,createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),
                     alternatives=first,critique=second};
+                return SaveDraft(draftRoot,path,draft,token);
+            }
+            catch(Exception){return false;}
+        }
+        private static bool SaveDraft(string draftRoot,string path,Draft draft,CancellationToken token)
+        {
+            try
+            {
                 draft.draftSha256=Digest(draft);
                 string json=JsonUtility.ToJson(draft,true);
                 if(Utf8.GetByteCount(json)>MaxRecord)return false;

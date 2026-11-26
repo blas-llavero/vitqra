@@ -19,7 +19,8 @@ namespace Vitqra
         private readonly List<GameObject> modelObjects=new List<GameObject>(), normalObjects=new List<GameObject>();
         private bool modelPage;
         private int modelIndex=-1;
-        private string selectedSlug="";
+        private string selectedSlug{get=>VitqraChatAccount.ManualModel;set=>VitqraChatAccount.ManualModel=value;}
+        private Text researchConsentLabel;
         private int normalTargets;
         private bool chatSelected;
         private float nextPoll;
@@ -37,7 +38,7 @@ namespace Vitqra
             Box("Background",rect,Vector2.zero,new Vector2(640,340),new Color(.025f,.065f,.10f,.98f));
             Box("Accent",rect,new Vector2(0,166),new Vector2(640,8),new Color(.75f,.64f,1f));
             Label("Heading",rect,new Vector2(0,135),new Vector2(600,42),T(K.Title),28,Color.cyan);
-            Button(rect,-195,96,200,36,T(K.Local),()=>{VitqraChatAccount.Cancel();select("local");},out localBox);
+            Button(rect,-195,96,200,36,T(K.Local),()=>{VitqraChatAccount.Cancel();VitqraChatAccount.SetResearchConsent(false);select("local");},out localBox);
             localStatus=Label("Local model state",rect,new Vector2(105,96),new Vector2(380,38),"",16,Color.white);
             localStatus.supportRichText=false;
             // One shared visual container for the account heading, state and controls.
@@ -54,7 +55,10 @@ namespace Vitqra
             normalTargets=targets.Count;
             foreach(Transform child in rect)if(child.name!="Background"&&child.name!="Accent"&&child.name!="Heading")normalObjects.Add(child.gameObject);
             int start=rect.childCount;
-            modelTitle=Label("Model heading",rect,new Vector2(0,96),new Vector2(590,30),T(K.Models),22,Color.cyan);
+            researchConsentLabel=Button(rect,0,96,590,32,"",()=>{
+                VitqraChatAccount.SetResearchConsent(!VitqraChatAccount.ResearchConsent);UpdateModels();
+            },out _);
+            researchConsentLabel.fontSize=15;
             modelStatus=Label("Model state",rect,new Vector2(0,63),new Vector2(590,34),"",16,Color.white);
             modelStatus.supportRichText=false;
             modelChoice=Button(rect,0,21,590,42,"",NextModel,out _);
@@ -131,6 +135,7 @@ namespace Vitqra
             K state=test==1?K.TestRunning:test==2?K.TestPassed:test==4?K.ProviderLimit:test==5?K.LocalLimit:test==3?K.TestFailed:
                 VitqraChatAccount.CatalogState==1?K.LoadingModels:VitqraChatAccount.CatalogState==3?K.NoModels:K.TestNote;
             modelStatus.text=T(state);
+            researchConsentLabel.text=T(K.ResearchConsent)+": "+T(VitqraChatAccount.ResearchConsent?K.On:K.Off);
         }
         private void UpdateAccountStatus()
         {

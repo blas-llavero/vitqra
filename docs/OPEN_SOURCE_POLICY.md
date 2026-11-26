@@ -57,3 +57,7 @@ English is the canonical repository language; the app automatically follows the 
 ## Optional account-provider preference
 
 The author has requested a voluntary ChatGPT choice inspired by BIOQRA. A persisted UI preference is now available, but the external provider is not connected and the effective local-only inference gate remains in force. Any future official plan-usage connector requires explicit consent, eligibility, privacy and security review. No paid API billing fallback is authorized. See [AI_PROVIDER_SETTINGS.md](AI_PROVIDER_SETTINGS.md).
+
+## Authorized experimental exception
+
+Optional ChatGPT plan inference is now limited to the five predefined public educational tasks with explicit session-only consent, no arbitrary source data, no paid API fallback and no clinical or general scientific execution. Local AI remains the default and the general scientific gate remains closed. See [CHATGPT_RESEARCH.md](CHATGPT_RESEARCH.md).

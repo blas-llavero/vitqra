@@ -21,3 +21,5 @@ v0.5.3c initial: official model catalog, on-demand token refresh, local daily at
 Catalog lifecycle requirement: refresh configured and authorized providers automatically at launch; ChatGPT startup and post-sign-in refresh implemented in source. Ollama and other provider adapters must implement this lifecycle when integrated. See [AI_CATALOG_LIFECYCLE.md](AI_CATALOG_LIFECYCLE.md).
 
 Startup selection requirement: prefer current official research rankings intersected with each configured provider's eligible catalog. ChatGPT public-guidance parser and reviewed fallback implemented in source; live-format/device validation and other providers pending.
+
+v0.5.3c.1 development: bounded two-pass ChatGPT educational drafts in the automatic queue, explicit consent, common usage cap and provider-specific local reports. General external research, live validation and conversation integration pending.

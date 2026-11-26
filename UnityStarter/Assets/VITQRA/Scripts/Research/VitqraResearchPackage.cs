@@ -67,7 +67,7 @@ namespace Vitqra
                     report.sections.Add(new VitqraResearchReport.Section{heading=warning,body=
                         T(language,D.DraftAlternatives)+"\n"+draft.alternatives+"\n\n"+
                         T(language,D.DraftImpact)+"\n"+draft.critique+"\n\n"+warning+
-                        "\nSHA-256 (model): "+draft.modelSha256+"\nSHA-256 (source): "+draft.sourceSha256});
+                        "\n"+draft.ModelIdentity+"\nSHA-256 (source): "+draft.sourceSha256});
                 }
                 string body=VitqraResearchReport.PlainText(report),html=VitqraResearchReport.Html(report);
                 if(body.Length>40000||Utf8.GetByteCount(html)>MaxText||Utf8.GetByteCount(body)>MaxText)return null;
