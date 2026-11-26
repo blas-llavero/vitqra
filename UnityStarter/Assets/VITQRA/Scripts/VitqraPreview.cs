@@ -10,7 +10,7 @@ namespace Vitqra
         private bool searched;
         private Vector2 scroll;
         private const string NoteKey = "vitqra.preview.note";
-        private readonly string[] providers = { "local", "OpenAI", "Anthropic", "Gemini", "Mistral", "DeepSeek" };
+
         private void Awake() { settings = VitqraSettings.Load(); note = PlayerPrefs.GetString(NoteKey, ""); }
         private void OnGUI()
         {
@@ -30,8 +30,9 @@ namespace Vitqra
             settings.automaticResearch = GUILayout.Toggle(settings.automaticResearch,l[2]);
             settings.automaticTranslation = GUILayout.Toggle(settings.automaticTranslation,l[3]);
             GUILayout.Label(l[4]);
-            int p = Mathf.Max(0,Array.IndexOf(providers,settings.provider));
-            settings.provider = providers[GUILayout.SelectionGrid(p,providers,3)];
+            settings.provider = "local";
+            settings.dailyBudgetCents = 0;
+            GUILayout.Label("local");
             GUILayout.Label(l[5]);
             if (GUILayout.Button(l[6])) settings.Save();
             GUILayout.Space(12);

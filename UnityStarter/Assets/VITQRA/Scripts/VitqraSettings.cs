@@ -21,7 +21,7 @@ namespace Vitqra
             {
                 var value = new VitqraSettings();
                 JsonUtility.FromJsonOverwrite(PlayerPrefs.GetString(Key, "{}"), value);
-                value.dailyBudgetCents = Math.Max(0, value.dailyBudgetCents);
+                value.EnforceLocalOnly();
                 return value;
             }
             catch (ArgumentException) { return new VitqraSettings(); }
@@ -29,18 +29,24 @@ namespace Vitqra
 
         public void Save()
         {
-            dailyBudgetCents = Math.Max(0, dailyBudgetCents);
+            EnforceLocalOnly();
             PlayerPrefs.SetString(Key, JsonUtility.ToJson(this));
             PlayerPrefs.Save();
         }
 
-        // A future adapter needs a cumulative spending ledger with atomic reservations.
+        private void EnforceLocalOnly()
+        {
+            // Migrate old preferences, including a previously selected commercial provider.
+            provider = "local";
+            dailyBudgetCents = 0;
+        }
+
+        // Readiness only; a future inference adapter must independently enforce
+        // the reviewed dependency/model registry and prohibit remote fallback.
         public bool CanStartResearch(bool providerVerified, bool isLocal, bool paidRequest, int estimatedCostCents)
         {
-            if (!automaticResearch || !providerVerified || estimatedCostCents < 0) return false;
-            if (isLocal) return !paidRequest && estimatedCostCents == 0;
-            if (!paidRequest) return estimatedCostCents == 0;
-            return dailyBudgetCents > 0 && estimatedCostCents > 0 && estimatedCostCents <= dailyBudgetCents;
+            return automaticResearch && providerVerified && provider == "local" &&
+                isLocal && !paidRequest && estimatedCostCents == 0;
         }
     }
 }

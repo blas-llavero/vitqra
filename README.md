@@ -2,7 +2,7 @@
 
 **Science without barriers.**
 
-VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 using Unity and OpenXR. Version 0.3.2 is a source-only desktop and spatial prototype, not an installable Quest application.
+VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 through OpenXR. The existing Unity source prototype is preserved as a reference; Unity is proprietary and is not the intended engine for the final fully open-source application. Godot is the proposed replacement. No installable Quest application has been published.
 
 ## Installation location
 
@@ -25,7 +25,7 @@ No APK or public release is available at this milestone. Clone this repository o
 1. Open the generated preview scene and press Play in Unity.
 2. Review automatic research and translation settings (enabled by default).
 3. Select a language or use the device language; English is the fallback.
-4. Select an AI provider. No external requests are implemented or made in this milestone. A configured provider, validated credentials and a budget gate are required in a future integration.
+4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
 5. Select a research topic or type a search query. The preview deliberately returns no results because a live source adapter is not implemented.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
@@ -38,7 +38,8 @@ No APK or public release is available at this milestone. Clone this repository o
 | Ten-language core preview UI | Source implemented; translations need review |
 | Non-sensitive note storage | Source implemented; Unity execution not verified |
 | Topic selection and editable search | Preview only; no live search |
-| AI providers and spending limits | Configuration only; no credentials or network calls |
+| Local-only AI and zero paid API policy | Preview guard implemented; no inference backend or network calls |
+| Open-source engine migration | Godot proposed; implementation and physical tests pending |
 | World-space panels and controller movement | Source implemented; physical testing pending |
 | Quest passthrough and XR rig | Template setup documented; not verified |
 | Procedural avatar selection, localized tips and review confirmation | Source implemented; Unity/headset tests pending |
@@ -53,9 +54,11 @@ No APK or public release is available at this milestone. Clone this repository o
 
 English (en), Spanish (es), Catalan (ca), Simplified Chinese (zh), Hindi (hi), French (fr), German (de), Portuguese (pt), Arabic (ar), Japanese (ja). Core strings are included. Arabic shaping, right-to-left layout and international font coverage require testing. Full research translation is not implemented yet.
 
-## AI and costs
+## Open-source and zero-paid-API policy
 
-The initial paid budget is zero. OpenAI API, Anthropic and other commercial APIs may incur charges independently of consumer subscriptions. Prefer a local provider such as Ollama for no external API charges, and cache outputs. Do not embed credentials in Unity source, settings files or APKs. Codex integration is planned through supported interfaces only. Provider selection in the preview is not authentication and never starts network activity.
+All VITQRA-controlled application code and required dependencies must use verified open-source licenses. Required model weights must have separately reviewed licenses, provenance and redistribution rights; availability of weights alone is not sufficient to establish open-source status. No paid API, required commercial account, cloud inference fallback or paid SDK is permitted. The paid API budget is permanently zero. The existing Unity preview now only exposes the local provider and rejects paid or non-local inference readiness. No model backend is connected yet.
+
+See [Open-source policy and migration plan](docs/OPEN_SOURCE_POLICY.md). The proprietary headset operating system, firmware and vendor runtime are unavoidable platform dependencies for Meta Quest and are outside VITQRA's licensing control. Internet access for public research sources is distinct from paid inference services.
 
 ## Privacy, scientific integrity and safety
 
@@ -72,6 +75,8 @@ Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs 
 Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. Voice and AI provider adapters are not connected. Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No speech engine or APK is provided.
 
 ## Build from source
+
+The following instructions reproduce the historical Unity preview only. They are not the build requirements for the planned open-source Godot client. The Godot port has not been implemented yet.
 
 ### 1. Install dependencies
 
