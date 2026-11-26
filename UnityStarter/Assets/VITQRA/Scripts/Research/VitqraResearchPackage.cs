@@ -23,7 +23,7 @@ namespace Vitqra
         private static string T(string locale,D key)=>VitqraDiscoveryStrings.Get(locale,key);
         public sealed class Content
         {
-            public string title,body,warning,html,identity;
+            public string title,body,warning,html,identity,reproducibility;
         }
         public sealed class Page
         {
@@ -74,11 +74,14 @@ namespace Vitqra
                         T(language,D.DraftImpact)+"\n"+draft.critique+"\n\n"+warning+
                         "\n"+draft.ModelIdentity+"\nSHA-256 (source): "+draft.sourceSha256});
                 }
+                string audit=VitqraReproducibility.Build(evidence,results,drafts,item,language);
+                if(audit==null)return null;
+                report.sections.Add(new VitqraResearchReport.Section{heading=VitqraReproducibility.Heading(language),body=VitqraReproducibility.Scope(language)+"\n"+audit});
                 string body=VitqraResearchReport.PlainText(report),html=VitqraResearchReport.Html(report);
                 if(body.Length>40000||Utf8.GetByteCount(html)>MaxText||Utf8.GetByteCount(body)>MaxText)return null;
                 // Stable path for the exact language, source, evidence and draft contents.
                 string identity=Hash(Utf8.GetBytes("v0.5.3\n"+body+"\n"+html+"\n"+warning));
-                return new Content{title=report.title,body=body,html=html,warning=warning,identity=identity};
+                return new Content{title=report.title,body=body,html=html,warning=warning,identity=identity,reproducibility=audit};
             }
             catch(Exception){return null;}
         }
@@ -95,6 +98,8 @@ namespace Vitqra
             if(pdf.Length>MaxPdf||!VitqraEvidence.PdfSignature(pdf))throw new IOException("Invalid PDF");
             var files=new Dictionary<string,byte[]>(StringComparer.Ordinal){
                 {"report.txt",Utf8.GetBytes(c.body)},{"report.html",Utf8.GetBytes(c.html)},{"report.pdf",pdf}};
+            if(string.IsNullOrEmpty(c.reproducibility)||Utf8.GetByteCount(c.reproducibility)>32768)throw new IOException("Invalid reproducibility record");
+            files.Add("reproducibility.txt",Utf8.GetBytes(c.reproducibility));
             files.Add("manifest.txt",Manifest(files));
             return files;
         }

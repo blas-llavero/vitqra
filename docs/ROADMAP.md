@@ -35,3 +35,5 @@ v0.5.5 initial: structured eight-dimension human-impact research questions, unkn
 ## Author-requested longitudinal and preventive healthcare extension
 
 After v0.5.6, add synthetic longitudinal trajectories (v0.5.7), controlled retrospective research (v0.5.8) and experimental multimodal evaluation (v0.5.9). Expand the existing v0.6 community roadmap into separate clinical, research and peer-support workspaces with clinician, patient, researcher and industry roles. Clinical use requires independent release gates; no real patient intake or individual prediction is currently enabled. See [LONGITUDINAL_HEALTH_RESEARCH.md](LONGITUDINAL_HEALTH_RESEARCH.md).
+
+v0.5.6: local reproducibility record, sample and synthetic benchmark rechecks, draft provenance and explicit blocked clinical/scientific release states in viewer and report package. Independent validation and Unity/device tests pending. See [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
