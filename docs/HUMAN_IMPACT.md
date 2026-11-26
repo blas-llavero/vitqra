@@ -1,0 +1,19 @@
+# Human impact research assessment — v0.5.5 initial development
+
+## Purpose
+
+Every supported documentary report now includes eight dimensions: potential benefit, potential harms and adverse effects, quality of life and burden, accessibility and equity, cost and resources, privacy and data protection, risk mitigation, and missing evidence and validation. This is a structured inventory of research questions and uncertainties, not an impact prediction model, clinical decision support or safety certification. No numeric risk score, clinical ranking, or claim of a proven benefit is generated. In particular, a successful educational algorithm benchmark is not evidence of patient benefit.
+
+## Workflow
+
+The existing critique request asks for eight short keyed research questions or uncertainties. Local llama.cpp and Ollama use the shared C# instruction; the Android ChatGPT educational connector uses the same authored suffix. No additional inference request, external endpoint, dataset, or permission is introduced. The existing educational-only remote scope, consent, quotas, reviewed server/model rules and scientific release gate remain unchanged. The model may omit or ignore the format; the parser does not infer missing values or accept duplicate fields, oversized values, markup or control/format characters. UNKNOWN and absent or invalid fields display as not assessed. The parser is not a medical or semantic safety classifier; model text can still be inaccurate or inappropriate and must be independently reviewed. No model text can authorize clinical use or patient release.
+
+New drafts carry an optional human-impact protocol identifier included in their consistency digest; previously saved drafts keep their existing digest and are not retrospectively marked as assessed. Existing drafts are not overwritten. The report viewer and generated PDF/HTML/TXT/ZIP package display the structured assessment with a localized warning, including an unknown-only assessment if there is no applicable draft. The original documentary report is not modified, preserving verification of existing stored reports. Existing stored package revisions remain unchanged. The assessment does not fetch additional evidence or independently verify any AI assertion. All eight headings and the warning are localized in ten languages; model text language is requested but not guaranteed.
+
+## Required later stages
+
+For real research proposals, establish the population, intervention or proposed deployment, comparison, outcomes, time horizon and evidence sources. Record study quality, applicability, uncertainty and conflicts; distinguish observed and hypothetical harms. Consider safety and benefit jointly, including subgroup effects, accessibility and burdens. Record mitigation and monitoring requirements and unresolved tradeoffs. Independent expert review is required before claims of scientific validity. For medical research, clinical and ethics review and relevant approvals must precede patient-facing recommendations or clinical use. No automated treatment assignment, clinical release or community communication is implemented. A future community module must use separate consent, access control, data minimization and reviewed plain-language information, not raw AI drafts.
+
+## Validation
+
+Run VITQRA > Run Human Impact Checks. Synthetic fixtures cover missing and duplicate fields, unsupported decision keys, markup/control rejection, bounds, legacy handling, localization and the unchanged scientific gate. Compile Unity C# and Android Java, exercise the three providers, verify actual prompt compliance and output limits, report rendering, privacy and device performance. No live model call, Unity compilation, Android build or Quest test was performed. No new dependency or third-party media.

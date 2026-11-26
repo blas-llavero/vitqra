@@ -111,6 +111,7 @@ namespace Vitqra
             string benchmark=VitqraMotifBenchmark.Load(EvidenceRoot,ResultRoot,item);
             if(benchmark!=null)report+="\n\n"+T(D.BenchmarkHeading)+"\n"+T(D.BenchmarkScope)+"\n"+benchmark;
             var draft=VitqraResearchDraft.Load(EvidenceRoot,DraftRoot,item,locale);
+            report+="\n\n"+VitqraHumanImpact.Heading(locale)+"\n"+VitqraHumanImpact.Describe(draft,locale);
             if(draft==null)return report;
             string optimization=benchmark==null?null:VitqraMotifOptimization.Describe(draft);
             if(optimization!=null)report+="\n\n"+T(D.OptimizationHeading)+"\n"+T(D.OptimizationScope)+"\n"+optimization;

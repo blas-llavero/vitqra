@@ -65,6 +65,7 @@ namespace Vitqra
                 var draft=VitqraResearchDraft.Load(evidence,drafts,item,language);
                 string optimization=benchmark==null?null:VitqraMotifOptimization.Describe(draft);
                 if(optimization!=null)report.sections.Add(new VitqraResearchReport.Section{heading=T(language,D.OptimizationHeading),body=T(language,D.OptimizationScope)+"\n"+optimization});
+                report.sections.Add(new VitqraResearchReport.Section{heading=VitqraHumanImpact.Heading(language),body=VitqraHumanImpact.Describe(draft,language)});
                 string warning=T(language,D.DraftWarning);
                 if(draft!=null)
                 {

@@ -22,7 +22,7 @@ namespace Vitqra
             public int version=1;
             public string scope="unvalidated_research_hypothesis";
             public string id,url,language,modelSha256,sourceSha256,createdUtc,alternatives,critique,draftSha256;
-            public string provider,modelSlug,optimizationProtocol;
+            public string provider,modelSlug,optimizationProtocol,impactProtocol;
             public string ModelIdentity=>version==2?"ChatGPT: "+modelSlug:version==3?"Ollama: "+modelSlug+" · manifest SHA-256: "+modelSha256:"SHA-256 (model): "+modelSha256;
         }
         public static string Instruction(string language,bool critique)
@@ -33,7 +33,7 @@ namespace Vitqra
                 "Never invent citations, measurements, datasets, benchmarks, completed experiments or rankings. "+
                 "Do not recommend treatments, dosing, self-experimentation, actionable hazardous procedures or patient-specific care. "+
                 (critique?
-                "Critique the alternatives. Propose a revised high-level approach with testable criteria, missing evidence, risks to people, equity, cost, access, uncertainty and safer alternatives. For medical topics describe only research questions and required independent clinical review. Do not claim it wins. Be concise.":
+                "Critique the alternatives. Propose a revised high-level approach with testable criteria, missing evidence, risks to people, equity, cost, access, uncertainty and safer alternatives. For medical topics describe only research questions and required independent clinical review. Do not claim it wins. Be concise."+VitqraHumanImpact.Prompt:
                 "Propose two distinct high-level approaches to the apparent challenge, compare likely merits against official criteria if actually provided, and specify missing data and tests. Include potential human benefit and harms. If the excerpt is insufficient, state that limitation. Be concise.");
         }
         private static string Bound(string text,int max)
@@ -53,6 +53,7 @@ namespace Vitqra
             var b=new StringBuilder();
             if(draft.version==2||draft.version==3)fields=fields.Concat(new[]{draft.provider,draft.modelSlug}).ToArray();
             if(!string.IsNullOrEmpty(draft.optimizationProtocol))fields=fields.Concat(new[]{draft.optimizationProtocol}).ToArray();
+            if(!string.IsNullOrEmpty(draft.impactProtocol))fields=fields.Concat(new[]{draft.impactProtocol}).ToArray();
             foreach(string f in fields){if(f==null)throw new InvalidDataException();b.Append(f.Length.ToString(CultureInfo.InvariantCulture)).Append(':').Append(f);}
             return Hash(b.ToString());
         }
@@ -81,6 +82,7 @@ namespace Vitqra
                     string.IsNullOrWhiteSpace(d.alternatives)||d.alternatives.Length>6000||
                     string.IsNullOrWhiteSpace(d.critique)||d.critique.Length>6000||
                     (!string.IsNullOrEmpty(d.optimizationProtocol)&&(d.id!=VitqraMotifBenchmark.ChallengeId||d.optimizationProtocol!=VitqraMotifOptimization.Protocol))||
+                    (!string.IsNullOrEmpty(d.impactProtocol)&&d.impactProtocol!=VitqraHumanImpact.Protocol)||
                     d.draftSha256!=Digest(d))return null;
                 return d;
             }
@@ -127,6 +129,7 @@ namespace Vitqra
                     language=VitqraStrings.ResolveLanguage(language),sourceSha256=source.sha256,
                     createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),
                     alternatives=response.alternatives,critique=response.critique,optimizationProtocol=optimize?VitqraMotifOptimization.Protocol:null};
+                draft.impactProtocol=VitqraHumanImpact.Protocol;
                 return SaveDraft(draftRoot,path,draft,token);
             }
             catch(Exception){return false;}
@@ -157,6 +160,7 @@ namespace Vitqra
                     language=VitqraStrings.ResolveLanguage(language),sourceSha256=source.sha256,
                     createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),alternatives=reply.alternatives,critique=reply.critique,
                     optimizationProtocol=item.id==VitqraMotifBenchmark.ChallengeId?VitqraMotifOptimization.Protocol:null};
+                draft.impactProtocol=VitqraHumanImpact.Protocol;
                 return SaveDraft(draftRoot,path,draft,token);
             }
             catch(Exception){return false;}
@@ -200,6 +204,7 @@ namespace Vitqra
                 var draft=new Draft{id=item.id,url=item.url,language=VitqraStrings.ResolveLanguage(language),modelSha256=model,
                     sourceSha256=sourceAsset.sha256,createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),
                     alternatives=first,critique=second,optimizationProtocol=optimize?VitqraMotifOptimization.Protocol:null};
+                draft.impactProtocol=VitqraHumanImpact.Protocol;
                 return SaveDraft(draftRoot,path,draft,token);
             }
             catch(Exception){return false;}

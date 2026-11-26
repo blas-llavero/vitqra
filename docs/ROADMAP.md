@@ -29,3 +29,5 @@ v0.5.3d development: Ollama private HTTPS catalog refresh, reviewed digest prior
 v0.5.4 initial: measured naive/KMP motif comparison, deterministic synthetic suite and verified local benchmark report extension. General iterative AI optimization and independent benchmarks remain pending. See [ALGORITHM_OPTIMIZATION.md](ALGORITHM_OPTIMIZATION.md).
 
 v0.5.4a development: AI-guided choice and one feedback revision for the reviewed motif algorithms across all three providers, separate synthetic evaluation and report comparison. General iterative optimization pending. See [AI_MOTIF_REVISION.md](AI_MOTIF_REVISION.md).
+
+v0.5.5 initial: structured eight-dimension human-impact research questions, unknown-state handling and report/package integration. Independent impact evidence, expert review and clinical/community release remain pending. See [HUMAN_IMPACT.md](HUMAN_IMPACT.md).
