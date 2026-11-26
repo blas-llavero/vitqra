@@ -1,0 +1,43 @@
+{
+  "scope": "fictional aggregate only",
+  "checked": 169416,
+  "allowed": 105,
+  "denied": 169311,
+  "boundary_checks": 8,
+  "visible_groups": 2,
+  "withheld_groups": 2,
+  "rows": [
+    {
+      "group": "A",
+      "state": "Visible",
+      "denominator": 60,
+      "cells": [
+        36,
+        18,
+        30
+      ]
+    },
+    {
+      "group": "B",
+      "state": "Visible",
+      "denominator": 60,
+      "cells": [
+        34,
+        10,
+        33
+      ]
+    },
+    {
+      "group": "C",
+      "state": "Withheld",
+      "denominator": null,
+      "cells": []
+    },
+    {
+      "group": "D",
+      "state": "Withheld",
+      "denominator": null,
+      "cells": []
+    }
+  ]
+}

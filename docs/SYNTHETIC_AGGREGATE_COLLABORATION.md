@@ -1,0 +1,17 @@
+# Synthetic aggregate research collaboration — v0.6.2 initial
+
+A closed Unity editor prototype for a research/industry workspace. Four predefined fictional groups, one fixed release, three invented binary marginal endpoints: benefit, harm and functional proxy. They are not measured efficacy, adverse-event or quality-of-life outcomes. No interventions, real patients, drugs, individual rows, recruitment, arbitrary data input, AI, server, persistence, export or clinical release. No comparison supports a treatment recommendation or causal claim.
+
+## Authorization and disclosure
+
+Only AggregateA, Care-independent Research/Read for the fictional Researcher (days 5–64), or Collaboration/Read for fictional Industry (days 15–59), as granted by v0.6.0. Other actors, resources, purposes and invalid days deny; no row or digest returned. Authorization is recomputed on every editor draw, not cached after denial. Real identity, time and grants must be server-controlled in any later deployment.
+
+The minimum group size is 20, minimum cell count 5 for each binary endpoint AND its complement. Entire group is withheld if any check fails, including denominator and every endpoint. No partial suppression, totals, arbitrary filters, overlapping group requests, revision differences, individual records or alternate breakdowns. A and B display; C and D are withheld. Only group labels and withholding status remain. The digest binds ONLY released content, not suppressed source counts. All recipients get the same fixed release. No endpoint joint counts are available; marginal counts cannot establish individual benefit without harm.
+
+The thresholds are project-selected illustrative policy, not legal or scientific anonymity criteria. Small-cell suppression is not differential privacy, does not guarantee non-reidentification, and group labels/withholding status themselves convey information. The fixed invented source counts are visible in source code because they are entirely synthetic; never implement production confidential data this way. Real release requires disclosure review of the complete publication history, external linkage, auxiliary knowledge, overlapping releases, differencing, small subgroups and membership inference; validated aggregation, reviewed provenance, independent governance, access audit and data agreements. Consider formally evaluated privacy mechanisms where appropriate. Do not equate suppressed counts with zero. No production data disclosure.
+
+## Verification and interface
+
+JavaScript reproduction: 169416 actor/resource/purpose/day combinations, 105 permitted and 169311 denied; 8 group/cell boundary checks. Fixed output shared by researcher and industry, no hidden payload in withheld rows. C# editor checks supplied, Unity compilation and execution pending. Reference design is shared; not an independent security audit. Editor menus: VITQRA > Synthetic Aggregate Collaboration Preview / Run Synthetic Aggregate Checks. Core labels follow ten device languages; invariant English technical identifiers and menus. No runtime XR changes, new dependencies or media.
+
+Next: v0.6.3 scientific and clinical validation center prototype. Patient education remains a separate future reviewed workflow, not an industry marketing channel. Actual benefit-risk assessment needs prespecified outcomes, valid comparison, adverse-event severity and follow-up, quality-of-life measures, missingness, uncertainty, independent review and appropriate clinical evidence. No automated certification or clinical advice.

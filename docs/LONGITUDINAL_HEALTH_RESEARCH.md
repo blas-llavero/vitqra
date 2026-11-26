@@ -66,3 +66,5 @@ The future clinical validation workflow must pin any approved prediction model i
 The v0.6.0 initial policy prototype models resource-specific role ceilings, purpose, action, expiry and revocation using fictional fixtures only. It is not authentication or a live data boundary. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).
 
 The v0.6.1 synthetic previsit prototype adds an unsigned descriptive summary under the fixed resource policy with separate access time and information cutoff. Actual patient intake, photographs, clinical import and release remain blocked. See [SYNTHETIC_PREVISIT.md](SYNTHETIC_PREVISIT.md).
+
+The v0.6.2 prototype demonstrates authorization and withholding of small fictional aggregate groups. No real data, treatment evidence or patient education delivery. See [SYNTHETIC_AGGREGATE_COLLABORATION.md](SYNTHETIC_AGGREGATE_COLLABORATION.md).

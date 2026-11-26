@@ -47,3 +47,5 @@ v0.5.9 initial: closed synthetic multimodal proxy comparison, paired complete-ca
 v0.6.0 initial: closed fictional role/resource/purpose/action authorization policy, expiry and revocation fixtures, editor test console and boundary/sample-day checks. No live authentication, server, real clinical data or collaboration. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).
 
 v0.6.1 initial: fictional previsit summary with current authorization and separate historical cutoff, missingness, provenance, descriptive trends and editor preview. No actual intake, export, clinical prediction or runtime XR. See [SYNTHETIC_PREVISIT.md](SYNTHETIC_PREVISIT.md).
+
+v0.6.2 initial: fixed fictional aggregate collaboration, exact purpose and resource permissions, group/cell/complement suppression, shared release digest and localized editor preview. No real disclosure, patient education delivery, clinical claims or live collaboration. See [SYNTHETIC_AGGREGATE_COLLABORATION.md](SYNTHETIC_AGGREGATE_COLLABORATION.md).
