@@ -1,0 +1,122 @@
+{
+  "scope": "synthetic raster reference only",
+  "grid": [
+    24,
+    24
+  ],
+  "templates": 588,
+  "minimum_iou_permille": 750,
+  "minimum_margin_permille": 80,
+  "known_cases": 432,
+  "unknown_cases": 4,
+  "unknown_rejected": 4,
+  "noise_results": [
+    {
+      "flip_attempts": 0,
+      "counts": [
+        [
+          36,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          36,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          36,
+          0
+        ]
+      ],
+      "correct": 108,
+      "abstained": 0,
+      "wrong": 0
+    },
+    {
+      "flip_attempts": 6,
+      "counts": [
+        [
+          36,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          36,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          36,
+          0
+        ]
+      ],
+      "correct": 108,
+      "abstained": 0,
+      "wrong": 0
+    },
+    {
+      "flip_attempts": 18,
+      "counts": [
+        [
+          36,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          36,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          36,
+          0
+        ]
+      ],
+      "correct": 108,
+      "abstained": 0,
+      "wrong": 0
+    },
+    {
+      "flip_attempts": 45,
+      "counts": [
+        [
+          16,
+          0,
+          0,
+          20
+        ],
+        [
+          0,
+          26,
+          0,
+          10
+        ],
+        [
+          0,
+          0,
+          2,
+          34
+        ]
+      ],
+      "correct": 44,
+      "abstained": 64,
+      "wrong": 0
+    }
+  ],
+  "camera": false,
+  "network": false,
+  "clinical_release": false
+}

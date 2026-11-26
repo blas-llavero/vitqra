@@ -61,3 +61,5 @@ v0.6.4 initial: ephemeral local synthetic signature exercise, revision binding, 
 v0.7.0 initial: fictional avatar meeting with scoped room grants, muted-by-default simulated turns, ten-language fixed captions and optional isolated procedural 3D preview. No actual audio, translation, network or clinical collaboration. See [SYNTHETIC_AVATAR_MEETING.md](SYNTHETIC_AVATAR_MEETING.md).
 
 v0.7.1 initial: local synthetic telepresence, per-channel consent, fictional bounded poses, stale/replay rejection and editor projection. No hardware capture, transport or live holograms. See [SYNTHETIC_TELEPRESENCE.md](SYNTHETIC_TELEPRESENCE.md).
+
+v0.8.0 initial: opt-in closed synthetic geometric recognition using in-memory raster templates, explicit unknown rejection, corruption stress tests and localized editor preview. No camera, learned model, real-object recognition or clinical use. See [SYNTHETIC_OBJECT_RECOGNITION.md](SYNTHETIC_OBJECT_RECOGNITION.md).
