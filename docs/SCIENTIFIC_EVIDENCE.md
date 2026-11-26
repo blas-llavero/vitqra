@@ -24,3 +24,7 @@ References:
 - https://www.govinfo.gov/developers
 - https://rosalind.info/faq/
 - https://developers.zenodo.org/
+
+## Documentary review
+
+After acquisition or cache reuse, v0.4.4 checks source identity and consistency of the stored evidence. See [EVIDENCE_REVIEW.md](EVIDENCE_REVIEW.md). Scientific validation and autonomous research remain unavailable.

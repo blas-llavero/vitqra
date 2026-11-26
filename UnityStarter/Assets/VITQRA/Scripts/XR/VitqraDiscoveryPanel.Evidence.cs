@@ -49,8 +49,14 @@ namespace Vitqra
         {
             VitqraEvidence.Result result=null;
             yield return VitqraEvidence.Acquire(item,EvidenceRoot,request=>evidenceRequest=request,value=>result=value);
-            evidenceStates[EvidenceKey(item)]=result!=null&&result.success?
-                (result.partial?D.EvidencePartial:D.EvidenceSaved):D.EvidenceFailed;
+            if(result!=null&&result.success)
+            {
+                var review=VitqraEvidenceReview.Inspect(EvidenceRoot,item);
+                evidenceStates[EvidenceKey(item)]=review.state==VitqraEvidenceReview.State.DocumentChecksPassed?
+                    D.DocumentChecksPassed:review.state==VitqraEvidenceReview.State.Partial?
+                    D.DocumentReviewPartial:D.DocumentReviewFailed;
+            }
+            else evidenceStates[EvidenceKey(item)]=D.EvidenceFailed;
             evidenceBusy=false;evidenceRoutine=null;evidenceNext=Time.unscaledTime+2f;Render();
         }
         private void CancelEvidence()
