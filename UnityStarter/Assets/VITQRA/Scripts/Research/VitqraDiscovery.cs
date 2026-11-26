@@ -64,7 +64,7 @@ namespace Vitqra
                        !DateTime.TryParseExact(x.publication_date,"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.None,out _))continue;
                     if(!Regex.IsMatch(x.title,@"\b(challenge|challenges|hackathon|hackathons|prize\s+competition|prize\s+competitions)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant))continue;
                     batch.items.Add(new Notice {document_number=x.document_number,title=x.title,
-                        html_url=x.html_url,publication_date=x.publication_date,type=x.type});
+                        html_url=x.html_url,publication_date=x.publication_date,type=x.type,pdf_url=x.pdf_url});
                 }
             }
             catch(ArgumentException){batch.success=false;batch.items.Clear();}
