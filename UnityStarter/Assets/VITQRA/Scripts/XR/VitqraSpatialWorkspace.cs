@@ -72,15 +72,22 @@ namespace Vitqra
             forward.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, forward);
             Vector3 center = headCamera.transform.position + forward * 1.65f;
-            for (int i = 0; i < panels.Count; i++)
-            {
-                float x = i % 2 == 0 ? -0.50f : 0.50f;
-                float y = i < 2 ? 0.02f : -0.42f;
-                panels[i].transform.position = center + right * x + Vector3.up * y;
-                FaceUser(panels[i].transform);
-                panels[i].gameObject.SetActive(true);
-            }
+            // Leave the central view open at startup and after a layout reset.
+            const float columnOffset = 0.85f;
+            const float upperRow = 0.12f;
+            const float lowerRow = -0.42f;
+            PlacePanel(research, center, right, -columnOffset, upperRow);
+            PlacePanel(notes, center, right, -columnOffset, lowerRow);
+            PlacePanel(advice, center, right, columnOffset, upperRow);
+            PlacePanel(configuration, center, right, columnOffset, lowerRow);
             initialized = true;
+        }
+
+        private void PlacePanel(VitqraSpatialPanel panel, Vector3 center, Vector3 right, float x, float y)
+        {
+            panel.transform.position = center + right * x + Vector3.up * y;
+            FaceUser(panel.transform);
+            panel.gameObject.SetActive(true);
         }
 
         private void FaceUser(Transform panel)

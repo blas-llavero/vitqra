@@ -2,7 +2,7 @@
 
 **Science without barriers.**
 
-VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 using Unity and OpenXR. Version 0.2.0 is a source-only desktop and spatial prototype, not an installable Quest application.
+VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 using Unity and OpenXR. Version 0.2.1 is a source-only desktop and spatial prototype, not an installable Quest application.
 
 ## Installation location
 
@@ -64,9 +64,9 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.2.0)
+## Mixed reality prototype (v0.2.1)
 
-Four movable world-space panels, with sample actions and controller-based repositioning, are provided as a Unity source overlay. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial text localization is partial; no APK or verified headset build exists.
+Four independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial text localization is partial; no APK or verified headset build exists.
 
 ## Build from source
 
