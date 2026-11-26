@@ -8,7 +8,7 @@ namespace Vitqra
     {
         public sealed class Item
         {
-            public string id,title,url,keywords;
+            public string id,title,url,keywords,officialPdf,publicationDate;
             public bool educational,webCandidate;
         }
         // Reviewed BIOQRA snapshot, direct problem links only. Educational exercises
