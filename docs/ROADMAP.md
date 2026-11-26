@@ -39,3 +39,7 @@ After v0.5.6, add synthetic longitudinal trajectories (v0.5.7), controlled retro
 v0.5.6: local reproducibility record, sample and synthetic benchmark rechecks, draft provenance and explicit blocked clinical/scientific release states in viewer and report package. Independent validation and Unity/device tests pending. See [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 v0.5.6a: unsigned independent-review request bound to report and reproducibility hashes; formal review, signatures, institutional and regulatory approval workflow required in future phases. No certificate or clinical release. See [SCIENTIFIC_CLINICAL_VALIDATION.md](SCIENTIFIC_CLINICAL_VALIDATION.md).
+
+v0.5.7–v0.5.8: synthetic timeline and retrospective experiment integrated into development at fb9171a; Unity tests pending. See [SYNTHETIC_LONGITUDINAL_AND_RETROSPECTIVE.md](SYNTHETIC_LONGITUDINAL_AND_RETROSPECTIVE.md).
+
+v0.5.9 initial: closed synthetic multimodal proxy comparison, paired complete-case evaluation, coverage and conditional Wilson intervals, editor-only preview. Disease-specific data access, feature extraction, clinical validation and runtime XR remain pending. See [SYNTHETIC_MULTIMODAL.md](SYNTHETIC_MULTIMODAL.md).

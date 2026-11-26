@@ -1,0 +1,250 @@
+{
+  "scope": "synthetic only; no clinical validation",
+  "protocol": "synthetic-multimodal-v1",
+  "perturbations": 600,
+  "development": {
+    "assigned": 400,
+    "unknown": 28,
+    "missing": 184,
+    "available": [
+      304,
+      312,
+      318,
+      326
+    ],
+    "eligible": 188
+  },
+  "holdout": {
+    "assigned": 200,
+    "unknown": 12,
+    "missing": 100,
+    "available": [
+      153,
+      147,
+      158,
+      164
+    ],
+    "eligible": 88
+  },
+  "models": [
+    {
+      "modality": "Temporal",
+      "threshold": -2,
+      "development": {
+        "TP": 71,
+        "FP": 69,
+        "TN": 32,
+        "FN": 16,
+        "n": 188,
+        "sensitivity": 0.8160919540229885,
+        "specificity": 0.31683168316831684,
+        "balanced_accuracy": 0.5664618185956527,
+        "sensitivity_wilson95": [
+          0.7219450963009358,
+          0.8835053303435857
+        ],
+        "specificity_wilson95": [
+          0.2342352631167658,
+          0.41285091427724097
+        ]
+      },
+      "holdout": {
+        "TP": 28,
+        "FP": 27,
+        "TN": 24,
+        "FN": 9,
+        "n": 88,
+        "sensitivity": 0.7567567567567568,
+        "specificity": 0.47058823529411764,
+        "balanced_accuracy": 0.6136724960254372,
+        "sensitivity_wilson95": [
+          0.5988270787855735,
+          0.8663864701088361
+        ],
+        "specificity_wilson95": [
+          0.3405299020949959,
+          0.6047669578990353
+        ]
+      }
+    },
+    {
+      "modality": "ImageProxy",
+      "threshold": 0,
+      "development": {
+        "TP": 62,
+        "FP": 48,
+        "TN": 53,
+        "FN": 25,
+        "n": 188,
+        "sensitivity": 0.7126436781609196,
+        "specificity": 0.5247524752475248,
+        "balanced_accuracy": 0.6186980767042222,
+        "sensitivity_wilson95": [
+          0.6101602906798939,
+          0.7971427236082388
+        ],
+        "specificity_wilson95": [
+          0.42824984362727647,
+          0.6194412134816415
+        ]
+      },
+      "holdout": {
+        "TP": 25,
+        "FP": 24,
+        "TN": 27,
+        "FN": 12,
+        "n": 88,
+        "sensitivity": 0.6756756756756757,
+        "specificity": 0.5294117647058824,
+        "balanced_accuracy": 0.6025437201907791,
+        "sensitivity_wilson95": [
+          0.514636672419722,
+          0.8036673347185581
+        ],
+        "specificity_wilson95": [
+          0.39523304210096466,
+          0.6594700979050041
+        ]
+      }
+    },
+    {
+      "modality": "SymptomProxy",
+      "threshold": 0,
+      "development": {
+        "TP": 58,
+        "FP": 44,
+        "TN": 57,
+        "FN": 29,
+        "n": 188,
+        "sensitivity": 0.6666666666666666,
+        "specificity": 0.5643564356435643,
+        "balanced_accuracy": 0.6155115511551155,
+        "sensitivity_wilson95": [
+          0.5624236002445081,
+          0.7568138974407851
+        ],
+        "specificity_wilson95": [
+          0.46705646765298536,
+          0.6569402808302014
+        ]
+      },
+      "holdout": {
+        "TP": 24,
+        "FP": 21,
+        "TN": 30,
+        "FN": 13,
+        "n": 88,
+        "sensitivity": 0.6486486486486487,
+        "specificity": 0.5882352941176471,
+        "balanced_accuracy": 0.6184419713831479,
+        "sensitivity_wilson95": [
+          0.4875902312255084,
+          0.7817439286607287
+        ],
+        "specificity_wilson95": [
+          0.4516533720637157,
+          0.7124560479541906
+        ]
+      }
+    },
+    {
+      "modality": "GeneticProxy",
+      "threshold": 2,
+      "development": {
+        "TP": 45,
+        "FP": 23,
+        "TN": 78,
+        "FN": 42,
+        "n": 188,
+        "sensitivity": 0.5172413793103449,
+        "specificity": 0.7722772277227723,
+        "balanced_accuracy": 0.6447593035165586,
+        "sensitivity_wilson95": [
+          0.4137512133636875,
+          0.6192733553623774
+        ],
+        "specificity_wilson95": [
+          0.6814098987582484,
+          0.8431917294398499
+        ]
+      },
+      "holdout": {
+        "TP": 13,
+        "FP": 17,
+        "TN": 34,
+        "FN": 24,
+        "n": 88,
+        "sensitivity": 0.35135135135135137,
+        "specificity": 0.6666666666666666,
+        "balanced_accuracy": 0.509009009009009,
+        "sensitivity_wilson95": [
+          0.2182560713392713,
+          0.5124097687744917
+        ],
+        "specificity_wilson95": [
+          0.529683778569708,
+          0.7803006814641148
+        ]
+      }
+    },
+    {
+      "modality": "Fusion",
+      "threshold": 0,
+      "development": {
+        "TP": 67,
+        "FP": 34,
+        "TN": 67,
+        "FN": 20,
+        "n": 188,
+        "sensitivity": 0.7701149425287356,
+        "specificity": 0.6633663366336634,
+        "balanced_accuracy": 0.7167406395811995,
+        "sensitivity_wilson95": [
+          0.6714172271485064,
+          0.8459676828931757
+        ],
+        "specificity_wilson95": [
+          0.5667267191475079,
+          0.7480342577713511
+        ]
+      },
+      "holdout": {
+        "TP": 23,
+        "FP": 19,
+        "TN": 32,
+        "FN": 14,
+        "n": 88,
+        "sensitivity": 0.6216216216216216,
+        "specificity": 0.6274509803921569,
+        "balanced_accuracy": 0.6245363010068892,
+        "sensitivity_wilson95": [
+          0.46100430439217654,
+          0.7593600082420173
+        ],
+        "specificity_wilson95": [
+          0.4902521346885088,
+          0.7467948053373558
+        ]
+      }
+    }
+  ],
+  "baseline": {
+    "TP": 0,
+    "FP": 0,
+    "TN": 51,
+    "FN": 37,
+    "n": 88,
+    "sensitivity": 0,
+    "specificity": 1,
+    "balanced_accuracy": 0.5,
+    "sensitivity_wilson95": [
+      0,
+      0.09405782583720251
+    ],
+    "specificity_wilson95": [
+      0.9299533801014687,
+      1
+    ]
+  },
+  "canonical_length": 79421
+}
