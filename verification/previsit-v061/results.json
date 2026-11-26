@@ -1,0 +1,12 @@
+{
+  "scope": "fictional previsit only",
+  "checked": 134664,
+  "allowed": 7150,
+  "denied": 127514,
+  "day25": 8,
+  "day29": 9,
+  "explicit_missing": 1,
+  "placeholders": 2,
+  "changeA": 4,
+  "changeB": -4
+}

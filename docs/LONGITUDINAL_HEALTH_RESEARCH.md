@@ -64,3 +64,5 @@ No clinical data processing or code is added in this milestone. No medical claim
 The future clinical validation workflow must pin any approved prediction model independently of the research provider's dynamic model selector. See [SCIENTIFIC_CLINICAL_VALIDATION.md](SCIENTIFIC_CLINICAL_VALIDATION.md).
 
 The v0.6.0 initial policy prototype models resource-specific role ceilings, purpose, action, expiry and revocation using fictional fixtures only. It is not authentication or a live data boundary. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).
+
+The v0.6.1 synthetic previsit prototype adds an unsigned descriptive summary under the fixed resource policy with separate access time and information cutoff. Actual patient intake, photographs, clinical import and release remain blocked. See [SYNTHETIC_PREVISIT.md](SYNTHETIC_PREVISIT.md).
