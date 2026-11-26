@@ -11,7 +11,8 @@ namespace Vitqra
     {
         private readonly List<Rect> targets=new List<Rect>();
         private readonly List<Action> actions=new List<Action>();
-        private Image localBox,chatBox;
+        private Image localBox,chatBox,chatCard;
+        private Text localStatus;
         private Text status,translation,signIn,signOut,usage;
         private Image signInBox,signOutBox,usageBox;
         private bool chatSelected;
@@ -30,15 +31,19 @@ namespace Vitqra
             Box("Background",rect,Vector2.zero,new Vector2(640,340),new Color(.025f,.065f,.10f,.98f));
             Box("Accent",rect,new Vector2(0,166),new Vector2(640,8),new Color(.75f,.64f,1f));
             Label("Heading",rect,new Vector2(0,135),new Vector2(600,42),T(K.Title),28,Color.cyan);
-            Button(rect,-150,82,290,48,T(K.Local),()=>{VitqraChatAccount.Cancel();select("local");},out localBox);
-            Button(rect,150,82,290,48,T(K.ChatGpt),()=>select("chatgpt"),out chatBox);
-            status=Label("Provider state",rect,new Vector2(0,23),new Vector2(594,64),"",19,Color.white);
+            Button(rect,-195,96,200,36,T(K.Local),()=>{VitqraChatAccount.Cancel();select("local");},out localBox);
+            localStatus=Label("Local model state",rect,new Vector2(105,96),new Vector2(380,38),"",16,Color.white);
+            localStatus.supportRichText=false;
+            // One shared visual container for the account heading, state and controls.
+            chatCard=Box("ChatGPT account group",rect,new Vector2(0,-1),new Vector2(600,144),new Color(.08f,.22f,.26f,1));
+            Button(rect,0,49,584,36,T(K.ChatGpt),()=>select("chatgpt"),out chatBox);
+            status=Label("Account state",rect,new Vector2(0,8),new Vector2(570,42),"",17,Color.white);
             status.supportRichText=false;
-            signIn=Button(rect,-197,-35,190,44,T(K.SignIn),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignIn();},out signInBox);
-            signOut=Button(rect,0,-35,190,44,T(K.SignOut),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignOut();},out signOutBox);
-            usage=Button(rect,197,-35,190,44,T(K.Usage),()=>{if(chatSelected)Application.OpenURL("https://chatgpt.com/settings/usage");},out usageBox);
-            translation=Button(rect,0,-88,590,44,"",toggleTranslation,out _);
-            Button(rect,0,-139,590,42,T(K.Avatar),avatar,out _);
+            signIn=Button(rect,-190,-39,182,40,T(K.SignIn),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignIn();},out signInBox);
+            signOut=Button(rect,0,-39,182,40,T(K.SignOut),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignOut();},out signOutBox);
+            usage=Button(rect,190,-39,182,40,T(K.Usage),()=>{if(chatSelected)Application.OpenURL("https://chatgpt.com/settings/usage");},out usageBox);
+            translation=Button(rect,0,-96,590,36,"",toggleTranslation,out _);
+            Button(rect,0,-139,590,38,T(K.Avatar),avatar,out _);
         }
         private Text Button(RectTransform parent,float x,float y,float width,float height,string label,Action action,out Image box)
         {
@@ -55,7 +60,8 @@ namespace Vitqra
             localBox.color=local?Selected:NormalButton;
             chatBox.color=local?NormalButton:Selected;
             chatSelected=!local;
-            status.text=T(local?(modelReady?K.Ready:K.NotReady):K.Disconnected);
+            localStatus.text=local?T(modelReady?K.Ready:K.NotReady):"";
+            status.text=T(K.Disconnected);
             UpdateAccountStatus();
             translation.text=T(K.Translate)+": "+T(settings.automaticTranslation?K.On:K.Off);
         }
@@ -63,6 +69,8 @@ namespace Vitqra
         private void UpdateAccountStatus()
         {
             if(signIn==null)return;
+            chatCard.gameObject.SetActive(chatSelected);
+            status.gameObject.SetActive(chatSelected);
             foreach(var t in new[]{signIn,signOut,usage})t.gameObject.SetActive(chatSelected);
             foreach(var b in new[]{signInBox,signOutBox,usageBox})b.gameObject.SetActive(chatSelected);
             if(!chatSelected)return;
@@ -89,9 +97,18 @@ namespace Vitqra
                !new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f)return false;
             Vector3 local=transform.InverseTransformPoint(ray.GetPoint(distance));
             if(Mathf.Abs(local.x)>Width*.5f||Mathf.Abs(local.y)>Height*.5f)return false;
-            for(int i=0;i<targets.Count;i++)if(targets[i].Contains(new Vector2(local.x,local.y))){region=i+1;break;}
+            for(int i=0;i<targets.Count;i++)
+            {
+                // Account actions are not hit targets while their group is collapsed.
+                if(!chatSelected&&i>=2&&i<=4)continue;
+                if(targets[i].Contains(new Vector2(local.x,local.y))){region=i+1;break;}
+            }
             return true;
         }
-        public override void InvokeAction(int region){if(region>0&&region<=actions.Count)actions[region-1]?.Invoke();}
+        public override void InvokeAction(int region)
+        {
+            if(!chatSelected&&region>=3&&region<=5)return;
+            if(region>0&&region<=actions.Count)actions[region-1]?.Invoke();
+        }
     }
 }
