@@ -24,3 +24,7 @@ Model selection references (reviewed 2026-11-26):
 - https://developers.openai.com/api/docs/guides/model-selection
 - https://developers.openai.com/api/docs/models
 - https://developers.openai.com/api/docs/models/all
+
+## Automatic catalog refresh at launch
+
+The XR workspace now initializes the ChatGPT catalog once per process, independently of the visible panel or selected provider. On the serialized IO executor, only an existing registration with the required sharing scopes, valid issued client and recorded subject can attempt the existing official catalog request; session refresh uses the existing protected renewal path if needed. Successful explicit sign-in also refreshes the list automatically. The manual refresh button remains. No account is created, browser login opened, inference test run, daily attempt reserved, model downloaded or API billing fallback initiated by startup. Catalog state is in memory, cleared during refresh and on failure; no stale list is used for inference. A network failure does not block the XR workspace or trigger automatic retries. Existing transport limits and consent boundaries remain. The user can sign in again or refresh manually. The selector recalculates its research priority from the refreshed list, but its documented ranking policy is not itself downloaded or updated by this feature. No live sign-in, Android compilation or headset testing was performed.

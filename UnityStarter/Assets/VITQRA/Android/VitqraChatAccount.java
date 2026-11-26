@@ -178,7 +178,16 @@ public final class VitqraChatAccount {
             initialized=true;busy=true;status=1;
         }
         Context c=a.getApplicationContext();
-        IO.execute(()->{synchronized(LOCK){try{status=state(load(c));}catch(Exception e){status=4;}finally{busy=false;}}});
+        IO.execute(()->{
+            // Restore only an existing authorized registration. Never initiate
+            // browser login, inference or model downloads during startup.
+            try{
+                JSONObject session=load(c);
+                if(sharing(session)&&validClient(session.optString("client"))&&!session.optString("subject").isEmpty())
+                    fetchCatalog(c);
+            }catch(Exception ignored){catalog="[]";catalogState=3;}
+            finally{synchronized(LOCK){try{status=state(load(c));}catch(Exception e){status=4;}busy=false;}}
+        });
     }
     private static String line(InputStream in,int max)throws Exception{
         ByteArrayOutputStream b=new ByteArrayOutputStream();
@@ -279,7 +288,13 @@ public final class VitqraChatAccount {
                     record.put("access",tokens.optString("access_token",""));
                     record.put("refresh",tokens.optString("refresh_token",""));
                 }
-                synchronized(LOCK){if(attempt!=generation)throw new IOException();save(c,record);outcome=state(record);}
+                synchronized(LOCK){if(attempt!=generation)throw new IOException();save(c,record);listener=null;outcome=state(record);}
+                // Refresh after explicit authorization even if the models
+                // subpage was never opened. The login transaction is complete.
+                if(outcome==2&&attempt==generation){
+                    fetchCatalog(c);
+                    outcome=state(load(c));
+                }
             }catch(Exception ignored){}
             finally{
                 synchronized(LOCK){listener=null;busy=false;if(attempt==generation)status=outcome;else try{status=state(load(c));}catch(Exception e){status=4;}}
@@ -380,6 +395,13 @@ public final class VitqraChatAccount {
         synchronized(LOCK){if(busy)return;busy=true;status=1;catalog="[]";catalogState=1;testState=0;}
         Context c=activity.getApplicationContext();
         IO.execute(()->{
+            try{fetchCatalog(c);}
+            finally{synchronized(LOCK){try{status=state(load(c));}catch(Exception e){status=4;}busy=false;}}
+        });
+    }
+    // Called only on the serialized IO executor while busy is held.
+    private static void fetchCatalog(Context c){
+            catalog="[]";catalogState=1;testState=0;
             try{
                 JSONObject session=usable(c);HttpURLConnection conn=api("/models",session);
                 try{
@@ -399,8 +421,6 @@ public final class VitqraChatAccount {
                     catalog=out.toString();catalogState=out.length()>0?2:3;
                 }finally{conn.disconnect();}
             }catch(Exception ignored){catalog="[]";catalogState=3;}
-            finally{synchronized(LOCK){try{status=state(load(c));}catch(Exception e){status=4;}busy=false;}}
-        });
     }
     private static boolean listed(String slug)throws Exception{
         JSONArray models=new JSONArray(catalog);

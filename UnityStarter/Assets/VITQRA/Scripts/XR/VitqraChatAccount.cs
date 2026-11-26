@@ -8,6 +8,13 @@ namespace Vitqra
     {
         public enum State { Disconnected=0, Busy=1, PlanGranted=2, IdentityOnly=3, Failed=4, Expired=5, Unsupported=6, RevocationUnconfirmed=7 }
         private static bool initialized;
+        public static void InitializeCatalog()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if(initialized)return;
+            try{Invoke("initialize");initialized=true;}catch(Exception){}
+#endif
+        }
         public static State Status
         {
             get
@@ -15,7 +22,7 @@ namespace Vitqra
 #if UNITY_ANDROID && !UNITY_EDITOR
                 try
                 {
-                    if(!initialized){Invoke("initialize");initialized=true;}
+                    InitializeCatalog();
                     using(var api=new AndroidJavaClass("com.blasllavero.vitqra.account.VitqraChatAccount"))
                     {
                         int state=api.CallStatic<int>("getStatus");

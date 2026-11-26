@@ -53,6 +53,9 @@ namespace Vitqra
                 return;
             }
             settings = VitqraSettings.Load();
+            // Catalog metadata only, including previously authorized accounts
+            // not currently selected for inference. No UI navigation required.
+            VitqraChatAccount.InitializeCatalog();
             var l = VitqraStrings.Get(settings.language);
             var researchObject=new GameObject("Scientific Discovery");
             researchObject.transform.SetParent(transform,false);

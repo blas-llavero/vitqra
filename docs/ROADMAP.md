@@ -17,3 +17,5 @@ Configuration extension: two provider choices in the initial XR settings panel; 
 v0.5.3b development: optional Android account sign-in, identity and scope checks, encrypted session record and sign-out controls. Single registration only; live tests, refresh, multi-account support and inference remain pending. See [CHATGPT_ACCOUNT.md](CHATGPT_ACCOUNT.md).
 
 v0.5.3c initial: official model catalog, on-demand token refresh, local daily attempts and explicit neutral connection test. General inference and automatic research pending live tests and consent integration.
+
+Catalog lifecycle requirement: refresh configured and authorized providers automatically at launch; ChatGPT startup and post-sign-in refresh implemented in source. Ollama and other provider adapters must implement this lifecycle when integrated. See [AI_CATALOG_LIFECYCLE.md](AI_CATALOG_LIFECYCLE.md).
