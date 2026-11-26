@@ -17,13 +17,17 @@ namespace Vitqra
         private bool evidenceBusy,evidencePaused,runPaused,runStopped;
         private const string RunPreference="vitqra.research.run.v1";
         private string ResultRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","EducationalResults");
+        private string ReportRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchReports");
+        private readonly Dictionary<string,bool> reportStates=new Dictionary<string,bool>(StringComparer.Ordinal);
         private int evidenceJobs;
         private float evidenceNext;
         private string EvidenceRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchEvidence");
         private static string EvidenceKey(VitqraChallengeDirectory.Item item)=>item.id+"\n"+item.url;
         private string EvidenceSuffix(VitqraChallengeDirectory.Item item)
         {
-            return evidenceStates.TryGetValue(EvidenceKey(item),out var state)?" · "+T(state):"";
+            string key=EvidenceKey(item);
+            string suffix=evidenceStates.TryGetValue(key,out var state)?" · "+T(state):"";
+            return reportStates.TryGetValue(key,out var saved)?suffix+" · "+T(saved?D.ReportSaved:D.ReportUnavailable):suffix;
         }
         private void QueueManualEvidence(VitqraChallengeDirectory.Item item)
         {
@@ -91,6 +95,8 @@ namespace Vitqra
                     state=check==VitqraSampleSolver.State.Checked?D.SampleChecked:
                         check==VitqraSampleSolver.State.Mismatch?D.SampleMismatch:D.SamplePending;
                 }
+                if(review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)
+                    reportStates[EvidenceKey(item)]=VitqraResearchReport.Save(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
                 evidenceStates[EvidenceKey(item)]=state;
             }
             else evidenceStates[EvidenceKey(item)]=D.EvidenceFailed;

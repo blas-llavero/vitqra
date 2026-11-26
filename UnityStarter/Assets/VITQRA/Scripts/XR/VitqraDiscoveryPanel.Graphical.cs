@@ -47,9 +47,10 @@ namespace Vitqra
             graphicCanvas.GetComponent<Canvas>().renderMode=RenderMode.WorldSpace;
             Box("Browser background",rect,Vector2.zero,new Vector2(860,900),new Color(.025f,.065f,.10f,.98f));
             Label("Browser heading",rect,new Vector2(0,415),new Vector2(810,42),T(D.GraphicBrowser),29,Color.cyan);
-            GraphicButton(rect,-270,361,260,48,T(D.Back),CloseGraphic);
-            GraphicButton(rect,0,361,260,48,T(D.Reader),UseTextReader);
-            GraphicButton(rect,270,361,260,48,T(D.ExternalBrowser),()=>{if(graphicItem!=null&&VitqraChallengeDirectory.ValidLink(graphicItem))Application.OpenURL(graphicItem.url);});
+            GraphicButton(rect,-306,361,194,48,T(D.Back),CloseGraphic);
+            GraphicButton(rect,-102,361,194,48,T(D.Reader),UseTextReader);
+            GraphicButton(rect,102,361,194,48,T(D.ViewReport),ShowGraphicReport);
+            GraphicButton(rect,306,361,194,48,T(D.ExternalBrowser),()=>{if(graphicItem!=null&&VitqraChallengeDirectory.ValidLink(graphicItem))Application.OpenURL(graphicItem.url);});
             GraphicButton(rect,-340,306,128,45,"←",()=>{if(Ready()&&graphicWeb.CanGoBack)graphicWeb.Back();});
             GraphicButton(rect,-202,306,128,45,"→",()=>{if(Ready()&&graphicWeb.CanGoForward)graphicWeb.Forward();});
             GraphicButton(rect,-64,306,128,45,"↻",()=>{if(Ready())graphicWeb.Reload();});
@@ -159,6 +160,14 @@ namespace Vitqra
         {
             if(graphicPressed&&graphicWeb!=null)graphicWeb.CancelPointer(lastUv);
             graphicPressed=false;
+        }
+        private void ShowGraphicReport()
+        {
+            var item=graphicItem;
+            if(item==null)return;
+            string report=LoadLocalReport(item);
+            if(report==null){graphicStatus.text=T(D.ReportUnavailable);return;}
+            CloseGraphic();OpenLocalReport(item,report);
         }
         private void UseTextReader()
         {

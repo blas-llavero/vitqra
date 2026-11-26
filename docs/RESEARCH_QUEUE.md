@@ -15,3 +15,7 @@ VitqraEvidenceReview.Report.CanStartAutonomousResearch remains false. General re
 ## Acceptance
 
 Run VITQRA > Run Educational Sample Checks for synthetic algorithm and parser tests. No Unity compilation or physical test has been executed. Verify actual source markup and terms, cache consistency, stop/resume and restart behavior, cancellation, result status, storage, ten-language UI and Quest 3 performance. Local synchronous sample checking is bounded but may still cause frame delay when reading and hashing evidence. Broader job persistence, approved data adapters, scientific method validation, sandboxed code execution and report generation remain pending. No new external library, model, binary, credentials or multimedia are distributed.
+
+## Local reports
+
+See [RESEARCH_REPORTS.md](RESEARCH_REPORTS.md) for v0.5.2 report generation after documentary review and sample checks.

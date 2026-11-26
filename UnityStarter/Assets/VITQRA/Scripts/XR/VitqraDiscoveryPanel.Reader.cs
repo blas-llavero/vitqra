@@ -13,7 +13,8 @@ namespace Vitqra
         private GameObject discoveryCanvas,readerCanvas;
         private readonly List<Rect> readerTargets=new List<Rect>();
         private readonly List<Action> readerActions=new List<Action>();
-        private Text readerTitle,readerAddress,readerBody,readerStatus;
+        private Text readerHeading,readerTitle,readerAddress,readerBody,readerStatus;
+        private bool reportView;
         private VitqraChallengeDirectory.Item readerItem;
         private List<string> readerPages=new List<string>();
         private int readerPage,readerRevision;
@@ -31,9 +32,10 @@ namespace Vitqra
             readerCanvas.GetComponent<Canvas>().renderMode=RenderMode.WorldSpace;
             Box("Reader Background",rect,Vector2.zero,new Vector2(860,900),new Color(.025f,.065f,.10f,.98f));
             Box("Reader Accent",rect,new Vector2(0,446),new Vector2(860,8),Color.cyan);
-            Label("Reader heading",rect,new Vector2(0,413),new Vector2(820,44),T(D.Reader),30,Color.cyan);
-            ReaderButton(rect,-205,353,390,52,T(D.Back),CloseReader);
-            ReaderButton(rect,205,353,390,52,T(D.ExternalBrowser),OpenExternal);
+            readerHeading=Label("Reader heading",rect,new Vector2(0,413),new Vector2(820,44),T(D.Reader),30,Color.cyan);
+            ReaderButton(rect,-270,353,260,52,T(D.Back),CloseReader);
+            ReaderButton(rect,0,353,260,52,T(D.ViewReport),ShowReaderReport);
+            ReaderButton(rect,270,353,260,52,T(D.ExternalBrowser),OpenExternal);
             readerTitle=Label("Original title",rect,new Vector2(0,282),new Vector2(810,76),"",26,Color.white);
             readerAddress=Label("Original address",rect,new Vector2(0,221),new Vector2(810,42),"",18,Color.cyan);
             readerBody=Label("Page text",rect,new Vector2(0,-37),new Vector2(810,460),"",25,Color.white);
@@ -60,6 +62,7 @@ namespace Vitqra
             CloseReader();
             if(!VitqraChallengeDirectory.ValidLink(item))return;
             readerItem=item;readerOpen=true;
+            readerHeading.text=T(D.Reader);
             discoveryCanvas.SetActive(false);readerCanvas.SetActive(true);
             readerTitle.text=item.title;
             readerAddress.text=item.url;
@@ -92,11 +95,35 @@ namespace Vitqra
             readerPage=0;RenderReader();
         }
 
+        private string LoadLocalReport(VitqraChallengeDirectory.Item item)
+        {
+            return VitqraResearchReport.Load(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
+        }
+        private void ShowReaderReport()
+        {
+            if(!readerOpen||readerItem==null)return;
+            var item=readerItem;
+            string report=LoadLocalReport(item);
+            if(report==null){readerStatus.text=T(D.ReportUnavailable);return;}
+            OpenLocalReport(item,report);
+        }
+        private void OpenLocalReport(VitqraChallengeDirectory.Item item,string report)
+        {
+            CloseReader();
+            readerItem=item;readerOpen=true;reportView=true;
+            readerHeading.text=T(D.ViewReport);
+            readerTitle.text=item.title;
+            readerAddress.text=item.url;
+            readerPages=VitqraWebReader.Pages(report);
+            readerPage=0;
+            discoveryCanvas.SetActive(false);readerCanvas.SetActive(true);
+            RenderReader();
+        }
         private void RenderReader()
         {
             if(!readerOpen||readerPages.Count==0)return;
             readerBody.text=readerPages[readerPage];
-            readerStatus.text=(readerPage+1)+" / "+readerPages.Count+" · "+T(D.UnverifiedPreview)+
+            readerStatus.text=(readerPage+1)+" / "+readerPages.Count+" · "+T(reportView?D.ResearchGateClosed:D.UnverifiedPreview)+
                 (readerTruncated?" · "+T(D.TextTruncated):"");
         }
 
@@ -117,7 +144,7 @@ namespace Vitqra
             readerRevision++;
             if(readerRequest!=null)readerRequest.Abort();
             if(readerRoutine!=null){StopCoroutine(readerRoutine);readerRoutine=null;}
-            readerRequest=null;readerOpen=false;readerItem=null;
+            readerRequest=null;readerOpen=false;readerItem=null;reportView=false;
             readerPages.Clear();readerPage=0;readerTruncated=false;
             if(readerTitle!=null)readerTitle.text="";
             if(readerAddress!=null)readerAddress.text="";
