@@ -14,7 +14,13 @@ namespace Vitqra
         private Image localBox,chatBox,chatCard;
         private Text localStatus;
         private Text status,translation,signIn,signOut,usage;
-        private Image signInBox,signOutBox,usageBox;
+        private Image signInBox,signOutBox,usageBox,modelsBox;
+        private Text modelsLabel,modelTitle,modelStatus,modelChoice,modelLimit,modelTest,modelBack,modelRefresh;
+        private readonly List<GameObject> modelObjects=new List<GameObject>(), normalObjects=new List<GameObject>();
+        private bool modelPage;
+        private int modelIndex=-1;
+        private string selectedSlug="";
+        private int normalTargets;
         private bool chatSelected;
         private float nextPoll;
         private string locale;
@@ -39,11 +45,24 @@ namespace Vitqra
             Button(rect,0,49,584,36,T(K.ChatGpt),()=>select("chatgpt"),out chatBox);
             status=Label("Account state",rect,new Vector2(0,8),new Vector2(570,42),"",17,Color.white);
             status.supportRichText=false;
-            signIn=Button(rect,-190,-39,182,40,T(K.SignIn),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignIn();},out signInBox);
-            signOut=Button(rect,0,-39,182,40,T(K.SignOut),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignOut();},out signOutBox);
-            usage=Button(rect,190,-39,182,40,T(K.Usage),()=>{if(chatSelected)Application.OpenURL("https://chatgpt.com/settings/usage");},out usageBox);
+            signIn=Button(rect,-219,-39,142,40,T(K.SignIn),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignIn();},out signInBox);
+            signOut=Button(rect,-73,-39,142,40,T(K.SignOut),()=>{if(chatSelected&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.SignOut();},out signOutBox);
+            usage=Button(rect,73,-39,142,40,T(K.Usage),()=>{if(chatSelected)Application.OpenURL("https://chatgpt.com/settings/usage");},out usageBox);
+            modelsLabel=Button(rect,219,-39,142,40,T(K.Models),OpenModels,out modelsBox);
             translation=Button(rect,0,-96,590,36,"",toggleTranslation,out _);
             Button(rect,0,-139,590,38,T(K.Avatar),avatar,out _);
+            normalTargets=targets.Count;
+            foreach(Transform child in rect)if(child.name!="Background"&&child.name!="Accent"&&child.name!="Heading")normalObjects.Add(child.gameObject);
+            int start=rect.childCount;
+            modelTitle=Label("Model heading",rect,new Vector2(0,96),new Vector2(590,30),T(K.Models),22,Color.cyan);
+            modelStatus=Label("Model state",rect,new Vector2(0,63),new Vector2(590,34),"",16,Color.white);
+            modelStatus.supportRichText=false;
+            modelChoice=Button(rect,0,21,590,42,"",NextModel,out _);
+            modelLimit=Button(rect,0,-25,590,40,"",()=>{VitqraChatAccount.CycleLimit();UpdateModels();},out _);
+            modelRefresh=Button(rect,-150,-73,290,42,T(K.RefreshModels),()=>VitqraChatAccount.RefreshCatalog(),out _);
+            modelTest=Button(rect,150,-73,290,42,T(K.TestConnection),TestModel,out _);
+            modelBack=Button(rect,0,-130,590,42,T(K.Back),CloseModels,out _);
+            for(int i=start;i<rect.childCount;i++){var child=rect.GetChild(i).gameObject;modelObjects.Add(child);child.SetActive(false);}
         }
         private Text Button(RectTransform parent,float x,float y,float width,float height,string label,Action action,out Image box)
         {
@@ -65,14 +84,63 @@ namespace Vitqra
             UpdateAccountStatus();
             translation.text=T(K.Translate)+": "+T(settings.automaticTranslation?K.On:K.Off);
         }
-        private void Update(){if(chatSelected&&Time.unscaledTime>=nextPoll){nextPoll=Time.unscaledTime+.5f;UpdateAccountStatus();}}
+        private void Update(){if(chatSelected&&Time.unscaledTime>=nextPoll){nextPoll=Time.unscaledTime+.5f;if(modelPage)UpdateModels();else UpdateAccountStatus();}}
+        private void OpenModels()
+        {
+            if(!chatSelected)return;
+            modelPage=true;
+            foreach(var obj in normalObjects)obj.SetActive(false);
+            foreach(var obj in modelObjects)obj.SetActive(true);
+            if(VitqraChatAccount.CatalogState==0&&VitqraChatAccount.Status!=VitqraChatAccount.State.Busy)VitqraChatAccount.RefreshCatalog();
+            UpdateModels();
+        }
+        private void CloseModels()
+        {
+            modelPage=false;
+            foreach(var obj in modelObjects)obj.SetActive(false);
+            foreach(var obj in normalObjects)obj.SetActive(true);
+            UpdateAccountStatus();
+        }
+        private void NextModel()
+        {
+            var models=VitqraChatAccount.Catalog;
+            if(models.Length==0||VitqraChatAccount.Status==VitqraChatAccount.State.Busy)return;
+            modelIndex=Array.FindIndex(models,m=>m.slug==selectedSlug);
+            modelIndex=(modelIndex+2)%(models.Length+1)-1;
+            selectedSlug=modelIndex<0?"":models[modelIndex].slug;
+            UpdateModels();
+        }
+        private string ResolveModel(VitqraChatAccount.Model[] models)
+        {
+            if(models.Length==0)return "";
+            if(string.IsNullOrEmpty(selectedSlug))return models[0].slug;
+            return Array.Exists(models,m=>m.slug==selectedSlug)?selectedSlug:"";
+        }
+        private void TestModel()
+        {
+            string slug=ResolveModel(VitqraChatAccount.Catalog);
+            if(!string.IsNullOrEmpty(slug))VitqraChatAccount.TestConnection(slug);
+        }
+        private void UpdateModels()
+        {
+            var models=VitqraChatAccount.Catalog;
+            string slug=ResolveModel(models);
+            var model=Array.Find(models,m=>m.slug==slug);
+            modelChoice.text=(string.IsNullOrEmpty(selectedSlug)?T(K.AutoModel)+": ":"")+(model==null?T(K.NoModels):model.name);
+            modelLimit.text=T(K.DailyAttempts)+": "+VitqraChatAccount.Used+" / "+VitqraChatAccount.DailyLimit+" (UTC)";
+            int test=VitqraChatAccount.TestState;
+            K state=test==1?K.TestRunning:test==2?K.TestPassed:test==4?K.ProviderLimit:test==5?K.LocalLimit:test==3?K.TestFailed:
+                VitqraChatAccount.CatalogState==1?K.LoadingModels:VitqraChatAccount.CatalogState==3?K.NoModels:K.TestNote;
+            modelStatus.text=T(state);
+        }
         private void UpdateAccountStatus()
         {
             if(signIn==null)return;
+            if(modelPage)return;
             chatCard.gameObject.SetActive(chatSelected);
             status.gameObject.SetActive(chatSelected);
-            foreach(var t in new[]{signIn,signOut,usage})t.gameObject.SetActive(chatSelected);
-            foreach(var b in new[]{signInBox,signOutBox,usageBox})b.gameObject.SetActive(chatSelected);
+            foreach(var t in new[]{signIn,signOut,usage,modelsLabel})t.gameObject.SetActive(chatSelected);
+            foreach(var b in new[]{signInBox,signOutBox,usageBox,modelsBox})b.gameObject.SetActive(chatSelected);
             if(!chatSelected)return;
             var state=VitqraChatAccount.Status;
             K key=K.Disconnected;
@@ -100,14 +168,16 @@ namespace Vitqra
             for(int i=0;i<targets.Count;i++)
             {
                 // Account actions are not hit targets while their group is collapsed.
-                if(!chatSelected&&i>=2&&i<=4)continue;
+                if(modelPage!=(i>=normalTargets))continue;
+                if(!chatSelected&&i>=2&&i<=5)continue;
                 if(targets[i].Contains(new Vector2(local.x,local.y))){region=i+1;break;}
             }
             return true;
         }
         public override void InvokeAction(int region)
         {
-            if(!chatSelected&&region>=3&&region<=5)return;
+            if(modelPage!=(region>normalTargets))return;
+            if(!chatSelected&&region>=3&&region<=6)return;
             if(region>0&&region<=actions.Count)actions[region-1]?.Invoke();
         }
     }

@@ -22,7 +22,7 @@ import java.util.concurrent.*;
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 
-/** Development account connector. No inference endpoint or token export. */
+/** Development account connector: catalog, session renewal and explicit neutral inference test only. No token export. */
 public final class VitqraChatAccount {
     private static final String ISSUER="https://auth.openai.com";
     private static final String RESOURCE="https://api.openai.com/v1";
@@ -33,6 +33,9 @@ public final class VitqraChatAccount {
     private static final Object LOCK=new Object();
     private static volatile int status=0, generation=0;
     private static volatile long expiresAt=0;
+    private static volatile String catalog="[]";
+    private static volatile int catalogState=0, testState=0;
+    private static final int[] LIMITS={1,3,5,10,20,40};
     private static volatile ServerSocket listener;
     private static boolean initialized=false, busy=false;
     // 0 disconnected, 1 busy, 2 plan scope granted, 3 identity only,
@@ -108,7 +111,18 @@ public final class VitqraChatAccount {
                 byte[] b=bytes(body);c.setFixedLengthStreamingMode(b.length);
                 try(OutputStream out=c.getOutputStream()){out.write(b);}finally{Arrays.fill(b,(byte)0);}
             }
-            int code=c.getResponseCode();if(code<200||code>=300)throw new IOException();
+            int code=c.getResponseCode();
+            if(code<200||code>=300){
+                String error="";
+                try(InputStream in=c.getErrorStream()){
+                    if(in!=null)error=readBounded(in,16384);
+                }catch(Exception ignored){}
+                String machine="";
+                try{JSONObject o=new JSONObject(error);Object e=o.opt("error");
+                    machine=e instanceof JSONObject?((JSONObject)e).optString("code"):e instanceof String?(String)e:"";
+                }catch(Exception ignored){}
+                throw new RemoteFailure(code,machine);
+            }
             try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){
                 byte[] b=new byte[4096];int n;
                 while((n=in.read(b))!=-1){if(out.size()+n>262144)throw new IOException();out.write(b,0,n);}
@@ -207,7 +221,7 @@ public final class VitqraChatAccount {
     }
     public static void signIn(Activity activity){
         final int attempt;
-        synchronized(LOCK){if(busy)return;busy=true;status=1;attempt=++generation;}
+        synchronized(LOCK){if(busy)return;busy=true;status=1;catalog="[]";catalogState=0;testState=0;attempt=++generation;}
         Context c=activity.getApplicationContext();
         IO.execute(()->{
             int outcome=4;
@@ -260,6 +274,7 @@ public final class VitqraChatAccount {
                 JSONObject record=new JSONObject();
                 record.put("client",client);record.put("subject",subject);record.put("identity",jwt);
                 record.put("scope",tokens.optString("scope",""));record.put("expires",now()+seconds);
+                record.put("earliest",tokens.optLong("earliest_refresh_at",0));
                 if("Bearer".equalsIgnoreCase(tokens.optString("token_type"))){
                     record.put("access",tokens.optString("access_token",""));
                     record.put("refresh",tokens.optString("refresh_token",""));
@@ -271,10 +286,201 @@ public final class VitqraChatAccount {
             }
         });
     }
+    private static final class RemoteFailure extends IOException {
+        final int statusCode;final String code;
+        RemoteFailure(int statusCode,String code){this.statusCode=statusCode;this.code=code;}
+    }
+    private static String readBounded(InputStream in,int max)throws IOException{
+        ByteArrayOutputStream out=new ByteArrayOutputStream();
+        byte[] buf=new byte[4096];int n;
+        while((n=in.read(buf))!=-1){if(out.size()+n>max)throw new IOException();out.write(buf,0,n);}
+        return out.toString("UTF-8");
+    }
+    private static boolean terminalRefresh(String code){
+        return Arrays.asList("invalid_grant","invalid_refresh_token","token_expired","refresh_token_expired",
+            "refresh_token_invalidated","refresh_token_reused").contains(code);
+    }
+    private static void clearSession(Context c,JSONObject old)throws Exception{
+        JSONObject reg=new JSONObject();reg.put("client",old.optString("client"));reg.put("subject",old.optString("subject"));
+        save(c,reg);expiresAt=0;catalog="[]";catalogState=0;
+    }
+    // Only called on the single IO executor; rotating refresh tokens are never raced.
+    private static JSONObject usable(Context c)throws Exception{
+        JSONObject old=load(c);
+        if(!sharing(old)||!validClient(old.optString("client"))||old.optString("subject").isEmpty())throw new IOException();
+        long time=now();
+        if(old.optLong("expires",0)>time+120)return old;
+        if(old.optLong("earliest",0)>time){
+            if(old.optLong("expires",0)>time+15)return old;
+            throw new IOException();
+        }
+        if(old.optString("refresh").isEmpty())throw new IOException();
+        JSONObject t;
+        try{
+            t=request(ISSUER+"/api/accounts/oauth/token",form("grant_type","refresh_token","client_id",old.getString("client"),
+                "refresh_token",old.getString("refresh"),"resource",RESOURCE),false);
+        }catch(RemoteFailure e){
+            if(terminalRefresh(e.code))clearSession(c,old);
+            throw e;
+        }
+        long expires=t.optLong("expires_in",0);
+        if(expires<=0||expires>86400||!"Bearer".equalsIgnoreCase(t.optString("token_type"))||
+            t.optString("access_token").isEmpty()||t.optString("refresh_token").isEmpty()){
+            clearSession(c,old);throw new IOException();
+        }
+        // The refresh is bound to the existing validated subject and issued client.
+        // Keep the previously validated ID token as a reauthorization hint only.
+        old.put("access",t.getString("access_token"));old.put("refresh",t.getString("refresh_token"));
+        old.put("expires",now()+expires);old.put("earliest",t.optLong("earliest_refresh_at",0));
+        if(t.has("scope"))old.put("scope",t.getString("scope"));
+        save(c,old);
+        if(!sharing(old)){catalog="[]";catalogState=0;throw new IOException();}
+        return old;
+    }
+    private static HttpURLConnection api(String path,JSONObject session)throws Exception{
+        if(!"/models".equals(path)&&!"/responses".equals(path))throw new IOException();
+        if(!sharing(session)||session.optLong("expires",0)<=now())throw new IOException();
+        HttpURLConnection conn=(HttpURLConnection)new URL(RESOURCE+path).openConnection();
+        conn.setInstanceFollowRedirects(false);conn.setUseCaches(false);
+        conn.setConnectTimeout(12000);conn.setReadTimeout(20000);
+        conn.setRequestProperty("Authorization","Bearer "+session.getString("access"));
+        return conn;
+    }
+    public static String getCatalog(){return catalog;}
+    public static int getCatalogState(){return catalogState;}
+    public static int getTestState(){return testState;}
+    public static int getLimit(Activity a){
+        int value=prefs(a).getInt("daily_limit",40);
+        for(int n:LIMITS)if(n==value)return n;
+        return 40;
+    }
+    public static void cycleLimit(Activity a){
+        synchronized(LOCK){
+            if(busy)return;
+            int current=getLimit(a);
+            for(int i=0;i<LIMITS.length;i++)if(LIMITS[i]==current){
+                prefs(a).edit().putInt("daily_limit",LIMITS[(i+1)%LIMITS.length]).commit();return;
+            }
+        }
+    }
+    private static long day(){return now()/86400L;}
+    public static int getUsed(Activity a){
+        SharedPreferences p=prefs(a);
+        return day()<=p.getLong("usage_day",-1)?Math.max(0,p.getInt("usage_count",0)):0;
+    }
+    private static boolean reserve(Activity a){
+        synchronized(LOCK){
+            SharedPreferences p=prefs(a);long current=day(),previous=p.getLong("usage_day",-1);
+            int used=getUsed(a);
+            if(current<previous||used>=getLimit(a))return false;
+            return p.edit().putLong("usage_day",current).putInt("usage_count",used+1).commit();
+        }
+    }
+    public static void refreshCatalog(Activity activity){
+        synchronized(LOCK){if(busy)return;busy=true;status=1;catalog="[]";catalogState=1;testState=0;}
+        Context c=activity.getApplicationContext();
+        IO.execute(()->{
+            try{
+                JSONObject session=usable(c);HttpURLConnection conn=api("/models",session);
+                try{
+                    conn.setRequestProperty("Accept","application/json");
+                    if(conn.getResponseCode()!=200)throw new IOException();
+                    JSONArray models;
+                    try(InputStream in=conn.getInputStream()){models=new JSONObject(readBounded(in,1048576)).getJSONArray("models");}
+                    JSONArray out=new JSONArray();Set<String> seen=new HashSet<>();
+                    for(int i=0;i<models.length();i++){
+                        JSONObject m=models.optJSONObject(i);if(m==null||!"list".equals(m.optString("visibility")))continue;
+                        String slug=m.optString("slug"),name=m.optString("display_name");
+                        if(!slug.matches("[A-Za-z0-9._:-]{1,128}")||name.isEmpty()||name.length()>128||
+                            name.matches("(?s).*[\\p{Cc}\\p{Cf}].*")||!seen.add(slug))continue;
+                        JSONObject safe=new JSONObject();safe.put("slug",slug);safe.put("name",name);out.put(safe);
+                        if(out.length()>=100)break;
+                    }
+                    catalog=out.toString();catalogState=out.length()>0?2:3;
+                }finally{conn.disconnect();}
+            }catch(Exception ignored){catalog="[]";catalogState=3;}
+            finally{synchronized(LOCK){try{status=state(load(c));}catch(Exception e){status=4;}busy=false;}}
+        });
+    }
+    private static boolean listed(String slug)throws Exception{
+        JSONArray models=new JSONArray(catalog);
+        for(int i=0;i<models.length();i++)if(slug.equals(models.getJSONObject(i).getString("slug")))return true;
+        return false;
+    }
+    private static int eventResult(String data)throws Exception{
+        if(data.isEmpty())return 0;
+        JSONObject event=new JSONObject(data);
+        String type=event.optString("type");
+        if("response.completed".equals(type)){
+            JSONObject response=event.optJSONObject("response");
+            return response!=null&&"completed".equals(response.optString("status"))?2:3;
+        }
+        if("response.failed".equals(type)||"error".equals(type)||"response.incomplete".equals(type)){
+            JSONObject response=event.optJSONObject("response");
+            JSONObject error=response==null?event.optJSONObject("error"):response.optJSONObject("error");
+            String code=error==null?event.optString("code"):error.optString("code");
+            return "subscription_sharing_usage_limit_exceeded".equals(code)?4:3;
+        }
+        return 0;
+    }
+    // Test only, no arbitrary prompt argument. Never transfers a challenge or conversation.
+    public static void testConnection(Activity activity,String slug){
+        synchronized(LOCK){
+            if(busy||catalogState!=2)return;
+            try{if(!listed(slug))return;}catch(Exception e){return;}
+            busy=true;status=1;testState=1;
+        }
+        Context c=activity.getApplicationContext();
+        IO.execute(()->{
+            int outcome=3;
+            try{
+                JSONObject session=usable(c);
+                if(!reserve(activity)){outcome=5;return;}
+                HttpURLConnection conn=api("/responses",session);
+                try{
+                    JSONObject body=new JSONObject();
+                    body.put("model",slug);body.put("store",false);body.put("stream",true);
+                    JSONArray input=new JSONArray();JSONObject message=new JSONObject();
+                    message.put("role","user");message.put("content","Reply exactly: OK");input.put(message);body.put("input",input);
+                    byte[] payload=bytes(body.toString());
+                    conn.setRequestMethod("POST");conn.setDoOutput(true);
+                    conn.setRequestProperty("Accept","text/event-stream");conn.setRequestProperty("Content-Type","application/json");
+                    conn.setFixedLengthStreamingMode(payload.length);
+                    try(OutputStream out=conn.getOutputStream()){out.write(payload);}
+                    int code=conn.getResponseCode();
+                    if(code==429){outcome=4;return;}
+                    if(code!=200)return;
+                    long start=android.os.SystemClock.elapsedRealtime();
+                    try(InputStream in=new BufferedInputStream(conn.getInputStream())){
+                        ByteArrayOutputStream line=new ByteArrayOutputStream();
+                        StringBuilder data=new StringBuilder();int total=0,ch;
+                        while((ch=in.read())!=-1){
+                            if(++total>2097152||android.os.SystemClock.elapsedRealtime()-start>90000)throw new IOException();
+                            if(ch==10){
+                                String row=line.toString("UTF-8");line.reset();
+                                if(row.endsWith("\r"))row=row.substring(0,row.length()-1);
+                                if(row.isEmpty()){
+                                    int terminal=eventResult(data.toString());data.setLength(0);
+                                    if(terminal!=0){outcome=terminal;return;}
+                                }else if(row.startsWith("data:")){
+                                    String part=row.substring(5);if(part.startsWith(" "))part=part.substring(1);
+                                    if(data.length()>0)data.append('\n');data.append(part);
+                                    if(data.length()>262144)throw new IOException();
+                                }
+                            }else{
+                                if(line.size()>=262144)throw new IOException();line.write(ch);
+                            }
+                        }
+                    }
+                }finally{conn.disconnect();}
+            }catch(Exception ignored){}
+            finally{synchronized(LOCK){testState=outcome;try{status=state(load(c));}catch(Exception e){status=4;}busy=false;}}
+        });
+    }
     private static void closeListener(){ServerSocket s=listener;if(s!=null)try{s.close();}catch(IOException ignored){}}
     public static void cancel(){synchronized(LOCK){if(busy&&listener!=null){generation++;closeListener();}}}
     public static void signOut(Activity activity){
-        synchronized(LOCK){if(busy)return;busy=true;status=1;}
+        synchronized(LOCK){if(busy)return;busy=true;status=1;catalog="[]";catalogState=0;testState=0;}
         Context c=activity.getApplicationContext();
         IO.execute(()->{
             int outcome=4;

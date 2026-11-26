@@ -17,3 +17,7 @@ References:
 - https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions
 - https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery
 - https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt
+
+## Model and usage development extension
+
+See [CHATGPT_MODELS.md](CHATGPT_MODELS.md). The catalog, on-demand session refresh and explicit fixed-text connection test are implemented in source. General inference and automatic research remain disabled.

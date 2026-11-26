@@ -16,3 +16,5 @@ References:
 - https://developers.openai.com/siwc/quickstart
 - https://developers.openai.com/siwc/token-sharing-open-source
 - https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery
+
+See [CHATGPT_MODELS.md](CHATGPT_MODELS.md) for the model/usage subpanel and neutral connection test. The automatic research connector is still pending.

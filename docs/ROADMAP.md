@@ -15,3 +15,5 @@
 Configuration extension: two provider choices in the initial XR settings panel; local remains default and the ChatGPT preference is pending official account connection. Model listing, authorized account usage, translation execution and headset validation remain pending. See [AI_PROVIDER_SETTINGS.md](AI_PROVIDER_SETTINGS.md).
 
 v0.5.3b development: optional Android account sign-in, identity and scope checks, encrypted session record and sign-out controls. Single registration only; live tests, refresh, multi-account support and inference remain pending. See [CHATGPT_ACCOUNT.md](CHATGPT_ACCOUNT.md).
+
+v0.5.3c initial: official model catalog, on-demand token refresh, local daily attempts and explicit neutral connection test. General inference and automatic research pending live tests and consent integration.
