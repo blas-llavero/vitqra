@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using D=Vitqra.VitqraDiscoveryStrings.Key;
@@ -19,6 +21,23 @@ namespace Vitqra
         private string ResultRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","EducationalResults");
         private string ReportRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchReports");
         private readonly Dictionary<string,bool> reportStates=new Dictionary<string,bool>(StringComparer.Ordinal);
+        private readonly Dictionary<string,D> draftStates=new Dictionary<string,D>(StringComparer.Ordinal);
+        private VitqraLocalAi researchAi;
+        private CancellationTokenSource draftCancel;
+        private Task<bool> activeDraft;
+        private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchDrafts");
+        public void ConfigureResearchAi(VitqraLocalAi ai){researchAi=ai;}
+        private async Task<bool> GenerateDraft(VitqraChallengeDirectory.Item item)
+        {
+            var cancel=new CancellationTokenSource();
+            draftCancel=cancel;
+            try{return await VitqraResearchDraft.Generate(researchAi,EvidenceRoot,DraftRoot,item,locale,cancel.Token);}
+            finally
+            {
+                if(ReferenceEquals(draftCancel,cancel))draftCancel=null;
+                cancel.Dispose();
+            }
+        }
         private int evidenceJobs;
         private float evidenceNext;
         private string EvidenceRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchEvidence");
@@ -27,7 +46,8 @@ namespace Vitqra
         {
             string key=EvidenceKey(item);
             string suffix=evidenceStates.TryGetValue(key,out var state)?" · "+T(state):"";
-            return reportStates.TryGetValue(key,out var saved)?suffix+" · "+T(saved?D.ReportSaved:D.ReportUnavailable):suffix;
+            if(reportStates.TryGetValue(key,out var saved))suffix+=" · "+T(saved?D.ReportSaved:D.ReportUnavailable);
+            return draftStates.TryGetValue(key,out var draft)?suffix+" · "+T(draft):suffix;
         }
         private void QueueManualEvidence(VitqraChallengeDirectory.Item item)
         {
@@ -63,7 +83,7 @@ namespace Vitqra
         }
         private void UpdateEvidence()
         {
-            if(runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if((activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {
@@ -97,6 +117,15 @@ namespace Vitqra
                 }
                 if(review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)
                     reportStates[EvidenceKey(item)]=VitqraResearchReport.Save(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
+                if((review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)&&researchAi!=null&&researchAi.Configured)
+                {
+                    string key=EvidenceKey(item);
+                    draftStates[key]=D.DraftGenerating;Render();
+                    activeDraft=GenerateDraft(item);
+                    while(!activeDraft.IsCompleted)yield return null;
+                    draftStates[key]=activeDraft.Status==TaskStatus.RanToCompletion&&activeDraft.Result?D.DraftSaved:D.DraftUnavailable;
+                    activeDraft=null;
+                }
                 evidenceStates[EvidenceKey(item)]=state;
             }
             else evidenceStates[EvidenceKey(item)]=D.EvidenceFailed;
@@ -104,12 +133,13 @@ namespace Vitqra
         }
         private void CancelEvidence()
         {
+            if(draftCancel!=null)draftCancel.Cancel();
             if(evidenceRequest!=null)evidenceRequest.Abort();
             if(evidenceRoutine!=null)StopCoroutine(evidenceRoutine);
             evidenceRequest=null;evidenceRoutine=null;evidenceBusy=false;manualEvidence=null;
             var canceled=new List<string>();
             foreach(var pair in evidenceStates)if(pair.Value==D.EvidenceLoading)canceled.Add(pair.Key);
-            foreach(var key in canceled)evidenceStates.Remove(key);
+            foreach(var key in canceled){evidenceStates.Remove(key);draftStates.Remove(key);}
             evidenceNext=Time.unscaledTime+2f;
         }
         private void OnApplicationPause(bool paused)

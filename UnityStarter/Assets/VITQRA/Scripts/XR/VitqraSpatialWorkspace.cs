@@ -75,6 +75,7 @@ namespace Vitqra
             panels.Add(conversation);
             localAi=GetComponent<VitqraLocalAi>();
             if(localAi!=null)localAi.Configure(conversation,settings.language,AddAssistantMessage);
+            research.ConfigureResearchAi(localAi);
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
             speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));

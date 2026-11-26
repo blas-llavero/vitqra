@@ -28,3 +28,7 @@ References:
 - https://github.com/ggml-org/llama.cpp/tree/9c003a97ab34a69cc49243f9b02014038205ffae
 - https://github.com/ggml-org/llama.cpp/blob/9c003a97ab34a69cc49243f9b02014038205ffae/LICENSE
 - https://github.com/ggml-org/llama.cpp/blob/9c003a97ab34a69cc49243f9b02014038205ffae/docs/android.md
+
+## Exploratory research extension
+
+The reviewed model can also receive isolated bounded public evidence excerpts through the research queue. See [HUMAN_CENTERED_RESEARCH.md](HUMAN_CENTERED_RESEARCH.md). No patient data, validated research execution or community publication is enabled.

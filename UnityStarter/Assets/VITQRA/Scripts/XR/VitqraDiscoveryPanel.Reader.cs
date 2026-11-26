@@ -97,7 +97,14 @@ namespace Vitqra
 
         private string LoadLocalReport(VitqraChallengeDirectory.Item item)
         {
-            return VitqraResearchReport.Load(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
+            string report=VitqraResearchReport.Load(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
+            if(report==null)return null;
+            var draft=VitqraResearchDraft.Load(EvidenceRoot,DraftRoot,item,locale);
+            if(draft==null)return report;
+            // Keep the reviewed report distinct from unvalidated AI-generated text.
+            return report+"\n\n"+T(D.DraftWarning)+"\n"+T(D.DraftAlternatives)+"\n"+draft.alternatives+
+                "\n\n"+T(D.DraftImpact)+"\n"+draft.critique+"\n\n"+T(D.DraftWarning)+
+                "\nSHA-256 (model): "+draft.modelSha256+"\nSHA-256 (source): "+draft.sourceSha256;
         }
         private void ShowReaderReport()
         {

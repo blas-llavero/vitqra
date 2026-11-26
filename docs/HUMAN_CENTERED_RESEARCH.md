@@ -1,0 +1,33 @@
+# Human-centered autonomous research — v0.5.2 research extension
+
+## Product requirement
+
+Follow the BIOQRA-style automatic queue: retrieve the specific official challenge statement and scoring criteria, discover and acquire authorized real data, generate candidate solutions, evaluate them against the official objective, iterate, document reproducible results and continue automatically to the next challenge. Manual mode runs the selected record. Pause, resume, stop, previous and next retain their existing behavior. Competition success is an objective, not a promise. Do not submit without explicit review and authorization.
+
+The reference BIOQRA AutomaticChallengeRunner retrieves statements, discovers public datasets, asks its configured AI for a proposal, saves PDF and ZIP, and records unvalidated data status. VITQRA adopts that workflow concept but uses its own local AI and does not assume that a generated proposal is a validated solution. No commercial API is required.
+
+## Implemented initial AI step
+
+For an eligible documentary snapshot that passes or partially passes the existing checks, an explicitly configured, reviewed local model receives a bounded public source excerpt. The queue automatically requests two candidate approaches, followed by a separate critique and revised high-level approach addressing evaluation criteria, human harms, access, uncertainty and missing evidence. The second call uses a bounded excerpt of the first answer. These are isolated requests, with no conversation history or patient data and no network or tool access. Both use the existing shared native inference gate and model hash verification. Timeout requests cancellation after 120 seconds per call, including waiting for the gate. Truncated or failed outputs are not saved as completed proposals. Pause, stop, filter changes and application pause request cancellation, and the queue waits for outstanding inference before starting further jobs. Cancellation is cooperative.
+
+The excerpt is not a verified full statement. The prompts are not a safety guarantee. The two passes are not independent scientific validation or benchmark execution. There is no automated treatment selection, experimental execution, clinical claim, code execution or organizer submission. All outputs are explicitly labeled unvalidated researcher-only hypotheses. No AI output is sent to patients or community members. The current gate for autonomous validated research remains closed.
+
+A separate app-private ResearchDrafts directory stores one bounded JSON draft per source and language, with model/source SHA-256, timestamp, both outputs and consistency digest. Existing changed or mismatched drafts are not overwritten. The report viewer appends labeled draft text after the documentary report; saved documentary HTML/TXT remain unchanged. A checksum does not authenticate a model or prove a conclusion. Drafts may contain inaccurate, unsafe or incidental source-derived material and require review. No output is uploaded or published automatically. Storage is local but not independently encrypted. The language-specific prompt cannot guarantee translation quality.
+
+## Required future competitive research stages
+
+- Retrieve complete official statements and evaluation metrics; confirm deadline, eligibility, licenses and data access.
+- Search permitted scientific sources and related work; distinguish downloaded data from candidate links. Preserve source provenance.
+- Generate alternatives and explicit hypotheses, then compare against baseline and official criteria using held-out data when applicable. Avoid leakage and fabricated measurements.
+- Execute only reviewed, isolated reproducible experiments; record configuration, code, seeds, errors and metrics. Iterate within resource budgets and report uncertainty and failed hypotheses.
+- Assess effects on people: benefit, harms, privacy, accessibility, fairness, cost, environmental and social effects. Rank only using measured metrics and justified tradeoffs; do not invent a score. Prefer safer alternatives where efficacy is comparable.
+- For health challenges, assess clinical endpoints, adverse events, contraindications, uncertainty, burden and quality of life in research terms. Benefit and risk must be assessed together; do not select solely by minimizing adverse effects. Preclinical evidence, simulations or AI outputs cannot establish clinical safety. Require qualified clinical and ethics review, relevant regulatory approval and independently validated evidence before clinical use. Never advise individuals to start, stop or change treatment on the basis of a draft.
+- Generate complete reproducible reports, PDF and evidence archive; separate proposed, tested, independently validated and approved-for-use states. No guarantee of winning.
+
+## Separate patient and affected-person community (future)
+
+A voluntary, privacy-preserving XR community organized by challenge or condition, with pseudonymous avatars, optional telepresence and moderated researcher/clinician participation. No auto-enrollment, inferred diagnosis, exposure of identity or medical status, recording or secondary data reuse. Separate consent for community participation, voice/video, research contribution and sharing. Opt-out, deletion, access controls and encryption must be implemented and audited. Use minimum necessary information; no public GitHub storage or research-model access to patient conversations by default. Patient-reported experiences are not proof of efficacy or causal adverse effects. Present reviewed, accessible plain-language information about available evidence and uncertainty, distinguish peer support from clinical care, and refer personal treatment decisions to qualified clinicians. Do not expose draft hypotheses as therapies or organize unsupervised experiments. Actual holographic capture, networking, consent UI, moderation, incident response and clinical governance are not implemented in this milestone. Review applicable privacy and health-product requirements before deployment.
+
+## Acceptance
+
+Run the new editor smoke checks and all earlier checks; compile C# and the reviewed native bridge; install a reviewed model; validate timeout, cancellation, language, output quality, no outbound inference requests, data minimization and Quest resource use. Verify that raw draft text never reaches a community or clinical release path. Tests are supplied, not executed. No new software dependency, media, model weights, clinical dataset or paid API is introduced. General web candidates are still excluded from automatic inference until supported evidence is acquired and reviewed.
