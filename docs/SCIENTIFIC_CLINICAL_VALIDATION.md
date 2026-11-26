@@ -32,3 +32,5 @@ Official references:
 - https://www.aemps.gob.es/productos-sanitarios/investigacionclinica-productossanitarios/instrucciones-de-la-aemps-para-la-realizacion-de-investigaciones-clinicas-con-productos-sanitarios-en-espana/
 
 The v0.6.0 fictional community policy explicitly separates reviewer draft submission from approval; real identity, reviewer independence, signatures and certification remain unimplemented. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).
+
+The future evidence-review workflow must include a versioned dataset quality and observation-process bias report before training or validation, with independent review of missing-data assumptions and cohort representation. The v0.6.2a closed fixture is not a real-data gate or certification. See [DATA_QUALITY_AND_BIAS.md](DATA_QUALITY_AND_BIAS.md).
