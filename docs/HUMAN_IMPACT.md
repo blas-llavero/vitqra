@@ -17,3 +17,5 @@ For real research proposals, establish the population, intervention or proposed 
 ## Validation
 
 Run VITQRA > Run Human Impact Checks. Synthetic fixtures cover missing and duplicate fields, unsupported decision keys, markup/control rejection, bounds, legacy handling, localization and the unchanged scientific gate. Compile Unity C# and Android Java, exercise the three providers, verify actual prompt compliance and output limits, report rendering, privacy and device performance. No live model call, Unity compilation, Android build or Quest test was performed. No new dependency or third-party media.
+
+The proposed longitudinal health extension requires evidence on clinical utility, false reassurance, overdiagnosis, alert burden and equity before individual predictive outputs or clinician alerts. See [LONGITUDINAL_HEALTH_RESEARCH.md](LONGITUDINAL_HEALTH_RESEARCH.md). The existing impact questions and clinical release gate remain unchanged.

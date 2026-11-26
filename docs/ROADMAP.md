@@ -31,3 +31,7 @@ v0.5.4 initial: measured naive/KMP motif comparison, deterministic synthetic sui
 v0.5.4a development: AI-guided choice and one feedback revision for the reviewed motif algorithms across all three providers, separate synthetic evaluation and report comparison. General iterative optimization pending. See [AI_MOTIF_REVISION.md](AI_MOTIF_REVISION.md).
 
 v0.5.5 initial: structured eight-dimension human-impact research questions, unknown-state handling and report/package integration. Independent impact evidence, expert review and clinical/community release remain pending. See [HUMAN_IMPACT.md](HUMAN_IMPACT.md).
+
+## Author-requested longitudinal and preventive healthcare extension
+
+After v0.5.6, add synthetic longitudinal trajectories (v0.5.7), controlled retrospective research (v0.5.8) and experimental multimodal evaluation (v0.5.9). Expand the existing v0.6 community roadmap into separate clinical, research and peer-support workspaces with clinician, patient, researcher and industry roles. Clinical use requires independent release gates; no real patient intake or individual prediction is currently enabled. See [LONGITUDINAL_HEALTH_RESEARCH.md](LONGITUDINAL_HEALTH_RESEARCH.md).

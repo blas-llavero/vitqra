@@ -31,3 +31,7 @@ A voluntary, privacy-preserving XR community organized by challenge or condition
 ## Acceptance
 
 Run the new editor smoke checks and all earlier checks; compile C# and the reviewed native bridge; install a reviewed model; validate timeout, cancellation, language, output quality, no outbound inference requests, data minimization and Quest resource use. Verify that raw draft text never reaches a community or clinical release path. Tests are supplied, not executed. No new software dependency, media, model weights, clinical dataset or paid API is introduced. General web candidates are still excluded from automatic inference until supported evidence is acquired and reviewed.
+
+## Longitudinal and preventive healthcare extension
+
+The author requests previsit observations, longitudinal disease characterization, preclinical research and collaboration among clinicians, patients, researchers and pharmaceutical organizations. This is a separate governed data and research architecture, not permission to use real patient data in the current challenge pipeline. See [LONGITUDINAL_HEALTH_RESEARCH.md](LONGITUDINAL_HEALTH_RESEARCH.md).
