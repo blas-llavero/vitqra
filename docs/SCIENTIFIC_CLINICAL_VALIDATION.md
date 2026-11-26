@@ -36,3 +36,5 @@ The v0.6.0 fictional community policy explicitly separates reviewer draft submis
 The future evidence-review workflow must include a versioned dataset quality and observation-process bias report before training or validation, with independent review of missing-data assumptions and cohort representation. The v0.6.2a closed fixture is not a real-data gate or certification. See [DATA_QUALITY_AND_BIAS.md](DATA_QUALITY_AND_BIAS.md).
 
 The v0.6.3 synthetic center demonstrates a quality-gated, revision-bound two-reviewer workflow with conflict and authorization checks. No actual reviewer credentials, package submission, scientific/clinical/regulatory approval or certification. See [SYNTHETIC_VALIDATION_CENTER.md](SYNTHETIC_VALIDATION_CENTER.md).
+
+The v0.6.4 source-only ephemeral trust exercise generates fictional signing material locally during testing. No actual reviewer identity, certificate trust, clinical release or pre-generated signing material. See [EPHEMERAL_DIGITAL_TRUST.md](EPHEMERAL_DIGITAL_TRUST.md).

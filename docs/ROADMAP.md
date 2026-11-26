@@ -55,3 +55,5 @@ v0.6.2a initial: author-requested data completeness and informative sampling qua
 v0.6.2b initial: interactive fictional six-state daily diary, scheduled/extra distinction, voluntary simulated reminder and device authorization, separate coverage counts and preserved prevalence. No actual intake, device integration or OS notifications. See [SYNTHETIC_DAILY_DIARY.md](SYNTHETIC_DAILY_DIARY.md).
 
 v0.6.3 initial: closed fictional validation center with data-quality gate, two assigned reviewers, conflict and expiry checks, revision-bound unsigned decisions and preserved in-memory history. No actual approval, signature or clinical release. See [SYNTHETIC_VALIDATION_CENTER.md](SYNTHETIC_VALIDATION_CENTER.md).
+
+v0.6.4 initial: ephemeral local synthetic signature exercise, revision binding, in-session certificate pin, simulated validity/revocation. Source only; no pre-generated cryptographic material or actual certification. See [EPHEMERAL_DIGITAL_TRUST.md](EPHEMERAL_DIGITAL_TRUST.md).
