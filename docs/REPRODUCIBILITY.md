@@ -9,3 +9,5 @@ No general scientific validation, clinical approval, competition eligibility, de
 For future longitudinal work, record observation and availability timestamps, cutoff, cohort splits, missingness and provenance separately; use only synthetic nonclinical fixtures until appropriate data permissions and independent governance exist. See LONGITUDINAL_HEALTH_RESEARCH.md.
 
 Run VITQRA > Run Reproducibility Checks and existing report/evidence tests. Verify real source retrieval, corrupted/missing records, archive consistency, historical retention, rendering and performance. No Unity build, actual Android archive execution or physical Quest test is claimed.
+
+The v0.5.6a unsigned review-request.txt binds report and audit digests and remains explicitly pending and nonclinical. See [SCIENTIFIC_CLINICAL_VALIDATION.md](SCIENTIFIC_CLINICAL_VALIDATION.md).

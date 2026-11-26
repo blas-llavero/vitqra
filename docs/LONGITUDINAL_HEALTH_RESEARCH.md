@@ -60,3 +60,5 @@ Use reviewed HL7 FHIR profiles for future authorized integration (Observation, D
 - https://www.aemps.gob.es/productos-sanitarios/productos-sanitarios/
 
 No clinical data processing or code is added in this milestone. No medical claims, model testing, Unity build or headset validation have been performed.
+
+The future clinical validation workflow must pin any approved prediction model independently of the research provider's dynamic model selector. See [SCIENTIFIC_CLINICAL_VALIDATION.md](SCIENTIFIC_CLINICAL_VALIDATION.md).

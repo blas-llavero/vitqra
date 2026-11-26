@@ -23,7 +23,7 @@ namespace Vitqra
         private static string T(string locale,D key)=>VitqraDiscoveryStrings.Get(locale,key);
         public sealed class Content
         {
-            public string title,body,warning,html,identity,reproducibility;
+            public string title,body,warning,html,identity,reproducibility,reviewRequest;
         }
         public sealed class Page
         {
@@ -80,8 +80,10 @@ namespace Vitqra
                 string body=VitqraResearchReport.PlainText(report),html=VitqraResearchReport.Html(report);
                 if(body.Length>40000||Utf8.GetByteCount(html)>MaxText||Utf8.GetByteCount(body)>MaxText)return null;
                 // Stable path for the exact language, source, evidence and draft contents.
-                string identity=Hash(Utf8.GetBytes("v0.5.3\n"+body+"\n"+html+"\n"+warning));
-                return new Content{title=report.title,body=body,html=html,warning=warning,identity=identity,reproducibility=audit};
+                string reviewRequest=VitqraReviewDossier.Build(body,html,audit);
+                if(reviewRequest==null)return null;
+                string identity=Hash(Utf8.GetBytes("v0.5.6a\n"+body+"\n"+html+"\n"+warning+"\n"+reviewRequest));
+                return new Content{title=report.title,body=body,html=html,warning=warning,identity=identity,reproducibility=audit,reviewRequest=reviewRequest};
             }
             catch(Exception){return null;}
         }
@@ -100,6 +102,8 @@ namespace Vitqra
                 {"report.txt",Utf8.GetBytes(c.body)},{"report.html",Utf8.GetBytes(c.html)},{"report.pdf",pdf}};
             if(string.IsNullOrEmpty(c.reproducibility)||Utf8.GetByteCount(c.reproducibility)>32768)throw new IOException("Invalid reproducibility record");
             files.Add("reproducibility.txt",Utf8.GetBytes(c.reproducibility));
+            if(!VitqraReviewDossier.Matches(c.reviewRequest,c.body,c.html,c.reproducibility))throw new IOException("Invalid unsigned review request");
+            files.Add("review-request.txt",Utf8.GetBytes(c.reviewRequest));
             files.Add("manifest.txt",Manifest(files));
             return files;
         }
