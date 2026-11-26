@@ -11,9 +11,10 @@ namespace Vitqra
     {
         public override float BaseWidth => .86f;
         public override float BaseHeight => .90f;
-        private const int VisibleRows=6;
+        private const int VisibleRows=VitqraResultPages.PageSize;
         private string locale,query="",editBuffer="";
-        private Text searchLabel,status,manualLabel,automaticLabel;
+        private Text searchLabel,status,manualLabel,automaticLabel,resultCount,pageLabel,previousLabel,nextLabel;
+        private Image previousBox,nextBox;
         private Image background,manualBox,automaticBox;
         private readonly Text[] areaLabels=new Text[11];
         private readonly Image[] areaBoxes=new Image[11];
@@ -59,7 +60,10 @@ namespace Vitqra
             manualLabel=Button(rect,-205,277,390,50,T(D.Manual),()=>SetMode(false),out manualBox);
             automaticLabel=Button(rect,205,277,390,50,T(D.Automatic),()=>SetMode(true),out automaticBox);
             Label("Areas heading",rect,new Vector2(-266,222),new Vector2(280,45),T(D.Areas),23,Color.cyan);
-            Label("Results heading",rect,new Vector2(145,222),new Vector2(515,45),T(D.Title),23,Color.cyan);
+            var resultsHeading=Label("Results heading",rect,new Vector2(65,222),new Vector2(350,45),T(D.ResultsHeading),23,Color.cyan);
+            resultsHeading.alignment=TextAnchor.MiddleLeft;
+            resultCount=Label("Result count",rect,new Vector2(350,222),new Vector2(100,45),"",20,Color.white);
+            resultCount.alignment=TextAnchor.MiddleRight;
             for(int i=0;i<areaLabels.Length;i++)
             {
                 int selected=i-1;
@@ -72,7 +76,10 @@ namespace Vitqra
                 rowLabels[i]=Button(rect,145,160-i*86,510,80,"",()=>OpenRow(slot),out rowBoxes[i]);
                 rowLabels[i].alignment=TextAnchor.MiddleLeft;
             }
-            status=Label("Status",rect,new Vector2(0,-388),new Vector2(810,78),"",19,Color.white);
+            previousLabel=Button(rect,-25,-338,170,40,T(D.ResultPrevious),()=>TurnResultPage(-1),out previousBox);
+            pageLabel=Label("Results page",rect,new Vector2(145,-338),new Vector2(150,40),"",18,Color.white);
+            nextLabel=Button(rect,315,-338,170,40,T(D.ResultNext),()=>TurnResultPage(1),out nextBox);
+            status=Label("Status",rect,new Vector2(0,-403),new Vector2(810,72),"",19,Color.white);
             InitializeReader();
             all=VitqraChallengeDirectory.Educational();
             ApplyFilter();
@@ -137,16 +144,16 @@ namespace Vitqra
         private void SelectArea(int selected)
         {
             CancelEvidence();manualEvidence=null;
-            area=selected;query="";QueueWebSearch();ApplyFilter();
+            area=selected;query="";QueueWebSearch();ApplyFilter(true);
         }
-        private void ApplyFilter()
+        private void ApplyFilter(bool resetPage=false)
         {
             filtered=VitqraChallengeDirectory.Filter(all,area,query);
             var urls=new HashSet<string>(StringComparer.Ordinal);
             foreach(var item in filtered)urls.Add(item.url);
             foreach(var item in webResults)
                 if(VitqraChallengeDirectory.ValidLink(item)&&urls.Add(item.url))filtered.Add(item);
-            first=0;Render();
+            first=resetPage?0:VitqraResultPages.ClampFirst(first,filtered.Count);Render();
         }
         private void QueueWebSearch()
         {
@@ -184,11 +191,26 @@ namespace Vitqra
             nextScroll=Time.unscaledTime+.22f;
             if(graphicOpen)return;
             if(readerOpen){TurnReaderPage(y<0?1:-1);return;}
-            first=Mathf.Clamp(first+(y<0?1:-1),0,Mathf.Max(0,filtered.Count-VisibleRows));Render();
+            TurnResultPage(y<0?1:-1);
+        }
+        private void TurnResultPage(int direction)
+        {
+            first=VitqraResultPages.Move(first,filtered.Count,direction);
+            Render();
+        }
+        private static void SetPageButton(Text label,Image box,bool available)
+        {
+            label.color=available?Color.white:new Color(.55f,.63f,.68f,1f);
+            box.color=available?Normal:new Color(.06f,.12f,.17f,1f);
         }
         private void Render()
         {
             if(status==null)return;
+            first=VitqraResultPages.ClampFirst(first,filtered.Count);
+            resultCount.text=filtered.Count.ToString();
+            pageLabel.text=VitqraResultPages.PageNumber(first,filtered.Count)+" / "+VitqraResultPages.PageCount(filtered.Count);
+            SetPageButton(previousLabel,previousBox,first>0);
+            SetPageButton(nextLabel,nextBox,first+VisibleRows<filtered.Count);
             searchLabel.text=string.IsNullOrWhiteSpace(query)?T(D.SearchAreas):query;
             manualBox.color=automatic?Normal:Selected;
             automaticBox.color=automatic?Selected:Normal;
@@ -208,7 +230,7 @@ namespace Vitqra
                 rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.webCandidate?D.WebCandidate:item.educational?D.Educational:D.Candidate)+EvidenceSuffix(item);
             }
             string summary=filtered.Count==0?T(loading?D.Searching:D.NoChallenges):
-                (first+1)+"–"+Mathf.Min(first+VisibleRows,filtered.Count)+" / "+filtered.Count+" · "+T(D.Scroll);
+                (first+1)+"–"+Mathf.Min(first+VisibleRows,filtered.Count)+" / "+filtered.Count;
             if(unavailable)summary+=" · "+T(D.Unavailable);
             else if(partial)summary+=" · "+T(D.Limited);
             if(webLoading||webQueued)summary+=" · "+T(D.WebSearching);
@@ -248,7 +270,7 @@ namespace Vitqra
             for(int i=0;i<10;i++)
                 if(string.Equals(query,T((D)((int)D.Bioinformatics+i)),StringComparison.OrdinalIgnoreCase))
                 {area=i;query="";break;}
-            QueueWebSearch();ApplyFilter();
+            QueueWebSearch();ApplyFilter(true);
         }
         private void Update()
         {
