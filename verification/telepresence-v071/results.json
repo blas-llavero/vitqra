@@ -1,0 +1,8 @@
+{
+  "scope": "fictional local reference only",
+  "checks": 33,
+  "stale_after_ms": 500,
+  "network": false,
+  "hardware": false,
+  "recording": false
+}

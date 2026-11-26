@@ -59,3 +59,5 @@ v0.6.3 initial: closed fictional validation center with data-quality gate, two a
 v0.6.4 initial: ephemeral local synthetic signature exercise, revision binding, in-session certificate pin, simulated validity/revocation. Source only; no pre-generated cryptographic material or actual certification. See [EPHEMERAL_DIGITAL_TRUST.md](EPHEMERAL_DIGITAL_TRUST.md).
 
 v0.7.0 initial: fictional avatar meeting with scoped room grants, muted-by-default simulated turns, ten-language fixed captions and optional isolated procedural 3D preview. No actual audio, translation, network or clinical collaboration. See [SYNTHETIC_AVATAR_MEETING.md](SYNTHETIC_AVATAR_MEETING.md).
+
+v0.7.1 initial: local synthetic telepresence, per-channel consent, fictional bounded poses, stale/replay rejection and editor projection. No hardware capture, transport or live holograms. See [SYNTHETIC_TELEPRESENCE.md](SYNTHETIC_TELEPRESENCE.md).
