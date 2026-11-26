@@ -23,6 +23,12 @@ namespace Vitqra
         private bool previousGrip, previousTrigger, previousPrimary;
         private ulong activeDevice;
         private bool initialized, hasController;
+        private Vector3 layoutOrigin;
+        private Quaternion layoutHeading;
+        private bool layoutDirty;
+        private bool assistantPositionCustomized;
+        private VitqraSpatialPanel[] LayoutPanels =>
+            new VitqraSpatialPanel[]{research,notes,advice,configuration,assistant,conversation};
         private int topicIndex, adviceIndex;
         private static readonly Color Cyan = new Color(.24f,.95f,.92f);
         private static readonly Color Violet = new Color(.75f,.64f,1f);
@@ -92,7 +98,8 @@ namespace Vitqra
         {
             if (settingsOpen) return;
             settingsOpen = true;
-            assistant.transform.SetPositionAndRotation(configuration.transform.position, configuration.transform.rotation);
+            if(!assistantPositionCustomized)
+                assistant.transform.SetPositionAndRotation(configuration.transform.position, configuration.transform.rotation);
             configuration.gameObject.SetActive(false);
             assistant.gameObject.SetActive(true);
         }
@@ -111,6 +118,7 @@ namespace Vitqra
             if (grabbed == advice) grabbed = null;
             advice.gameObject.SetActive(false);
             conversation.gameObject.SetActive(true);
+            MarkLayoutChanged();
         }
 
         private void MinimizeConversation()
@@ -120,6 +128,7 @@ namespace Vitqra
             conversation.gameObject.SetActive(false);
             if(playback!=null)playback.Stop();
             advice.gameObject.SetActive(true);
+            MarkLayoutChanged();
         }
 
         // Adapter hooks: subscribe directly to the panel, after initialization, on the main thread.
@@ -194,7 +203,10 @@ namespace Vitqra
             if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
             forward.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, forward);
-            Vector3 center = headCamera.transform.position + forward * 1.65f;
+            layoutOrigin=headCamera.transform.position;
+            layoutHeading=Quaternion.LookRotation(forward,Vector3.up);
+            assistantPositionCustomized=false;
+            Vector3 center = layoutOrigin + forward * 1.65f;
             // Leave the central view open at startup and after a layout reset.
             const float columnOffset = 0.85f;
             const float upperRow = 0.12f;
@@ -212,6 +224,65 @@ namespace Vitqra
             advice.gameObject.SetActive(!conversationOpen);
             conversation.gameObject.SetActive(conversationOpen);
             initialized = true;
+        }
+
+        private bool RestoreLayout()
+        {
+            var saved=VitqraLayoutStore.Load();
+            if(saved==null)return false;
+            var windows=LayoutPanels;
+            foreach(var entry in saved.panels)
+            {
+                int index=System.Array.IndexOf(VitqraLayoutStore.PanelIds,entry.id);
+                if(index<0)continue;
+                if(VitqraLayoutStore.Apply(entry,layoutOrigin,layoutHeading,windows[index]) &&
+                    windows[index]==assistant)assistantPositionCustomized=true;
+            }
+            conversationOpen=saved.conversationOpen;
+            conversation.gameObject.SetActive(conversationOpen);
+            advice.gameObject.SetActive(!conversationOpen);
+            configuration.gameObject.SetActive(true);
+            assistant.gameObject.SetActive(false);
+            return true;
+        }
+
+        private void MarkLayoutChanged()
+        {
+            if(!initialized)return;
+            layoutDirty=true;
+            if(grabbed==null)SaveLayout();
+        }
+
+        private void SaveLayout()
+        {
+            if(!initialized||!layoutDirty)return;
+            var windows=LayoutPanels;
+            var entries=new VitqraLayoutStore.Entry[windows.Length];
+            for(int i=0;i<windows.Length;i++)
+            {
+                if(windows[i]==null)return;
+                entries[i]=VitqraLayoutStore.Capture(VitqraLayoutStore.PanelIds[i],layoutOrigin,layoutHeading,windows[i]);
+            }
+            // The avatar follows configuration until it has been moved independently.
+            // Persist that effective position, even when the avatar is hidden.
+            if(!assistantPositionCustomized)
+            {
+                entries[4].position=entries[3].position;
+                entries[4].rotation=entries[3].rotation;
+            }
+            if(VitqraLayoutStore.Save(new VitqraLayoutStore.Layout {
+                conversationOpen=conversationOpen,panels=entries}))layoutDirty=false;
+        }
+
+        private void ReleaseGrab()
+        {
+            grabbed=null;
+            SaveLayout();
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if(paused){ReleaseGrab();foreach(var panel in panels)panel.ClearResizeHover();}
         }
 
         private void PlacePanel(VitqraSpatialPanel panel, Vector3 center, Vector3 right, float x, float y)
@@ -244,7 +315,9 @@ namespace Vitqra
                 var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
                 if (!head.isValid || !head.TryGetFeatureValue(CommonUsages.isTracked, out bool tracked) || !tracked) return;
                 PlacePanels();
-                if(conversation.MessageCount==0) PresentTip();
+                RestoreLayout();
+                // Do not reopen a deliberately minimized conversation on startup.
+                if(conversationOpen&&conversation.MessageCount==0) PresentTip();
             }
 
             var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
@@ -253,7 +326,7 @@ namespace Vitqra
                 device = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
                 if (!ReadPose(device, out localPosition, out localRotation))
                 {
-                    grabbed = null;
+                    ReleaseGrab();
                     hasController = false;
                     foreach (var panel in panels) { panel.Highlight(false); panel.ClearResizeHover(); }
                     return;
@@ -266,7 +339,7 @@ namespace Vitqra
             if (!hasController || device.deviceId != activeDevice)
             {
                 activeDevice = device.deviceId;
-                grabbed = null;
+                ReleaseGrab();
                 foreach(var panel in panels) panel.ClearResizeHover();
                 previousGrip = grip;
                 previousTrigger = trigger;
@@ -282,6 +355,7 @@ namespace Vitqra
                 grabbed = null;
                 foreach(var panel in panels) { panel.SetSizeScale(1f); panel.ClearResizeHover(); }
                 PlacePanels();
+                MarkLayoutChanged();
             }
             VitqraSpatialPanel closest = null;
             float nearest = float.PositiveInfinity;
@@ -309,7 +383,7 @@ namespace Vitqra
                 grabbed = closest;
                 grabOffset = Quaternion.Inverse(rotation) * (grabbed.transform.position - origin);
             }
-            if (!grip) grabbed = null;
+            if (!grip && grabbed!=null) ReleaseGrab();
             if (grabbed != null)
             {
                 Vector3 target = origin + rotation * grabOffset;
@@ -317,10 +391,13 @@ namespace Vitqra
                 if (delta.sqrMagnitude > 0.0001f)
                     grabbed.transform.position = headCamera.transform.position + delta.normalized * Mathf.Clamp(delta.magnitude, .75f, 3f);
                 FaceUser(grabbed.transform);
+                if(grabbed==assistant)assistantPositionCustomized=true;
+                layoutDirty=true;
             }
             else if (!grip && trigger && !previousTrigger && closest != null && onAction != 0)
             {
-                if(!closest.TryResizeAction(onAction)) closest.InvokeAction(onAction);
+                if(closest.TryResizeAction(onAction)) MarkLayoutChanged();
+                else closest.InvokeAction(onAction);
             }
             foreach (var panel in panels) panel.Highlight(panel == grabbed || (grabbed == null && panel == closest));
             previousGrip = grip; previousTrigger = trigger; previousPrimary = primary;
@@ -328,6 +405,7 @@ namespace Vitqra
 
         private void OnDestroy()
         {
+            SaveLayout();
             foreach (var panel in panels) if (panel != null) Destroy(panel.gameObject);
         }
     }

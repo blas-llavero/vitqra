@@ -8,7 +8,7 @@ Aim at a visible button and press trigger. The controls are available on Researc
 - Normal panels at 100%: 0.64 × 0.34 m. Conversation at 100%: 0.86 × 0.90 m. Toolbar height is an additional 0.052 m, separated by 0.008 m.
 - Uniform scaling preserves layout, aspect ratio and relative text/button size. Hit testing uses inverse transforms, so button regions scale with the visible panel.
 - The percentage button resets only that panel's size, retaining position. A/X resets all sizes and default positions, closes avatar settings and respects whether the conversation is minimized.
-- Scale is retained when hiding and reopening a panel during the current session. Persistent position and scale between application launches are not yet implemented.
+- Scale is retained when hiding and reopening a panel and is saved across application launches together with position and orientation. See [SPATIAL_WORKSPACE.md](SPATIAL_WORKSPACE.md).
 - The center stays clear in the default layout. The user may manually move or enlarge panels into the center or another panel; no automatic collision prevention is implemented. Use grip to rearrange panels or reset the layout if needed.
 - No network, paid APIs or external assets are required by this feature. The Size label uses all ten language catalogs; plus/minus and numeric percentages are language-neutral.
 

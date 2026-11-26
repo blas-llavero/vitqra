@@ -1,4 +1,4 @@
-# VITQRA 0.3.5 — Meta Quest spatial prototype
+# VITQRA 0.3.6 — Meta Quest spatial prototype
 
 This source overlay adds four main world-space Unity UI panels, an on-demand avatar configuration panel and a larger conversation panel. It does not include a configured Unity project, an XR scene, an APK, a production avatar model, or a passthrough camera implementation. The Unity Mixed Reality template and its supported packages provide the XR rig and passthrough. Unity and headset testing are pending.
 
@@ -9,7 +9,7 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 3. Copy UnityStarter/Assets/VITQRA into Assets. The source uses Unity UI (com.unity.ugui) and UnityEngine.XR input. Install Unity UI from Package Manager if absent.
 4. Select Android/Meta Quest build profile. Confirm XR Plug-in Management > Android > OpenXR, Meta Quest features, controller interaction profiles and passthrough settings. Resolve validation errors and select ARM64/IL2CPP. Use the template's existing passthrough setup (AR Camera Manager on the XR camera where required). Do not enable camera image capture or request camera access for this prototype.
 5. In the template scene select the tracked Main Camera under XR Origin and choose **VITQRA > Add Spatial Workspace to Selected XR Camera**. Confirm that the serialized Tracking Space is the transform corresponding to the origin of controller tracking poses, normally the camera's Camera Offset parent. Keep the workspace root at world scale (1,1,1), outside the camera hierarchy.
-6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.3.5. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
+6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.3.6. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
 
 ## Initial panel layout
 
@@ -27,14 +27,14 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 - Hold grip on a panel and move the controller; release to leave the panel in world coordinates.
 - Aim at the bottom action bar and press trigger to switch sample topics, review or advance a tip, open avatar settings, select an avatar, close the configuration or conversation, reload the existing sample note, or toggle automatic research preference. AI Settings and Virtual Assistant each have two distinct action buttons.
 - Press the active controller's primary button (A or X) to restore the initial layout.
-- Tracking loss releases the grabbed panel. The layout is not saved across restarts and is not a persistent spatial anchor.
+- Tracking loss releases the grabbed panel and saves pending changes. The layout is saved across restarts relative to the initial head pose; it is not a persistent spatial anchor. See [SPATIAL_WORKSPACE.md](SPATIAL_WORKSPACE.md).
 - These are local demonstration actions only. No live search, voice, AI calls, object recognition, browser or patient-data functionality are enabled. Hand confirmation is optional; see the assistant guide. Spatial labels are localized in ten languages; font coverage, RTL and visual layout require testing. Do not enter sensitive data.
 
 ## Physical acceptance checklist (not run)
 
 - Android compilation succeeds without package or OpenXR validation errors.
 - Passthrough is visible using the template and camera tracking behaves correctly.
-- Four main panel slots appear after valid head tracking; the conversation replaces Smart Advice by default, but the avatar stays hidden until Avatar settings is selected. Verify the four main panels, with Research Challenges and My Notes on the left and Smart Advice and AI Settings on the right. Confirm the central view is unobstructed by the panels at startup and after reset, the panels stay world-fixed when the user moves, face the user initially, and remain legible. Move each panel independently and verify that the other visible panels do not move.
+- Four main panel slots appear after valid head tracking; the conversation replaces Smart Advice by default or follows its saved minimized state, but the avatar stays hidden until Avatar settings is selected. Verify the four main panels, with Research Challenges and My Notes on the left and Smart Advice and AI Settings on the right. Confirm the central view is unobstructed by the panels at startup and after reset, the panels stay world-fixed when the user moves, face the user initially, and remain legible. Move each panel independently and verify that the other visible panels do not move.
 - Both controllers can be tested independently, including controller tracking loss while grabbing. Grip moves the nearest hit panel; trigger acts only on the bottom bar; primary restores layout.
 - No unexpected locomotion from template input bindings; disable conflicting sample interactions if needed. Verify comfortable distance, readable fonts and no obstruction.
 - No AI calls, network services, medical data uploads or unexpected permissions are requested by VITQRA code.
