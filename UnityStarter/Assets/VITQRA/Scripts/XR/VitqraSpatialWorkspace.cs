@@ -17,6 +17,7 @@ namespace Vitqra
         private VitqraDiscoveryPanel research;
         private VitqraConversationPanel conversation;
         private VitqraSpeechPlayback playback;
+        private VitqraLocalAi localAi;
         private bool settingsOpen, conversationOpen = true;
         private VitqraAvatarPreview avatar;
         private bool reviewPending, reviewCompleted;
@@ -72,6 +73,8 @@ namespace Vitqra
             conversation.InitializeChat(settings.language, MinimizeConversation);
             conversation.InitializeResizeControls(l[21]);
             panels.Add(conversation);
+            localAi=GetComponent<VitqraLocalAi>();
+            if(localAi!=null)localAi.Configure(conversation,settings.language,AddAssistantMessage);
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
             speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));
@@ -200,7 +203,7 @@ namespace Vitqra
             if (note.Length > 180) note = note.Substring(0,180) + "...";
             notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
             research.SyncMode(settings.automaticResearch);
-            configuration.SetContent(l[19] + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
+            configuration.SetContent(l[19] + "\n" + VitqraChatStrings.Get(settings.language,localAi!=null&&localAi.Configured?VitqraChatStrings.Key.AiConfigured:VitqraChatStrings.Key.AiNotConfigured) + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
             int profile = settings.avatarProfile;
             string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
             assistant.SetContent(profileName + "\n" + T(K.NoSpeech), T(K.NextAvatar));
@@ -424,6 +427,7 @@ namespace Vitqra
 
         private void OnDestroy()
         {
+            if(localAi!=null)localAi.Cancel();
             SaveLayout();
             foreach (var panel in panels) if (panel != null) Destroy(panel.gameObject);
         }

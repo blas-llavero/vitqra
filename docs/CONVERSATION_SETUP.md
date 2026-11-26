@@ -19,3 +19,7 @@ The large Conversation panel replaces temporary subtitles. It opens automaticall
 - Test history paging, empty drafts, long text, Unicode and right-to-left layout, the message limit and restart behavior, opt-in persistence, deletion, corrupted archives and write failures.
 - Verify voice shows an unavailable state without starting a microphone; verify no fabricated AI replies or paid API requests.
 - Verify speech/AI adapters, when implemented, respect consent, cost controls, cancellation and local-only privacy preferences.
+
+## Local AI development
+
+See [LOCAL_AI.md](LOCAL_AI.md) for the optional native conversation adapter. Model provisioning, dependency audit and device validation remain pending. No saved conversation history is automatically submitted to inference.

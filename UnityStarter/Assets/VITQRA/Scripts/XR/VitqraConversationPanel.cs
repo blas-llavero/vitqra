@@ -44,7 +44,10 @@ namespace Vitqra
         private readonly Image[] bubbleBackgrounds = new Image[Rows];
         private Image background;
         private Text draftLabel, status, pageLabel, storageLabel, saveButton, deleteButton, voiceButton;
-        private bool persistHistory, deleteArmed;
+        private bool persistHistory, deleteArmed, aiBusy;
+        private Text sendButton;
+        public event Action AiCancelRequested;
+        public event Action HistoryCleared;
         private string archivePath;
         private const string HistoryPreference = "vitqra.chat.persist.v1";
         private const int MaxArchiveBytes = 8 * 1024 * 1024;
@@ -84,6 +87,7 @@ namespace Vitqra
                 bubbleBackgrounds[i]=Box("Bubble "+i,rect,new Vector2(0,y),new Vector2(810,97),new Color(.08f,.15f,.22f,1));
                 bubbles[i]=Label("Message "+i,rect,new Vector2(0,y),new Vector2(780,92),"",23,Color.white);
                 bubbles[i].alignment=TextAnchor.MiddleLeft;
+                bubbles[i].supportRichText=false;
             }
             AddButton(rect,-280,-174,240,48,T(C.Older),()=>{first=Mathf.Max(0,first-Rows);RenderHistory();});
             AddButton(rect,280,-174,240,48,T(C.Newer),()=>{first=Mathf.Min(MaxFirst,first+Rows);RenderHistory();});
@@ -92,11 +96,12 @@ namespace Vitqra
             Box("Composer",rect,new Vector2(0,-308),new Vector2(810,88),new Color(.06f,.14f,.20f,1));
             draftLabel=Label("Draft",rect,new Vector2(0,-308),new Vector2(775,80),T(C.Prompt),23,Color.white);
             draftLabel.alignment=TextAnchor.MiddleLeft;
+            draftLabel.supportRichText=false;
             targets.Add(new Rect(-.405f,-.352f,.81f,.088f));
             actions.Add(EditDraft);
             AddButton(rect,-270,-405,250,58,T(C.Write),EditDraft);
             voiceButton=AddButton(rect,0,-405,250,58,T(C.Voice),RequestVoice);
-            AddButton(rect,270,-405,250,58,T(C.Send),Send);
+            sendButton=AddButton(rect,270,-405,250,58,T(C.Send),Send);
             LoadHistory();
             UpdateStorageLabels();
             RenderHistory();
@@ -251,6 +256,7 @@ namespace Vitqra
             deleteArmed=false;
             if(RemoveArchive())
             {
+                HistoryCleared?.Invoke();
                 messages.Clear();
                 fragments.Clear();
                 first=0;
@@ -368,8 +374,16 @@ namespace Vitqra
             SetDraft(string.IsNullOrWhiteSpace(draft)?text:draft+" "+text);
         }
 
+        public void SetAiState(bool busy,C state)
+        {
+            aiBusy=busy;
+            if(sendButton!=null)sendButton.text=T(busy?C.Cancel:C.Send);
+            if(status!=null)status.text=T(state);
+        }
+
         private void Send()
         {
+            if(aiBusy){AiCancelRequested?.Invoke();return;}
             if(keyboard!=null||desktopEditing||string.IsNullOrWhiteSpace(draft))return;
             string message=draft.Trim();
             AddMessage(true,message);
@@ -387,6 +401,7 @@ namespace Vitqra
             deleteArmed=false;
             if(deleteButton!=null) UpdateStorageLabels();
             VoiceCanceled?.Invoke();
+            AiCancelRequested?.Invoke();
         }
     }
 }
