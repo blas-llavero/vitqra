@@ -28,6 +28,16 @@ namespace Vitqra
         private TouchScreenKeyboard keyboard;
         private float lastRefresh=-1000f,nextScroll;
         private Action<bool> modeChanged;
+        private string webEndpoint;
+        private bool webEnabled,webLoading,webFailed,webQueued;
+        private int searchRevision;
+        private float searchAt;
+        private List<VitqraChallengeDirectory.Item> webResults=new List<VitqraChallengeDirectory.Item>();
+        public void ConfigureWebSearch(string endpoint,bool allowPublicSearchTerms)
+        {
+            webEndpoint=endpoint;
+            webEnabled=allowPublicSearchTerms&&VitqraWebDiscovery.ValidEndpoint(endpoint);
+        }
         private string T(D key)=>VitqraDiscoveryStrings.Get(locale,key);
         private static readonly Color Normal=new Color(.10f,.20f,.28f,1);
         private static readonly Color Selected=new Color(.12f,.40f,.42f,1);
@@ -121,11 +131,44 @@ namespace Vitqra
         }
         private void SelectArea(int selected)
         {
-            area=selected;query="";ApplyFilter();
+            area=selected;query="";QueueWebSearch();ApplyFilter();
         }
         private void ApplyFilter()
         {
-            filtered=VitqraChallengeDirectory.Filter(all,area,query);first=0;Render();
+            filtered=VitqraChallengeDirectory.Filter(all,area,query);
+            var urls=new HashSet<string>(StringComparer.Ordinal);
+            foreach(var item in filtered)urls.Add(item.url);
+            foreach(var item in webResults)
+                if(VitqraChallengeDirectory.ValidLink(item)&&urls.Add(item.url))filtered.Add(item);
+            first=0;Render();
+        }
+        private void QueueWebSearch()
+        {
+            searchRevision++;
+            webResults.Clear();webFailed=false;
+            webQueued=webEnabled&&(area>=0||!string.IsNullOrWhiteSpace(query));
+            searchAt=Time.unscaledTime+.65f;
+        }
+        private IEnumerator SearchWeb(int revision,string term,string language)
+        {
+            webLoading=true;Render();
+            int success=0;
+            foreach(string kind in new[]{"challenge","competition"})
+            {
+                if(revision!=searchRevision)break;
+                VitqraWebDiscovery.Batch batch=null;
+                yield return VitqraWebDiscovery.Fetch(webEndpoint,term,language,kind,b=>batch=b);
+                if(revision!=searchRevision)break;
+                if(batch!=null&&batch.success)
+                {
+                    success++;
+                    webResults.AddRange(batch.items);
+                    ApplyFilter();
+                }
+                else webFailed=true;
+            }
+            webLoading=false;
+            if(revision==searchRevision){webFailed|=success==0;Render();}
         }
         public void SyncMode(bool value){automatic=value;Render();}
         private void SetMode(bool value){SyncMode(value);modeChanged?.Invoke(value);}
@@ -153,12 +196,15 @@ namespace Vitqra
                 if(!exists)continue;
                 var item=filtered[n];
                 string name=item.title.Length>110?item.title.Substring(0,110)+"…":item.title;
-                rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.educational?D.Educational:D.Candidate);
+                rowLabels[i].text=(n+1)+". "+name+"\n"+T(item.webCandidate?D.WebCandidate:item.educational?D.Educational:D.Candidate);
             }
             string summary=filtered.Count==0?T(loading?D.Searching:D.NoChallenges):
                 (first+1)+"–"+Mathf.Min(first+VisibleRows,filtered.Count)+" / "+filtered.Count+" · "+T(D.Scroll);
             if(unavailable)summary+=" · "+T(D.Unavailable);
             else if(partial)summary+=" · "+T(D.Limited);
+            if(webLoading||webQueued)summary+=" · "+T(D.WebSearching);
+            else if(webFailed)summary+=" · "+T(D.WebUnavailable);
+            else if(!webEnabled)summary+=" · "+T(D.WebNotConfigured);
             status.text=summary+"\n"+T(D.EnginePending)+" · "+T(D.OriginalTitles);
         }
         private void OpenRow(int slot)
@@ -191,10 +237,17 @@ namespace Vitqra
             for(int i=0;i<10;i++)
                 if(string.Equals(query,T((D)((int)D.Bioinformatics+i)),StringComparison.OrdinalIgnoreCase))
                 {area=i;query="";break;}
-            ApplyFilter();
+            QueueWebSearch();ApplyFilter();
         }
         private void Update()
         {
+            if(webQueued&&!webLoading&&Time.unscaledTime>=searchAt)
+            {
+                webQueued=false;
+                // Area queries use reviewed English terms. Typed keywords retain their language.
+                string term=area>=0?VitqraChallengeDirectory.AreaTerms[area][0]:query;
+                StartCoroutine(SearchWeb(searchRevision,term,area>=0?"en":VitqraStrings.ResolveLanguage(locale)));
+            }
             if(keyboard==null)return;
             if(keyboard.status==TouchScreenKeyboard.Status.Done){SetQuery(keyboard.text);keyboard=null;}
             else if(keyboard.status==TouchScreenKeyboard.Status.Canceled||keyboard.status==TouchScreenKeyboard.Status.LostFocus)keyboard=null;
@@ -216,7 +269,7 @@ namespace Vitqra
             base.OnDisable();
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
-            StopAllCoroutines();loading=false;
+            StopAllCoroutines();loading=false;webLoading=false;webQueued=false;searchRevision++;
         }
     }
 }

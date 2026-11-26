@@ -26,7 +26,7 @@ No APK or public release is available at this milestone. Clone this repository o
 2. Review automatic research and translation settings (enabled by default).
 3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
 4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
-5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. Choose Manual or Automatic research mode. Select a result to view its original page. The local research engine is not connected yet. The older desktop preview remains offline.
+5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. An optional authorized self-hosted SearXNG instance can discover web candidates automatically. Choose Manual or Automatic research mode. Select a result to view its original page. The local research engine is not connected yet. The older desktop preview remains offline.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
 
@@ -75,7 +75,7 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.4.0)
+## Mixed reality prototype (v0.4.1)
 
 Four main independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. The avatar panel is hidden until Avatar settings is selected, temporarily replacing AI Settings until closed. A larger, independently movable Conversation panel replaces the temporary subtitle window and temporarily occupies the Smart Advice slot. It displays session history, supports optional unencrypted local history with deletion controls, and allows text entry through the supported platform keyboard (or desktop editor fallback). Minimize restores Smart Advice; AI Settings remains visible. A local microphone and Sherpa-ONNX STT/TTS adapter are provided as source; no native libraries or models are bundled and no AI provider is connected. See [voice setup](docs/VOICE_SETUP.md). Panels face the user at placement. Each window has normally hidden minus, percentage-reset and plus controls (70–150%); pointing at any edge for 0.5 seconds reveals them, and they hide after 1.5 seconds away from the edge and toolbar; A/X resets sizes and default positions relative to the current view. See [window resizing](docs/WINDOW_RESIZING.md). Positions, orientations, sizes and conversation visibility are saved locally and restored relative to the next session's initial head pose. Avatar settings remain closed at startup. See [persistent workspace](docs/SPATIAL_WORKSPACE.md). Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No compiled speech engine or APK is provided.
 
@@ -104,4 +104,4 @@ Switch the build profile to Android. Install XR Plug-in Management, OpenXR, Unit
 
 Unity and the headset have not been available to test this source package. Do not treat a successful import or desktop preview as Quest compatibility. Record editor version, package versions, build logs and physical-device results for subsequent milestones.
 
-See [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the numbered directory, curated direct problems, public notices and verification limits.
+See [optional web search setup](docs/WEB_DISCOVERY.md) and [scientific discovery setup](docs/SCIENTIFIC_DISCOVERY.md) for the numbered directory, curated direct problems, public notices and verification limits.

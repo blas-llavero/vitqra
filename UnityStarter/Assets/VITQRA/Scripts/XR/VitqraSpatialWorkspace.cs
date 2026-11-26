@@ -9,6 +9,8 @@ namespace Vitqra
     {
         [SerializeField] private Camera headCamera;
         [SerializeField] private Transform trackingSpace;
+        [SerializeField] private string selfHostedSearchEndpoint="";
+        [SerializeField] private bool allowPublicSearchTerms;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
         private VitqraSpatialPanel advice, notes, configuration, assistant, grabbed;
@@ -54,6 +56,7 @@ namespace Vitqra
             researchObject.transform.SetParent(transform,false);
             research=researchObject.AddComponent<VitqraDiscoveryPanel>();
             research.InitializeDiscovery(settings.language,settings.automaticResearch,value=>{settings.automaticResearch=value;settings.Save();Refresh();});
+            research.ConfigureWebSearch(selfHostedSearchEndpoint,allowPublicSearchTerms);
             research.InitializeResizeControls(l[21]);
             panels.Add(research);
             advice = AddPanel(T(K.Advice), Violet, ReviewAction);

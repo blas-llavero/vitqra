@@ -9,7 +9,7 @@ namespace Vitqra
         public sealed class Item
         {
             public string id,title,url,keywords;
-            public bool educational;
+            public bool educational,webCandidate;
         }
         // Reviewed BIOQRA snapshot, direct problem links only. Educational exercises
         // are not open research competitions. Original titles and URLs are preserved.
@@ -64,6 +64,7 @@ namespace Vitqra
         public static bool ValidLink(Item item)
         {
             if(item==null)return false;
+            if(item.webCandidate)return VitqraWebDiscovery.ValidCandidateUrl(item.url);
             if(!item.educational)return VitqraDiscovery.ValidSource(item.url);
             return Uri.TryCreate(item.url,UriKind.Absolute,out var uri)&&uri.Scheme=="https"&&
                 uri.Host=="rosalind.info"&&uri.IsDefaultPort&&string.IsNullOrEmpty(uri.UserInfo)&&
