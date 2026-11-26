@@ -7,7 +7,7 @@ using D = Vitqra.VitqraDiscoveryStrings.Key;
 
 namespace Vitqra
 {
-    public sealed class VitqraDiscoveryPanel : VitqraSpatialPanel
+    public sealed partial class VitqraDiscoveryPanel : VitqraSpatialPanel
     {
         public override float BaseWidth => .86f;
         public override float BaseHeight => .90f;
@@ -46,6 +46,7 @@ namespace Vitqra
         {
             locale=language;automatic=automaticResearch;modeChanged=changeMode;
             var obj=new GameObject("Discovery Canvas",typeof(RectTransform),typeof(Canvas));
+            discoveryCanvas=obj;
             var rect=(RectTransform)obj.transform;
             rect.SetParent(transform,false);
             rect.sizeDelta=new Vector2(860,900);
@@ -72,6 +73,7 @@ namespace Vitqra
                 rowLabels[i].alignment=TextAnchor.MiddleLeft;
             }
             status=Label("Status",rect,new Vector2(0,-388),new Vector2(810,78),"",19,Color.white);
+            InitializeReader();
             all=VitqraChallengeDirectory.Educational();
             ApplyFilter();
         }
@@ -94,13 +96,15 @@ namespace Vitqra
             if(!new Plane(transform.forward,transform.position).Raycast(ray,out distance)||distance>4f)return false;
             var p=transform.InverseTransformPoint(ray.GetPoint(distance));
             if(Mathf.Abs(p.x)>BaseWidth*.5f||Mathf.Abs(p.y)>BaseHeight*.5f)return false;
-            for(int i=0;i<targets.Count;i++)
-                if(targets[i].Contains(new Vector2(p.x,p.y))){region=i+1;break;}
+            var hitTargets=readerOpen?readerTargets:targets;
+            for(int i=0;i<hitTargets.Count;i++)
+                if(hitTargets[i].Contains(new Vector2(p.x,p.y))){region=i+1;break;}
             return true;
         }
         public override void InvokeAction(int region)
         {
-            if(region>0&&region<=actions.Count)actions[region-1]?.Invoke();
+            var hitActions=readerOpen?readerActions:actions;
+            if(region>0&&region<=hitActions.Count)hitActions[region-1]?.Invoke();
         }
         public void RefreshSources()
         {
@@ -176,6 +180,7 @@ namespace Vitqra
         {
             if(Mathf.Abs(y)<.55f||Time.unscaledTime<nextScroll)return;
             nextScroll=Time.unscaledTime+.22f;
+            if(readerOpen){TurnReaderPage(y<0?1:-1);return;}
             first=Mathf.Clamp(first+(y<0?1:-1),0,Mathf.Max(0,filtered.Count-VisibleRows));Render();
         }
         private void Render()
@@ -212,7 +217,7 @@ namespace Vitqra
             int n=first+slot;
             if(n>=filtered.Count)return;
             var item=filtered[n];
-            if(VitqraChallengeDirectory.ValidLink(item))Application.OpenURL(item.url);
+            if(VitqraChallengeDirectory.ValidLink(item))OpenReader(item);
         }
         private void EditQuery()
         {
@@ -269,6 +274,7 @@ namespace Vitqra
             base.OnDisable();
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
+            CloseReader();
             StopAllCoroutines();loading=false;webLoading=false;webQueued=false;searchRevision++;
         }
     }

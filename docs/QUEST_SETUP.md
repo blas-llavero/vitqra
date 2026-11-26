@@ -1,4 +1,4 @@
-# VITQRA 0.4.0 — Meta Quest spatial prototype
+# VITQRA 0.4.2 — Meta Quest spatial prototype
 
 This source overlay adds four main world-space Unity UI panels, an on-demand avatar configuration panel and a larger conversation panel. It does not include a configured Unity project, an XR scene, an APK, a production avatar model, or a passthrough camera implementation. The Unity Mixed Reality template and its supported packages provide the XR rig and passthrough. Unity and headset testing are pending.
 
@@ -9,7 +9,7 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 3. Copy UnityStarter/Assets/VITQRA into Assets. The source uses Unity UI (com.unity.ugui) and UnityEngine.XR input. Install Unity UI from Package Manager if absent.
 4. Select Android/Meta Quest build profile. Confirm XR Plug-in Management > Android > OpenXR, Meta Quest features, controller interaction profiles and passthrough settings. Resolve validation errors and select ARM64/IL2CPP. Use the template's existing passthrough setup (AR Camera Manager on the XR camera where required). Do not enable camera image capture or request camera access for this prototype.
 5. In the template scene select the tracked Main Camera under XR Origin and choose **VITQRA > Add Spatial Workspace to Selected XR Camera**. Confirm that the serialized Tracking Space is the transform corresponding to the origin of controller tracking poses, normally the camera's Camera Offset parent. Keep the workspace root at world scale (1,1,1), outside the camera hierarchy.
-6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.4.0. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
+6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.4.2. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
 
 ## Initial panel layout
 
@@ -28,7 +28,7 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 - Aim at the bottom action bar and press trigger to switch sample topics, review or advance a tip, open avatar settings, select an avatar, close the configuration or conversation, reload the existing sample note, or toggle automatic research preference. AI Settings and Virtual Assistant each have two distinct action buttons.
 - Press the active controller's primary button (A or X) to restore the initial layout.
 - Tracking loss releases the grabbed panel and saves pending changes. The layout is saved across restarts relative to the initial head pose; it is not a persistent spatial anchor. See [SPATIAL_WORKSPACE.md](SPATIAL_WORKSPACE.md).
-- These are local demonstration actions only. No live search, voice, AI calls, object recognition, browser or patient-data functionality are enabled. Hand confirmation is optional; see the assistant guide. Spatial labels are localized in ten languages; font coverage, RTL and visual layout require testing. Do not enter sensitive data.
+- These are local demonstration actions only. The sample advice actions are local demonstrations. The discovery and read-only reader source adapters require live network and device testing; AI, object recognition and patient-data functionality are not enabled. Hand confirmation is optional; see the assistant guide. Spatial labels are localized in ten languages; font coverage, RTL and visual layout require testing. Do not enter sensitive data.
 
 ## Physical acceptance checklist (not run)
 
@@ -62,3 +62,7 @@ Every panel has a normally hidden size toolbar above it. Aim at any edge for 0.5
 ## Scientific discovery
 
 Enable Android Internet access for the public-notice adapter. Verify the source response and the keyboard in the XR research window; see [SCIENTIFIC_DISCOVERY.md](SCIENTIFIC_DISCOVERY.md). No live AI or paid API is enabled.
+
+## Integrated reader
+
+Select a numbered challenge to open the read-only reader, scroll with the controller, and return to the directory. See [WEB_READER.md](WEB_READER.md) for source restrictions and the editor test menu.
