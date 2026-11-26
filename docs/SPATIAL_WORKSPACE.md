@@ -17,3 +17,5 @@ A/X restores all default positions and 100% sizes relative to the current head p
 Use Unity Editor > VITQRA > Run Spatial Layout Checks to check coordinate transforms, JSON round trips, scale and invalid data. The smoke test does not write preferences. This menu has not been run in the development environment.
 
 Physical checklist: move and resize each panel; minimize the conversation; exit and reopen at another position and heading; verify relative layout and avatar hiding; test pause during a grip move, loss of tracking, language change, malformed preferences, reset and restart. Confirm resize hover behavior and that the restored layout does not obscure physical obstacles. Unity compilation and Quest 3 testing are pending.
+
+The v0.7.0 optional avatar meeting editor exercise is isolated from normal startup and layout. No changes to the six spatial panels or avatar hiding preference. See [SYNTHETIC_AVATAR_MEETING.md](SYNTHETIC_AVATAR_MEETING.md).

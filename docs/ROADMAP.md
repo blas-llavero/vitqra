@@ -57,3 +57,5 @@ v0.6.2b initial: interactive fictional six-state daily diary, scheduled/extra di
 v0.6.3 initial: closed fictional validation center with data-quality gate, two assigned reviewers, conflict and expiry checks, revision-bound unsigned decisions and preserved in-memory history. No actual approval, signature or clinical release. See [SYNTHETIC_VALIDATION_CENTER.md](SYNTHETIC_VALIDATION_CENTER.md).
 
 v0.6.4 initial: ephemeral local synthetic signature exercise, revision binding, in-session certificate pin, simulated validity/revocation. Source only; no pre-generated cryptographic material or actual certification. See [EPHEMERAL_DIGITAL_TRUST.md](EPHEMERAL_DIGITAL_TRUST.md).
+
+v0.7.0 initial: fictional avatar meeting with scoped room grants, muted-by-default simulated turns, ten-language fixed captions and optional isolated procedural 3D preview. No actual audio, translation, network or clinical collaboration. See [SYNTHETIC_AVATAR_MEETING.md](SYNTHETIC_AVATAR_MEETING.md).

@@ -21,3 +21,5 @@ Reference table: 26 exact grants, 12 fictional actors, 13 resources, 6 purposes,
 Editor menus: VITQRA > Synthetic Community Policy Preview and VITQRA > Run Synthetic Community Policy Checks. Preview labels follow the ten device languages; enum identifiers and technical codes remain invariant English. No runtime XR layout changes or new dependencies. Next: v0.6.1 synthetic previsit workflow using this policy prototype; real identity, storage and access enforcement remain separate work.
 
 The v0.6.2 aggregate prototype adds fixed synthetic releases with group/cell/complement suppression. It is not production anonymization or a real disclosure service. See [SYNTHETIC_AGGREGATE_COLLABORATION.md](SYNTHETIC_AGGREGATE_COLLABORATION.md).
+
+The v0.7.0 local fictional avatar meeting consumes only existing private-room Join grants; no new record access, cross-role permissions or real call. See [SYNTHETIC_AVATAR_MEETING.md](SYNTHETIC_AVATAR_MEETING.md).

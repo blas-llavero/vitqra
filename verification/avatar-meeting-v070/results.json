@@ -1,0 +1,10 @@
+{
+  "scope": "fictional local room reference only",
+  "checks": 22,
+  "caption_seconds": 5,
+  "rooms": 2,
+  "profiles": 4,
+  "network": false,
+  "microphone": false,
+  "recording": false
+}
