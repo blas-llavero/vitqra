@@ -56,6 +56,8 @@ namespace Vitqra
             // Catalog metadata only, including previously authorized accounts
             // not currently selected for inference. No UI navigation required.
             VitqraChatAccount.InitializeCatalog();
+            // A separate bounded, unauthenticated public guidance request.
+            StartCoroutine(VitqraResearchModelGuidance.RefreshAtLaunch());
             var l = VitqraStrings.Get(settings.language);
             var researchObject=new GameObject("Scientific Discovery");
             researchObject.transform.SetParent(transform,false);

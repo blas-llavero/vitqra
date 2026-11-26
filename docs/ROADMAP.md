@@ -19,3 +19,5 @@ v0.5.3b development: optional Android account sign-in, identity and scope checks
 v0.5.3c initial: official model catalog, on-demand token refresh, local daily attempts and explicit neutral connection test. General inference and automatic research pending live tests and consent integration.
 
 Catalog lifecycle requirement: refresh configured and authorized providers automatically at launch; ChatGPT startup and post-sign-in refresh implemented in source. Ollama and other provider adapters must implement this lifecycle when integrated. See [AI_CATALOG_LIFECYCLE.md](AI_CATALOG_LIFECYCLE.md).
+
+Startup selection requirement: prefer current official research rankings intersected with each configured provider's eligible catalog. ChatGPT public-guidance parser and reviewed fallback implemented in source; live-format/device validation and other providers pending.

@@ -154,6 +154,13 @@ namespace Vitqra
                 case VitqraChatAccount.State.RevocationUnconfirmed:key=K.RevocationUnconfirmed;break;
             }
             status.text=T(key);
+            if(state==VitqraChatAccount.State.PlanGranted&&VitqraChatAccount.CatalogState==2)
+            {
+                var models=VitqraChatAccount.Catalog;
+                string slug=ResolveModel(models);
+                var selected=Array.Find(models,model=>model.slug==slug);
+                if(selected!=null)status.text+="\n"+selected.name;
+            }
             bool ready=state!=VitqraChatAccount.State.Busy&&state!=VitqraChatAccount.State.Unsupported;
             signIn.color=signOut.color=ready?Color.white:Color.gray;
         }
