@@ -2,7 +2,7 @@
 
 **Science without barriers.**
 
-VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 through OpenXR. The existing Unity source prototype is preserved as a reference; Unity is proprietary and is not the intended engine for the final fully open-source application. Godot is the proposed replacement. No installable Quest application has been published.
+VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 through OpenXR. Unity with OpenXR remains the chosen development platform. The VITQRA source is open source under Apache-2.0; Unity and necessary headset runtime components are explicitly accepted proprietary platform exceptions. No installable Quest application has been published.
 
 ## Installation location
 
@@ -39,7 +39,7 @@ No APK or public release is available at this milestone. Clone this repository o
 | Non-sensitive note storage | Source implemented; Unity execution not verified |
 | Topic selection and editable search | Preview only; no live search |
 | Local-only AI and zero paid API policy | Preview guard implemented; no inference backend or network calls |
-| Open-source engine migration | Godot proposed; implementation and physical tests pending |
+| Unity/OpenXR development platform | Retained by author decision; compilation and physical tests pending |
 | World-space panels and controller movement | Source implemented; physical testing pending |
 | Quest passthrough and XR rig | Template setup documented; not verified |
 | Procedural avatar selection, localized tips and review confirmation | Source implemented; Unity/headset tests pending |
@@ -56,9 +56,9 @@ English (en), Spanish (es), Catalan (ca), Simplified Chinese (zh), Hindi (hi), F
 
 ## Open-source and zero-paid-API policy
 
-All VITQRA-controlled application code and required dependencies must use verified open-source licenses. Required model weights must have separately reviewed licenses, provenance and redistribution rights; availability of weights alone is not sufficient to establish open-source status. No paid API, required commercial account, cloud inference fallback or paid SDK is permitted. The paid API budget is permanently zero. The existing Unity preview now only exposes the local provider and rejects paid or non-local inference readiness. No model backend is connected yet.
+All VITQRA-owned code and independently selectable functional dependencies must use verified open-source licenses, except for Unity and the necessary XR platform tooling and runtime components explicitly accepted by the author. Required model weights must have separately reviewed licenses, provenance and redistribution rights; availability of weights alone is not sufficient to establish open-source status. No paid API, required commercial account, cloud inference fallback or paid SDK is permitted. The paid API budget is permanently zero. The existing Unity preview now only exposes the local provider and rejects paid or non-local inference readiness. No model backend is connected yet.
 
-See [Open-source policy and migration plan](docs/OPEN_SOURCE_POLICY.md). The proprietary headset operating system, firmware and vendor runtime are unavoidable platform dependencies for Meta Quest and are outside VITQRA's licensing control. Internet access for public research sources is distinct from paid inference services.
+See [Open-source and zero-paid-API policy](docs/OPEN_SOURCE_POLICY.md). The proprietary headset operating system, firmware and vendor runtime are unavoidable platform dependencies for Meta Quest and are outside VITQRA's licensing control. Internet access for public research sources is distinct from paid inference services.
 
 ## Privacy, scientific integrity and safety
 
@@ -76,7 +76,7 @@ Four main independently movable world-space panels are provided as a Unity sourc
 
 ## Build from source
 
-The following instructions reproduce the historical Unity preview only. They are not the build requirements for the planned open-source Godot client. The Godot port has not been implemented yet.
+The following instructions reproduce the current Unity preview. The Unity editor and applicable XR packages have separate license terms; verify free-tier eligibility and distribution requirements before building or releasing. No paid AI API is permitted.
 
 ### 1. Install dependencies
 

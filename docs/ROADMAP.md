@@ -1,6 +1,6 @@
 # Roadmap
 
-**Current gate:** preserve the Unity reference prototype and plan the Godot/OpenXR port before adding engine-specific voice or persistent chat features. The local-only settings guard is implemented; the Godot port and speech adapters are not. See [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md).
+**Current gate:** retain Unity/OpenXR as selected by the author; continue v0.3.3 with local speech integration, opt-in persistent chat and window resizing. The local-only settings guard is implemented; speech adapters, persistent chat and resizing are pending. No Godot migration is planned. See [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md).
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
 2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.
