@@ -58,7 +58,8 @@ public final class VitqraPdf {
         StaticLayout content=layout(body,normal);
         int line=0,pageNumber=0;
         Bounded bytes=new Bounded(MAX_PDF);
-        try(PdfDocument pdf=new PdfDocument()){
+        PdfDocument pdf=new PdfDocument();
+        try{
             while(line<content.getLineCount()){
                 if(++pageNumber>MAX_PAGES)throw new IOException("Page limit");
                 int end=line+1,top=content.getLineTop(line);
@@ -84,6 +85,8 @@ public final class VitqraPdf {
                 line=end;
             }
             pdf.writeTo(bytes);
+        }finally{
+            pdf.close();
         }
         return bytes.data.toByteArray();
     }

@@ -4,9 +4,9 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 
 ## Prepare Unity
 
-1. Install a supported Unity 6 LTS editor (prefer 6.3 LTS when available in Unity Hub) with Android Build Support, SDK, NDK and OpenJDK.
-2. Create a **Mixed Reality** template project in Unity Hub (not the desktop Universal 3D project). Use its XR Origin and configured passthrough example. Keep the template's compatible package versions; record the resolved Packages/manifest.json and packages-lock.json in your own test project. Do not replace the template rig with an ordinary camera.
-3. Copy UnityStarter/Assets/VITQRA into Assets. The source uses Unity UI (com.unity.ugui) and UnityEngine.XR input. Install Unity UI from Package Manager if absent.
+1. Install Unity 6.3 LTS with Android Build Support, SDK, NDK and OpenJDK.
+2. Stage a **Mixed Reality** project following the [Unity build preparation guide](UNITY_BUILD_PREPARATION.md). Use the template's XR Origin and passthrough example. Record the Unity version, `Packages/manifest.json` and the resolved `Packages/packages-lock.json`.
+3. Let Unity import the assets and finish script compilation. Verify Unity UI (`com.unity.ugui`) is resolved and check the Android-only import settings for the [account](CHATGPT_ACCOUNT.md) and [PDF](RESEARCH_PDF.md) Java plugins.
 4. Select Android/Meta Quest build profile. Confirm XR Plug-in Management > Android > OpenXR, Meta Quest features, controller interaction profiles and passthrough settings. Resolve validation errors and select ARM64/IL2CPP. Use the template's existing passthrough setup (AR Camera Manager on the XR camera where required). Do not enable camera image capture or request camera access for this prototype.
 5. In the template scene select the tracked Main Camera under XR Origin and choose **VITQRA > Add Spatial Workspace to Selected XR Camera**. Confirm that the serialized Tracking Space is the transform corresponding to the origin of controller tracking poses, normally the camera's Camera Offset parent. Keep the workspace root at world scale (1,1,1), outside the camera hierarchy.
 6. Save the scene and include it in the build profile. Use application identifier `com.blasllavero.vitqra` and record the application version of the milestone under test. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
@@ -48,8 +48,8 @@ See [ASSISTANT_SETUP.md](ASSISTANT_SETUP.md) for enabling the gesture adapter an
 
 - https://developers.meta.com/vr/documentation/unity/unity-xr-plugin/
 - https://developers.meta.com/vr/documentation/unity/unity-and-openxr-compatibility/
-- https://docs.unity.com/en-us/engine/6000.0/manual/xr/configuring-project-for/meta-quest-develop
-- https://docs.unity.com/en-us/engine/6000.7/manual/xr/configuring-project-for/meta-quest-develop/packages
+- https://docs.unity.com/en-us/engine/6000.3/manual/xr/configuring-project-for/meta-quest-develop
+- https://docs.unity.com/en-us/engine/6000.3/manual/xr/configuring-project-for/meta-quest-develop/packages
 
 ## Language selection
 

@@ -20,9 +20,9 @@ VITQRA is open source: everyone may use, study, modify and redistribute its own 
 
 No APK or public release is available at this milestone. Clone this repository or download its source ZIP. To run the preview, follow Build from source at the end of this README. Do not install an APK from an unverified source.
 
-### Development integration status (v0.9.0 initial)
+### Development integration status (v0.9.1 preparation)
 
-The development branch includes synthetic research, review, privacy, avatar, telepresence and geometry-recognition demonstrations. The standalone reference checks run with `python3 verification/run_offline_checks.py`. Unity import and the 35 editor suites are pending. The repository supplies source files to import into a Unity project. Real clinical intake, certification, live telepresence and real-object recognition remain disabled. See [integration and release gates](docs/INTEGRATION_AND_RELEASE_GATES.md).
+The development branch includes synthetic research, review, privacy, avatar, telepresence and geometry-recognition demonstrations. The [Unity build preparation guide](docs/UNITY_BUILD_PREPARATION.md) covers project staging and the first Unity compile check. The standalone reference checks run with `python3 verification/run_offline_checks.py`. Unity import and the 35 editor suites are pending. Real clinical intake, certification, live telepresence and real-object recognition remain disabled. See [integration and release gates](docs/INTEGRATION_AND_RELEASE_GATES.md).
 
 
 ## How to use

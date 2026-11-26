@@ -1,6 +1,8 @@
 # Roadmap
 
-**Current gate (v0.9.0 development):** import the source overlay into a Unity 6 LTS Mixed Reality project, verify compilation, and run the editor integration suites before Android and Quest 3 acceptance. The standalone synthetic reference checks can run before a Unity project is available. See [integration and release gates](INTEGRATION_AND_RELEASE_GATES.md).
+**Current gate (v0.9.1 development)**
+
+Stage a Unity 6 LTS Mixed Reality project and record its first Unity import and script compilation. See [Unity build preparation](UNITY_BUILD_PREPARATION.md) and the [integration and release gates](INTEGRATION_AND_RELEASE_GATES.md).
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
 2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.
@@ -65,3 +67,13 @@ v0.7.1 initial: local synthetic telepresence, per-channel consent, fictional bou
 v0.8.0 initial: opt-in closed synthetic geometric recognition using in-memory raster templates, explicit unknown rejection, corruption stress tests and localized editor preview. No camera, learned model, real-object recognition or clinical use. See [SYNTHETIC_OBJECT_RECOGNITION.md](SYNTHETIC_OBJECT_RECOGNITION.md).
 
 v0.9.0 initial: 35-suite editor integration runner, ten-locale synthetic evidence-chain test and release gates. Compilation, actual suite execution, full audits and device tests pending. See [INTEGRATION_AND_RELEASE_GATES.md](INTEGRATION_AND_RELEASE_GATES.md).
+
+v0.9.1 prepares the Unity project from the Mixed Reality template and adds a batch import check. Actual Unity import and compilation remain pending.
+
+v0.9.2 runs the 35 Unity Editor suites and fixes issues observed during import and integration.
+
+v0.9.3 audits security, privacy, dependencies and licenses.
+
+v0.9.4 builds the Android ARM64/IL2CPP player and runs Quest 3 acceptance.
+
+v1.0.0 is the first stable release after the release gates pass.
