@@ -11,7 +11,9 @@ namespace Vitqra
         [SerializeField] private Transform trackingSpace;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
-        private VitqraSpatialPanel research, advice, notes, configuration, assistant, grabbed;
+        private VitqraSpatialPanel research, advice, notes, configuration, assistant, subtitles, grabbed;
+        private bool settingsOpen;
+        private float subtitleUntil;
         private VitqraAvatarPreview avatar;
         private bool reviewPending, reviewCompleted;
         public bool ReviewPending => reviewPending;
@@ -43,8 +45,11 @@ namespace Vitqra
             research = AddPanel(l[7], Cyan, () => { topicIndex = (topicIndex + 1) % 5; Refresh(); });
             advice = AddPanel(T(K.Advice), Violet, ReviewAction);
             notes = AddPanel(T(K.Notes), Cyan, Refresh);
-            configuration = AddPanel(T(K.Settings), Violet, () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
+            configuration = AddPanel(T(K.Settings), Violet, OpenAvatarSettings);
+            configuration.SetSecondaryAction(T(K.ToggleResearch), () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
             assistant = AddPanel(T(K.Assistant), Violet, ChooseNextAvatar);
+            assistant.SetSecondaryAction(T(K.Close), CloseAvatarSettings);
+            subtitles = AddPanel(T(K.Subtitles), Cyan, HideSubtitle);
             assistant.ReserveAvatarSpace();
             avatar = assistant.gameObject.AddComponent<VitqraAvatarPreview>();
             avatar.SetProfile(settings.avatarProfile);
@@ -68,6 +73,46 @@ namespace Vitqra
         private string T(K key) => VitqraAssistantStrings.Get(settings.language, key);
         private string Tip => T((K)((int)K.Tip1 + adviceIndex));
 
+        private void OpenAvatarSettings()
+        {
+            if (settingsOpen) return;
+            settingsOpen = true;
+            assistant.transform.SetPositionAndRotation(configuration.transform.position, configuration.transform.rotation);
+            configuration.gameObject.SetActive(false);
+            assistant.gameObject.SetActive(true);
+        }
+
+        private void CloseAvatarSettings()
+        {
+            settingsOpen = false;
+            if (grabbed == assistant) grabbed = null;
+            assistant.gameObject.SetActive(false);
+            configuration.gameObject.SetActive(true);
+        }
+
+        // Main-thread entry point for future speech playback; use actual playback duration
+        // once available. The preview uses a reading-time estimate, not audio timing.
+        public void ShowSubtitle(string message, float seconds)
+        {
+            if (!initialized || subtitles == null || string.IsNullOrWhiteSpace(message)) return;
+            subtitles.SetContent(message, T(K.Close));
+            subtitleUntil = Time.unscaledTime + Mathf.Max(0.5f, seconds);
+            subtitles.gameObject.SetActive(true);
+        }
+
+        public void HideSubtitle()
+        {
+            subtitleUntil = 0;
+            if (grabbed == subtitles) grabbed = null;
+            if (subtitles != null) subtitles.gameObject.SetActive(false);
+        }
+
+        private void PresentTip()
+        {
+            ShowSubtitle(Tip, Mathf.Clamp(4f + Tip.Length * 0.10f, 8f, 18f));
+            AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
+        }
+
         private void ChooseNextAvatar()
         {
             settings.avatarProfile = settings.avatarProfile >= 0 && settings.avatarProfile < 3 ? settings.avatarProfile + 1 : 0;
@@ -84,11 +129,12 @@ namespace Vitqra
                 reviewCompleted = false;
                 adviceIndex = (adviceIndex + 1) % 3;
                 Refresh();
-                AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
+                PresentTip();
                 return;
             }
             reviewPending = true;
             Refresh();
+            PresentTip();
         }
 
         public void ConfirmReview()
@@ -108,7 +154,7 @@ namespace Vitqra
             string note = PlayerPrefs.GetString("vitqra.preview.note", "");
             if (note.Length > 180) note = note.Substring(0,180) + "...";
             notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
-            configuration.SetContent(settings.provider + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.ToggleResearch));
+            configuration.SetContent(settings.provider + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.AvatarSettings));
             int profile = settings.avatarProfile;
             string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
             assistant.SetContent(profileName + "\n" + T(K.NoSpeech), T(K.NextAvatar));
@@ -129,7 +175,11 @@ namespace Vitqra
             PlacePanel(notes, center, right, -columnOffset, lowerRow);
             PlacePanel(advice, center, right, columnOffset, upperRow);
             PlacePanel(configuration, center, right, columnOffset, lowerRow);
-            PlacePanel(assistant, center, right, columnOffset, 0.66f);
+            PlacePanel(assistant, center, right, columnOffset, lowerRow);
+            PlacePanel(subtitles, center, right, columnOffset, 0.66f);
+            settingsOpen = false;
+            assistant.gameObject.SetActive(false);
+            subtitles.gameObject.SetActive(subtitleUntil > Time.unscaledTime);
             initialized = true;
         }
 
@@ -163,8 +213,10 @@ namespace Vitqra
                 var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
                 if (!head.isValid || !head.TryGetFeatureValue(CommonUsages.isTracked, out bool tracked) || !tracked) return;
                 PlacePanels();
-                AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
+                PresentTip();
             }
+
+            if (subtitles.gameObject.activeSelf && Time.unscaledTime >= subtitleUntil) HideSubtitle();
 
             var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             if (!ReadPose(device, out Vector3 localPosition, out Quaternion localRotation))
@@ -198,10 +250,10 @@ namespace Vitqra
             if (primary && !previousPrimary) { grabbed = null; PlacePanels(); }
             VitqraSpatialPanel closest = null;
             float nearest = float.PositiveInfinity;
-            bool onAction = false;
+            int onAction = 0;
             foreach (var panel in panels)
             {
-                if (panel.Intersect(ray, out float distance, out bool region) && distance < nearest)
+                if (panel.Intersect(ray, out float distance, out int region) && distance < nearest)
                 {
                     closest = panel; nearest = distance; onAction = region;
                 }
@@ -220,7 +272,7 @@ namespace Vitqra
                     grabbed.transform.position = headCamera.transform.position + delta.normalized * Mathf.Clamp(delta.magnitude, .75f, 3f);
                 FaceUser(grabbed.transform);
             }
-            else if (!grip && trigger && !previousTrigger && closest != null && onAction) closest.InvokeAction();
+            else if (!grip && trigger && !previousTrigger && closest != null && onAction != 0) closest.InvokeAction(onAction);
             foreach (var panel in panels) panel.Highlight(panel == grabbed || (grabbed == null && panel == closest));
             previousGrip = grip; previousTrigger = trigger; previousPrimary = primary;
         }
