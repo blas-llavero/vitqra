@@ -30,3 +30,5 @@ Official references:
 - https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng (Articles 19, 20, 52, 61, 62 and Annex XIV)
 - https://www.aemps.gob.es/productos-sanitarios/productos-sanitarios/comercializacion-de-productos-sanitarios-en-espana/que-requisitos-deben-cumplir-los-productos-sanitarios/
 - https://www.aemps.gob.es/productos-sanitarios/investigacionclinica-productossanitarios/instrucciones-de-la-aemps-para-la-realizacion-de-investigaciones-clinicas-con-productos-sanitarios-en-espana/
+
+The v0.6.0 fictional community policy explicitly separates reviewer draft submission from approval; real identity, reviewer independence, signatures and certification remain unimplemented. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).

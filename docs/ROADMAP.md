@@ -43,3 +43,5 @@ v0.5.6a: unsigned independent-review request bound to report and reproducibility
 v0.5.7–v0.5.8: synthetic timeline and retrospective experiment integrated into development at fb9171a; Unity tests pending. See [SYNTHETIC_LONGITUDINAL_AND_RETROSPECTIVE.md](SYNTHETIC_LONGITUDINAL_AND_RETROSPECTIVE.md).
 
 v0.5.9 initial: closed synthetic multimodal proxy comparison, paired complete-case evaluation, coverage and conditional Wilson intervals, editor-only preview. Disease-specific data access, feature extraction, clinical validation and runtime XR remain pending. See [SYNTHETIC_MULTIMODAL.md](SYNTHETIC_MULTIMODAL.md).
+
+v0.6.0 initial: closed fictional role/resource/purpose/action authorization policy, expiry and revocation fixtures, editor test console and boundary/sample-day checks. No live authentication, server, real clinical data or collaboration. See [COMMUNITY_ACCESS_POLICY.md](COMMUNITY_ACCESS_POLICY.md).
