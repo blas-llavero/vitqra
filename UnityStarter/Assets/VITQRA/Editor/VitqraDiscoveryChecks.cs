@@ -10,9 +10,18 @@ namespace Vitqra
         public static void Run()
         {
             // Synthetic parser fixtures only; never shown as actual opportunities.
-            string json="{\"count\":3,\"results\":[{\"document_number\":\"fixture-1\",\"title\":\"Synthetic bioinformatics challenge\",\"type\":\"Notice\",\"publication_date\":\"2025-01-01\",\"html_url\":\"https://www.federalregister.gov/documents/fixture\"},{\"document_number\":\"fixture-2\",\"title\":\"Synthetic challenge\",\"type\":\"Notice\",\"publication_date\":\"2025-01-01\",\"html_url\":\"https://example.invalid/documents/fixture\"},{\"document_number\":\"fixture-3\",\"title\":\"Synthetic unrelated rule\",\"type\":\"Notice\",\"publication_date\":\"2025-01-01\",\"html_url\":\"https://www.federalregister.gov/documents/fixture\"}]}";
+            const string pdfUrl = "https://www.govinfo.gov/content/pkg/FR-2025-01-01/pdf/2025-00001.pdf";
+            string json="{\"count\":3,\"results\":["+
+                "{\"document_number\":\"fixture-1\",\"title\":\"Synthetic bioinformatics challenge\",\"type\":\"Notice\","+
+                "\"publication_date\":\"2025-01-01\",\"html_url\":\"https://www.federalregister.gov/documents/fixture\",\"pdf_url\":\""+pdfUrl+"\"},"+
+                "{\"document_number\":\"fixture-2\",\"title\":\"Synthetic challenge\",\"type\":\"Notice\","+
+                "\"publication_date\":\"2025-01-01\",\"html_url\":\"https://example.invalid/documents/fixture\"},"+
+                "{\"document_number\":\"fixture-3\",\"title\":\"Synthetic unrelated rule\",\"type\":\"Notice\","+
+                "\"publication_date\":\"2025-01-01\",\"html_url\":\"https://www.federalregister.gov/documents/fixture\"}]}";
             var batch=VitqraDiscovery.Parse(json);
             Check(batch.success&&batch.items.Count==1,"Reject foreign URLs and unrelated titles");
+            Check(batch.items[0].pdf_url==pdfUrl,"Official PDF metadata retained");
+            Check(VitqraDiscovery.BuildUrl("challenge").Contains("&fields%5B%5D=pdf_url&"),"Request official PDF metadata");
             batch.items.Add(batch.items[0]);
             Check(VitqraDiscovery.Filter(batch.items,"BIOINFORMATICS").Count==1,"Keyword and deduplication");
             Check(VitqraDiscovery.Filter(batch.items,"not-present").Count==0,"Empty results");

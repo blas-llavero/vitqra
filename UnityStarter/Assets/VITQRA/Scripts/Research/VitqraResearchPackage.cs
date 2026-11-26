@@ -195,7 +195,7 @@ namespace Vitqra
                             using(var archive=new ZipArchive(stream,ZipArchiveMode.Create))
                                 foreach(var f in files)
                                 {
-                                    var entry=archive.CreateEntry(f.Key,CompressionLevel.Optimal);
+                                    var entry=archive.CreateEntry(f.Key,System.IO.Compression.CompressionLevel.Optimal);
                                     using(var output=entry.Open())output.Write(f.Value,0,f.Value.Length);
                                 }
                             long size=files.Sum(f=>(long)f.Value.Length)+new FileInfo(zip).Length;

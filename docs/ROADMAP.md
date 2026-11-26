@@ -1,6 +1,6 @@
 # Roadmap
 
-**Current gate:** retain Unity/OpenXR as selected by the author; continue v0.3.3 with local speech integration, opt-in persistent chat and window resizing. The local-only settings guard, opt-in single-conversation persistence and optional microphone/transcription bridge are implemented in source. Sherpa-ONNX STT/TTS source adapters are added in v0.3.4; native compilation, model provisioning, device validation, and multiple conversations remain pending. Cross-session window layout persistence is added in v0.3.6; editor and device verification remain pending. Independent resizing source is added in v0.3.5; editor and headset tests remain pending. No Godot migration is planned. See [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md).
+**Current gate (v0.9.0 development):** import the source overlay into a Unity 6 LTS Mixed Reality project, verify compilation, and run the editor integration suites before Android and Quest 3 acceptance. The standalone synthetic reference checks can run before a Unity project is available. See [integration and release gates](INTEGRATION_AND_RELEASE_GATES.md).
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
 2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.

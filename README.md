@@ -22,7 +22,7 @@ No APK or public release is available at this milestone. Clone this repository o
 
 ### Development integration status (v0.9.0 initial)
 
-The development branch includes synthetic research, review, privacy, avatar, telepresence and geometry-recognition demonstrations. The integration runner and evidence-chain checks are prepared, but no Unity suite has been executed in the development environment. This is still a source overlay, not a complete Unity project or installable APK. See [integration and release gates](docs/INTEGRATION_AND_RELEASE_GATES.md). Real clinical intake, certification, live telepresence and real-object recognition remain disabled.
+The development branch includes synthetic research, review, privacy, avatar, telepresence and geometry-recognition demonstrations. The standalone reference checks run with `python3 verification/run_offline_checks.py`. Unity import and the 35 editor suites are pending. The repository supplies source files to import into a Unity project. Real clinical intake, certification, live telepresence and real-object recognition remain disabled. See [integration and release gates](docs/INTEGRATION_AND_RELEASE_GATES.md).
 
 
 ## How to use
@@ -30,8 +30,8 @@ The development branch includes synthetic research, review, privacy, avatar, tel
 1. Open the generated preview scene and press Play in Unity.
 2. Review automatic research and translation settings (enabled by default).
 3. The interface automatically uses the supported device language; otherwise it uses English. Restart the app after changing the device language.
-4. The provider is restricted to local inference. No external AI requests are implemented or made. A reviewed local engine and model must be configured before research can start.
-5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. An optional authorized self-hosted SearXNG instance can discover web candidates automatically. Choose Manual or Automatic research mode. Select a result to open the integrated browser when enabled, or its text reader fallback; an explicit external browser action opens the original page. The local research engine is not connected yet. The older desktop preview remains offline.
+4. In XR, Local AI is the default and requires a configured, reviewed engine and model. The development branch also includes optional adapters for a [user-controlled Ollama server](docs/OLLAMA.md) and [ChatGPT educational drafts](docs/CHATGPT_RESEARCH.md) with explicit session consent. Unity and live provider verification are pending.
+5. In XR, select a scientific area or enter keywords to filter the automatically populated numbered directory. An optional authorized self-hosted SearXNG instance can discover web candidates automatically. Choose Manual or Automatic research mode. Select a result to open the integrated browser when enabled, or its text reader fallback. Use the external browser action to open the original page. General scientific execution remains gated. The desktop preview runs offline.
 6. Save or retrieve a sample note. Use only non-sensitive notes: local preview storage is not encrypted.
 7. Stop Play mode when finished. Save settings explicitly; sample notes persist locally.
 
@@ -43,7 +43,7 @@ The development branch includes synthetic research, review, privacy, avatar, tel
 | Ten-language core preview UI | Source implemented; translations need review |
 | Non-sensitive note storage | Source implemented; Unity execution not verified |
 | XR numbered challenge directory, area/keyword filters and resolution mode | Source implemented; live API and device tests pending |
-| Local-only AI and zero paid API policy | Preview guard implemented; no inference backend or network calls |
+| AI provider prototypes | Optional llama.cpp, user-controlled Ollama and scoped ChatGPT source adapters. Unity and live provider verification pending |
 | Unity/OpenXR development platform | Retained by author decision; compilation and physical tests pending |
 | World-space panels and controller movement | Source implemented; physical testing pending |
 | Independent proportional window resizing | Source implemented; editor smoke checks and headset tests pending |
@@ -66,7 +66,7 @@ English (en), Spanish (es), Catalan (ca), Simplified Chinese (zh), Hindi (hi), F
 
 ## Open-source and zero-paid-API policy
 
-All VITQRA-owned code and independently selectable functional dependencies must use verified open-source licenses, except for Unity and the necessary XR platform tooling and runtime components explicitly accepted by the author. Required model weights must have separately reviewed licenses, provenance and redistribution rights; availability of weights alone is not sufficient to establish open-source status. No paid API, required commercial account, cloud inference fallback or paid SDK is permitted. The paid API budget is permanently zero. The existing Unity preview now only exposes the local provider and rejects paid or non-local inference readiness. No model backend is connected yet.
+All VITQRA-owned code and independently selectable functional dependencies must use verified open-source licenses, except for Unity and the necessary XR platform tooling and runtime components explicitly accepted by the author. Required model weights must have separately reviewed licenses, provenance and redistribution rights. Local AI is the default. The optional ChatGPT plan prototype covers predefined public educational tasks and requires explicit consent for each session. Paid API usage and fallback are prohibited.
 
 See [Open-source and zero-paid-API policy](docs/OPEN_SOURCE_POLICY.md). The proprietary headset operating system, firmware and vendor runtime are unavoidable platform dependencies for Meta Quest and are outside VITQRA's licensing control. Internet access for public research sources is distinct from paid inference services.
 

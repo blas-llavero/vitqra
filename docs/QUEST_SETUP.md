@@ -9,7 +9,7 @@ This source overlay adds four main world-space Unity UI panels, an on-demand ava
 3. Copy UnityStarter/Assets/VITQRA into Assets. The source uses Unity UI (com.unity.ugui) and UnityEngine.XR input. Install Unity UI from Package Manager if absent.
 4. Select Android/Meta Quest build profile. Confirm XR Plug-in Management > Android > OpenXR, Meta Quest features, controller interaction profiles and passthrough settings. Resolve validation errors and select ARM64/IL2CPP. Use the template's existing passthrough setup (AR Camera Manager on the XR camera where required). Do not enable camera image capture or request camera access for this prototype.
 5. In the template scene select the tracked Main Camera under XR Origin and choose **VITQRA > Add Spatial Workspace to Selected XR Camera**. Confirm that the serialized Tracking Space is the transform corresponding to the origin of controller tracking poses, normally the camera's Camera Offset parent. Keep the workspace root at world scale (1,1,1), outside the camera hierarchy.
-6. Save the scene; include it in the build profile. Use application identifier com.blasllavero.vitqra and version 0.4.2. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
+6. Save the scene and include it in the build profile. Use application identifier `com.blasllavero.vitqra` and record the application version of the milestone under test. Build and Run on a developer-mode Quest 3. Do not publish a build until physical tests pass.
 
 ## Initial panel layout
 

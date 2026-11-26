@@ -29,7 +29,7 @@ namespace Vitqra
         public event System.Action<string, string> AdviceChanged;
         private Vector3 grabOffset;
         private bool previousGrip, previousTrigger, previousPrimary;
-        private ulong activeDevice;
+        private InputDevice activeDevice;
         private bool initialized, hasController;
         private Vector3 layoutOrigin;
         private Quaternion layoutHeading;
@@ -381,9 +381,9 @@ namespace Vitqra
             device.TryGetFeatureValue(CommonUsages.gripButton, out bool grip);
             device.TryGetFeatureValue(CommonUsages.triggerButton, out bool trigger);
             device.TryGetFeatureValue(CommonUsages.primaryButton, out bool primary);
-            if (!hasController || device.deviceId != activeDevice)
+            if (!hasController || !device.Equals(activeDevice))
             {
-                activeDevice = device.deviceId;
+                activeDevice = device;
                 research.CancelGraphicPointer();
                 ReleaseGrab();
                 foreach(var panel in panels) panel.ClearResizeHover();

@@ -6,6 +6,10 @@ Source preparation only, not a compiled release, complete security audit or clin
 
 The new test builds an invented educational sample in a unique OS temporary directory and cleans it in finally. It invokes the existing evidence review, sample solver, report, package content, reproducibility and unsigned review request APIs. It checks all ten locales, Arabic HTML direction, absence of an AI draft, stable identity, clinical release blocked, edited report, changed checkpoint and changed source. No download, real data, AI or signature. It tests package content, not Android PDF rendering or ZIP generation. The synthetic clinical modules remain isolated; no real patient-to-research pipeline is enabled.
 
+## Run the offline reference checks
+
+From the repository root, run `python3 verification/run_offline_checks.py` with Python 3, Node.js and Python's `cryptography` package (version 42 or newer, required by the digital trust check). Once the dependencies are installed, the command runs offline, compares each standalone synthetic script's JSON output with its checked-in `results.json`, and returns a nonzero exit code on failure. These scripts reproduce synthetic reference results independently of the C# implementation. Unity import, the 35 editor suites, Android and Quest checks require the corresponding environment below.
+
 ## Run in a disposable local test project
 
 1. Create a Unity 6 LTS Mixed Reality template project following QUEST_SETUP.md. Record exact Unity version, resolved Packages/manifest.json and packages-lock.json. This repository is a source overlay, not a complete Unity project; no generated scene, ProjectSettings or resolved package lock is present.

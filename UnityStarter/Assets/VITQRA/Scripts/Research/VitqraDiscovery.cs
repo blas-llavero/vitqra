@@ -23,11 +23,11 @@ namespace Vitqra
         };
         [Serializable] public sealed class Notice
         {
-            public string document_number,title,abstract_text,html_url,publication_date,type;
+            public string document_number,title,abstract_text,html_url,pdf_url,publication_date,type;
         }
         [Serializable] private sealed class RawNotice
         {
-            public string document_number,title,html_url,publication_date,type;
+            public string document_number,title,html_url,pdf_url,publication_date,type;
             // The API's abstract field is not used; preserve the original title only.
         }
         [Serializable] private sealed class Response { public RawNotice[] results; public int count; }
@@ -38,7 +38,7 @@ namespace Vitqra
             return Endpoint+"?per_page="+PageSize+"&order=newest&conditions%5Bterm%5D="+
                 Uri.EscapeDataString(fixedTerm)+"&conditions%5Btype%5D%5B%5D=NOTICE"+
                 "&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=html_url"+
-                "&fields%5B%5D=publication_date&fields%5B%5D=type";
+                "&fields%5B%5D=pdf_url&fields%5B%5D=publication_date&fields%5B%5D=type";
         }
         public static bool ValidSource(string url)
         {
