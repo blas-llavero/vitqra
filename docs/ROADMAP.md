@@ -1,10 +1,10 @@
 # Roadmap
 
-**Current gate:** retain Unity/OpenXR as selected by the author; continue v0.3.3 with local speech integration, opt-in persistent chat and window resizing. The local-only settings guard is implemented; speech adapters, persistent chat and resizing are pending. No Godot migration is planned. See [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md).
+**Current gate:** retain Unity/OpenXR as selected by the author; continue v0.3.3 with local speech integration, opt-in persistent chat and window resizing. The local-only settings guard, opt-in single-conversation persistence and optional microphone/transcription bridge are implemented in source. Native speech engines, TTS, multiple conversations and resizing are pending. No Godot migration is planned. See [OPEN_SOURCE_POLICY.md](OPEN_SOURCE_POLICY.md).
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
 2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.
-3. v0.3.2: larger conversation panel, in-session history, text composer, keyboard and future voice hooks; v0.3.1: on-demand avatar settings; v0.3.0: four selectable procedural avatar profiles, localized advice and optional XR Hands OK gesture source. Unity/device tests, international font/RTL validation, natural local speech, dictation and reviewed avatar models remain pending.
+3. v0.3.3: optional local chat persistence and speech lifecycle bridge; v0.3.2: larger conversation panel, in-session history, text composer, keyboard and future voice hooks; v0.3.1: on-demand avatar settings; v0.3.0: four selectable procedural avatar profiles, localized advice and optional XR Hands OK gesture source. Unity/device tests, international font/RTL validation, natural local speech, dictation and reviewed avatar models remain pending.
 4. Challenge and hackathon source adapters, browser and document import with provenance.
 5. Local AI adapter, mandatory zero-paid-API enforcement, job checkpointing and research evidence review; no commercial providers.
 6. Separate patient-service prototype only after privacy, security and clinical governance review.

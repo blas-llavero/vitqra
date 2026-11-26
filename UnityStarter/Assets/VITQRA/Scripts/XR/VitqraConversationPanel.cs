@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using C = Vitqra.VitqraChatStrings.Key;
@@ -14,12 +15,19 @@ namespace Vitqra
         private const int Rows = 4;
         private const int MaxCharacters = 1000;
         private const int MaxMessages = 200;
-        private const int ChunkElements = 90;
+        private const int ChunkElements = 72;
 
+        [Serializable]
         private sealed class Message
         {
             public bool user, sample;
             public string content;
+        }
+        [Serializable]
+        private sealed class Archive
+        {
+            public int version = 1;
+            public List<Message> messages = new List<Message>();
         }
         private sealed class Fragment
         {
@@ -33,7 +41,14 @@ namespace Vitqra
         private readonly Text[] bubbles = new Text[Rows];
         private readonly Image[] bubbleBackgrounds = new Image[Rows];
         private Image background;
-        private Text draftLabel, status, pageLabel;
+        private Text draftLabel, status, pageLabel, storageLabel, saveButton, deleteButton, voiceButton;
+        private bool persistHistory, deleteArmed;
+        private string archivePath;
+        private const string HistoryPreference = "vitqra.chat.persist.v1";
+        private const int MaxArchiveBytes = 8 * 1024 * 1024;
+        private const int MaxMessageLength = 8000;
+        public int MessageCount => messages.Count;
+        public event Action VoiceCanceled;
         private string language, draft = "", editBuffer = "";
         private TouchScreenKeyboard keyboard;
         private bool desktopEditing;
@@ -58,11 +73,14 @@ namespace Vitqra
             Label("Heading",rect,new Vector2(-100,402),new Vector2(610,52),T(C.Title),34,Color.cyan);
             AddButton(rect,310,402,200,52,T(C.Minimize),() => minimize?.Invoke());
             Label("Privacy",rect,new Vector2(0,350),new Vector2(810,40),T(C.Privacy),22,Color.white);
+            storageLabel=Label("Storage mode",rect,new Vector2(0,312),new Vector2(810,34),"",19,Color.white);
+            saveButton=AddButton(rect,-205,275,390,36,T(C.SaveLocal),TogglePersistence);
+            deleteButton=AddButton(rect,205,275,390,36,T(C.DeleteHistory),DeleteHistory);
             for (int i=0;i<Rows;i++)
             {
-                float y=274-i*126;
-                bubbleBackgrounds[i]=Box("Bubble "+i,rect,new Vector2(0,y),new Vector2(810,118),new Color(.08f,.15f,.22f,1));
-                bubbles[i]=Label("Message "+i,rect,new Vector2(0,y),new Vector2(780,110),"",23,Color.white);
+                float y=196-i*103;
+                bubbleBackgrounds[i]=Box("Bubble "+i,rect,new Vector2(0,y),new Vector2(810,97),new Color(.08f,.15f,.22f,1));
+                bubbles[i]=Label("Message "+i,rect,new Vector2(0,y),new Vector2(780,92),"",23,Color.white);
                 bubbles[i].alignment=TextAnchor.MiddleLeft;
             }
             AddButton(rect,-280,-174,240,48,T(C.Older),()=>{first=Mathf.Max(0,first-Rows);RenderHistory();});
@@ -75,17 +93,20 @@ namespace Vitqra
             targets.Add(new Rect(-.405f,-.352f,.81f,.088f));
             actions.Add(EditDraft);
             AddButton(rect,-270,-405,250,58,T(C.Write),EditDraft);
-            AddButton(rect,0,-405,250,58,T(C.Voice),RequestVoice);
+            voiceButton=AddButton(rect,0,-405,250,58,T(C.Voice),RequestVoice);
             AddButton(rect,270,-405,250,58,T(C.Send),Send);
+            LoadHistory();
+            UpdateStorageLabels();
             RenderHistory();
         }
 
-        private void AddButton(RectTransform parent,float x,float y,float width,float height,string title,Action callback)
+        private Text AddButton(RectTransform parent,float x,float y,float width,float height,string title,Action callback)
         {
             Box(title,parent,new Vector2(x,y),new Vector2(width,height),new Color(.10f,.27f,.31f,1));
-            Label(title+" text",parent,new Vector2(x,y),new Vector2(width-10,height-6),title,23,Color.white);
+            var label=Label(title+" text",parent,new Vector2(x,y),new Vector2(width-10,height-6),title,23,Color.white);
             targets.Add(new Rect((x-width*.5f)*.001f,(y-height*.5f)*.001f,width*.001f,height*.001f));
             actions.Add(callback);
+            return label;
         }
 
         public override void Highlight(bool value)
@@ -115,12 +136,137 @@ namespace Vitqra
         private void AddMessage(bool user,string content,bool sample=false)
         {
             if(string.IsNullOrWhiteSpace(content)) return;
+            if(content.Length>MaxMessageLength)
+            {
+                int limit=MaxMessageLength;
+                if(char.IsHighSurrogate(content[limit-1])) limit--;
+                content=content.Substring(0,limit)+"…";
+            }
             messages.Add(new Message {user=user,sample=sample,content=content});
             if(messages.Count>MaxMessages) messages.RemoveAt(0);
             RebuildFragments();
             first=MaxFirst;
             RenderHistory();
+            if(persistHistory) SaveHistory();
         }
+
+        private void LoadHistory()
+        {
+            archivePath=Path.Combine(Application.persistentDataPath,"vitqra-chat-v1.json");
+            persistHistory=PlayerPrefs.GetInt(HistoryPreference,0)==1;
+            if(!persistHistory) return;
+            try
+            {
+                if(!File.Exists(archivePath)) return;
+                if(new FileInfo(archivePath).Length>MaxArchiveBytes) throw new IOException();
+                var archive=JsonUtility.FromJson<Archive>(File.ReadAllText(archivePath));
+                if(archive==null||archive.version!=1||archive.messages==null) throw new IOException();
+                int start=Math.Max(0,archive.messages.Count-MaxMessages);
+                for(int i=start;i<archive.messages.Count;i++)
+                {
+                    var m=archive.messages[i];
+                    if(m!=null&&!string.IsNullOrWhiteSpace(m.content)&&m.content.Length<=MaxMessageLength+1) messages.Add(m);
+                }
+                RebuildFragments();
+                first=MaxFirst;
+            }
+            catch(Exception)
+            {
+                persistHistory=false;
+                PlayerPrefs.SetInt(HistoryPreference,0);
+                PlayerPrefs.Save();
+                status.text=T(C.StorageError);
+            }
+        }
+
+        private bool SaveHistory()
+        {
+            string temporary=archivePath+".tmp";
+            try
+            {
+                var json=JsonUtility.ToJson(new Archive {messages=messages});
+                if(System.Text.Encoding.UTF8.GetByteCount(json)>MaxArchiveBytes) throw new IOException();
+                File.WriteAllText(temporary,json);
+                if(File.Exists(archivePath)) File.Replace(temporary,archivePath,null);
+                else File.Move(temporary,archivePath);
+                return true;
+            }
+            catch(Exception)
+            {
+                try { File.Delete(temporary); } catch(Exception) {}
+                status.text=T(C.StorageError);
+                return false;
+            }
+        }
+
+        private bool RemoveArchive()
+        {
+            try
+            {
+                File.Delete(archivePath);
+                File.Delete(archivePath+".tmp");
+                return true;
+            }
+            catch(Exception)
+            {
+                status.text=T(C.StorageError);
+                return false;
+            }
+        }
+
+        private void UpdateStorageLabels()
+        {
+            storageLabel.text=T(persistHistory?C.LocalHistory:C.SessionOnly);
+            saveButton.text=T(persistHistory?C.StopSaving:C.SaveLocal);
+            deleteButton.text=T(deleteArmed?C.ConfirmDelete:C.DeleteHistory);
+        }
+
+        private void TogglePersistence()
+        {
+            deleteArmed=false;
+            if(persistHistory)
+            {
+                if(!RemoveArchive()){UpdateStorageLabels();return;}
+                persistHistory=false;
+            }
+            else
+            {
+                // Never silently overwrite an archive left behind by a failed read or deletion.
+                if(File.Exists(archivePath)||File.Exists(archivePath+".tmp"))
+                {status.text=T(C.DeleteSavedFirst);UpdateStorageLabels();return;}
+                if(!SaveHistory()){UpdateStorageLabels();return;}
+                persistHistory=true;
+            }
+            PlayerPrefs.SetInt(HistoryPreference,persistHistory?1:0);
+            PlayerPrefs.Save();
+            status.text="";
+            UpdateStorageLabels();
+        }
+
+        private void DeleteHistory()
+        {
+            if(!deleteArmed){deleteArmed=true;UpdateStorageLabels();return;}
+            deleteArmed=false;
+            if(RemoveArchive())
+            {
+                messages.Clear();
+                fragments.Clear();
+                first=0;
+                persistHistory=false;
+                PlayerPrefs.SetInt(HistoryPreference,0);
+                PlayerPrefs.Save();
+                RenderHistory();
+                status.text="";
+            }
+            UpdateStorageLabels();
+        }
+
+        public void SetVoiceState(bool recording,bool processing=false,bool failed=false)
+        {
+            voiceButton.text=T(recording?C.StopRecording:C.Voice);
+            status.text=failed?T(C.VoiceFailed):recording?T(C.Recording):processing?T(C.VoiceProcessing):"";
+        }
+
         private int MaxFirst => Mathf.Max(0,fragments.Count-Rows);
         private void RebuildFragments()
         {
@@ -226,7 +372,7 @@ namespace Vitqra
             string message=draft.Trim();
             AddMessage(true,message);
             SetDraft("");
-            if(MessageSubmitted==null){status.text=T(C.NoAi);return;}
+            if(MessageSubmitted==null){status.text=T(C.NotSent);return;}
             status.text="";
             MessageSubmitted.Invoke(message);
         }
@@ -235,6 +381,9 @@ namespace Vitqra
         {
             if(keyboard!=null){keyboard.active=false;keyboard=null;}
             desktopEditing=false;
+            deleteArmed=false;
+            if(deleteButton!=null) UpdateStorageLabels();
+            VoiceCanceled?.Invoke();
         }
     }
 }

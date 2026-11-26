@@ -55,6 +55,9 @@ namespace Vitqra
             conversation = chatObject.AddComponent<VitqraConversationPanel>();
             conversation.InitializeChat(settings.language, MinimizeConversation);
             panels.Add(conversation);
+            var speech = GetComponent<VitqraLocalVoice>();
+            if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
+            speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));
             assistant.ReserveAvatarSpace();
             avatar = assistant.gameObject.AddComponent<VitqraAvatarPreview>();
             avatar.SetProfile(settings.avatarProfile);
@@ -231,7 +234,7 @@ namespace Vitqra
                 var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
                 if (!head.isValid || !head.TryGetFeatureValue(CommonUsages.isTracked, out bool tracked) || !tracked) return;
                 PlacePanels();
-                PresentTip();
+                if(conversation.MessageCount==0) PresentTip();
             }
 
             var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
