@@ -25,3 +25,5 @@ Startup selection requirement: prefer current official research rankings interse
 v0.5.3c.1 development: bounded two-pass ChatGPT educational drafts in the automatic queue, explicit consent, common usage cap and provider-specific local reports. General external research, live validation and conversation integration pending.
 
 v0.5.3d development: Ollama private HTTPS catalog refresh, reviewed digest priority, provider settings and bounded educational drafts; live tests, dynamic capability ranking and general research pending. See [OLLAMA.md](OLLAMA.md).
+
+v0.5.4 initial: measured naive/KMP motif comparison, deterministic synthetic suite and verified local benchmark report extension. General iterative AI optimization and independent benchmarks remain pending. See [ALGORITHM_OPTIMIZATION.md](ALGORITHM_OPTIMIZATION.md).

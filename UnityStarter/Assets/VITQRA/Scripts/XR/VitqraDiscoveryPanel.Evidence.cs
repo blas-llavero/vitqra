@@ -136,6 +136,8 @@ namespace Vitqra
                 if(item.educational&&VitqraSampleSolver.Supports(item.id)&&review.state==VitqraEvidenceReview.State.DocumentChecksPassed)
                 {
                     var check=VitqraSampleSolver.Run(EvidenceRoot,ResultRoot,item);
+                    if(check==VitqraSampleSolver.State.Checked&&item.id==VitqraMotifBenchmark.ChallengeId)
+                        VitqraMotifBenchmark.Save(EvidenceRoot,ResultRoot,item);
                     state=check==VitqraSampleSolver.State.Checked?D.SampleChecked:
                         check==VitqraSampleSolver.State.Mismatch?D.SampleMismatch:D.SamplePending;
                 }

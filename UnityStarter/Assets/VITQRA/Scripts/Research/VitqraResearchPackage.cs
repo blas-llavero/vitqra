@@ -60,6 +60,8 @@ namespace Vitqra
                 if(VitqraResearchReport.Load(evidence,results,reports,item,language)==null)return null;
                 var report=VitqraResearchReport.Build(evidence,results,item,language);
                 if(report==null)return null;
+                string benchmark=VitqraMotifBenchmark.Load(evidence,results,item);
+                if(benchmark!=null)report.sections.Add(new VitqraResearchReport.Section{heading=T(language,D.BenchmarkHeading),body=T(language,D.BenchmarkScope)+"\n"+benchmark});
                 var draft=VitqraResearchDraft.Load(evidence,drafts,item,language);
                 string warning=T(language,D.DraftWarning);
                 if(draft!=null)

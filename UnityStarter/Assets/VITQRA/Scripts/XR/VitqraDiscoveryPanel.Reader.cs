@@ -108,6 +108,8 @@ namespace Vitqra
         {
             string report=VitqraResearchReport.Load(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
             if(report==null)return null;
+            string benchmark=VitqraMotifBenchmark.Load(EvidenceRoot,ResultRoot,item);
+            if(benchmark!=null)report+="\n\n"+T(D.BenchmarkHeading)+"\n"+T(D.BenchmarkScope)+"\n"+benchmark;
             var draft=VitqraResearchDraft.Load(EvidenceRoot,DraftRoot,item,locale);
             if(draft==null)return report;
             // Keep the reviewed report distinct from unvalidated AI-generated text.
