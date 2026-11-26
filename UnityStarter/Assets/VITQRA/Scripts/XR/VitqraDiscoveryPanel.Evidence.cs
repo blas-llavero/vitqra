@@ -35,13 +35,14 @@ namespace Vitqra
             try{return await VitqraResearchPackage.Save(PackageRoot,VitqraResearchPackage.Build(EvidenceRoot,ResultRoot,ReportRoot,DraftRoot,item,locale),token.Token);}
             finally{if(ReferenceEquals(packageCancel,token))packageCancel=null;token.Dispose();}
         }
-        private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA",localResearchSelected?"ResearchDrafts":"ChatGptResearchDrafts");
+        private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA",localResearchSelected?"ResearchDrafts":ollamaResearchSelected?"OllamaResearchDrafts":"ChatGptResearchDrafts");
         private bool EligibleForProvider(VitqraChallengeDirectory.Item item)=>VitqraEvidence.Eligible(item)&&(localResearchSelected||VitqraResearchDraft.SupportsExternal(item));
-        private bool localResearchSelected=true;
-        public void ConfigureResearchAi(VitqraLocalAi ai,bool localSelected=true)
+        private bool localResearchSelected=true,ollamaResearchSelected;
+        private bool ExternalReady=>ollamaResearchSelected?VitqraOllama.Ready:VitqraChatAccount.ResearchReady;
+        public void ConfigureResearchAi(VitqraLocalAi ai,bool localSelected=true,bool ollamaSelected=false)
         {
-            if(localResearchSelected!=localSelected){CancelEvidence();evidenceStates.Clear();draftStates.Clear();packageStates.Clear();reportStates.Clear();}
-            localResearchSelected=localSelected;
+            if(localResearchSelected!=localSelected||ollamaResearchSelected!=ollamaSelected){CancelEvidence();evidenceStates.Clear();draftStates.Clear();packageStates.Clear();reportStates.Clear();}
+            localResearchSelected=localSelected;ollamaResearchSelected=ollamaSelected;
             researchAi=localSelected?ai:null;
         }
         private async Task<bool> GenerateDraft(VitqraChallengeDirectory.Item item)
@@ -51,6 +52,7 @@ namespace Vitqra
             try
             {
                 return localResearchSelected?await VitqraResearchDraft.Generate(researchAi,EvidenceRoot,DraftRoot,item,locale,cancel.Token):
+                    ollamaResearchSelected?await VitqraResearchDraft.GenerateOllama(EvidenceRoot,DraftRoot,item,locale,cancel.Token):
                     await VitqraResearchDraft.GenerateExternal(EvidenceRoot,DraftRoot,item,locale,cancel.Token);
             }
             finally
@@ -105,7 +107,7 @@ namespace Vitqra
         }
         private void UpdateEvidence()
         {
-            if((!localResearchSelected&&!VitqraChatAccount.ResearchReady)||(activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if((!localResearchSelected&&!ExternalReady)||(activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {
@@ -139,7 +141,7 @@ namespace Vitqra
                 }
                 if(review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)
                     reportStates[EvidenceKey(item)]=VitqraResearchReport.Save(EvidenceRoot,ResultRoot,ReportRoot,item,locale);
-                if((review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)&&(localResearchSelected?researchAi!=null&&researchAi.Configured:VitqraChatAccount.ResearchReady))
+                if((review.state==VitqraEvidenceReview.State.DocumentChecksPassed||review.state==VitqraEvidenceReview.State.Partial)&&(localResearchSelected?researchAi!=null&&researchAi.Configured:ExternalReady))
                 {
                     string key=EvidenceKey(item);
                     draftStates[key]=D.DraftGenerating;Render();
@@ -166,7 +168,7 @@ namespace Vitqra
         {
             if(packageCancel!=null)packageCancel.Cancel();
             if(draftCancel!=null)draftCancel.Cancel();
-            if(!localResearchSelected)VitqraChatAccount.CancelResearch();
+            if(!localResearchSelected&&!ollamaResearchSelected)VitqraChatAccount.CancelResearch();
             if(evidenceRequest!=null)evidenceRequest.Abort();
             if(evidenceRoutine!=null)StopCoroutine(evidenceRoutine);
             evidenceRequest=null;evidenceRoutine=null;evidenceBusy=false;manualEvidence=null;

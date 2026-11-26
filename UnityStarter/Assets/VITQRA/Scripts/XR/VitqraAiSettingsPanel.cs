@@ -11,7 +11,11 @@ namespace Vitqra
     {
         private readonly List<Rect> targets=new List<Rect>();
         private readonly List<Action> actions=new List<Action>();
-        private Image localBox,chatBox,chatCard;
+        private Image localBox,chatBox,chatCard,ollamaBox;
+        private Text ollamaState,ollamaChoice;
+        private bool ollamaSelected,ollamaPage;
+        private int ollamaTargets;
+        private readonly List<GameObject> ollamaObjects=new List<GameObject>();
         private Text localStatus;
         private Text status,translation,signIn,signOut,usage;
         private Image signInBox,signOutBox,usageBox,modelsBox;
@@ -38,8 +42,8 @@ namespace Vitqra
             Box("Background",rect,Vector2.zero,new Vector2(640,340),new Color(.025f,.065f,.10f,.98f));
             Box("Accent",rect,new Vector2(0,166),new Vector2(640,8),new Color(.75f,.64f,1f));
             Label("Heading",rect,new Vector2(0,135),new Vector2(600,42),T(K.Title),28,Color.cyan);
-            Button(rect,-195,96,200,36,T(K.Local),()=>{VitqraChatAccount.Cancel();VitqraChatAccount.SetResearchConsent(false);select("local");},out localBox);
-            localStatus=Label("Local model state",rect,new Vector2(105,96),new Vector2(380,38),"",16,Color.white);
+            Button(rect,-150,96,290,36,T(K.Local),()=>{VitqraChatAccount.Cancel();VitqraChatAccount.SetResearchConsent(false);select("local");},out localBox);
+            localStatus=Label("Local model state",rect,new Vector2(0,8),new Vector2(570,42),"",16,Color.white);
             localStatus.supportRichText=false;
             // One shared visual container for the account heading, state and controls.
             chatCard=Box("ChatGPT account group",rect,new Vector2(0,-1),new Vector2(600,144),new Color(.08f,.22f,.26f,1));
@@ -52,6 +56,7 @@ namespace Vitqra
             modelsLabel=Button(rect,219,-39,142,40,T(K.Models),OpenModels,out modelsBox);
             translation=Button(rect,0,-96,590,36,"",toggleTranslation,out _);
             Button(rect,0,-139,590,38,T(K.Avatar),avatar,out _);
+            Button(rect,150,96,290,36,"Ollama",()=>{select("ollama");OpenOllama();},out ollamaBox);
             normalTargets=targets.Count;
             foreach(Transform child in rect)if(child.name!="Background"&&child.name!="Accent"&&child.name!="Heading")normalObjects.Add(child.gameObject);
             int start=rect.childCount;
@@ -67,6 +72,15 @@ namespace Vitqra
             modelTest=Button(rect,150,-73,290,42,T(K.TestConnection),TestModel,out _);
             modelBack=Button(rect,0,-130,590,42,T(K.Back),CloseModels,out _);
             for(int i=start;i<rect.childCount;i++){var child=rect.GetChild(i).gameObject;modelObjects.Add(child);child.SetActive(false);}
+            ollamaTargets=targets.Count;
+            start=rect.childCount;
+            Label("Ollama heading",rect,new Vector2(0,96),new Vector2(590,30),"Ollama",22,Color.cyan);
+            ollamaState=Label("Ollama state",rect,new Vector2(0,49),new Vector2(590,62),"",16,Color.white);
+            ollamaState.supportRichText=false;
+            ollamaChoice=Button(rect,0,-9,590,42,"",()=>{VitqraOllama.Cycle();UpdateOllama();},out _);
+            Button(rect,0,-65,590,42,T(K.RefreshModels),()=>{_=VitqraOllama.Refresh();},out _);
+            Button(rect,0,-130,590,42,T(K.Back),CloseOllama,out _);
+            for(int i=start;i<rect.childCount;i++){var child=rect.GetChild(i).gameObject;ollamaObjects.Add(child);child.SetActive(false);}
         }
         private Text Button(RectTransform parent,float x,float y,float width,float height,string label,Action action,out Image box)
         {
@@ -81,14 +95,49 @@ namespace Vitqra
             if(status==null)return;
             bool local=settings.LocalAiSelected;
             localBox.color=local?Selected:NormalButton;
-            chatBox.color=local?NormalButton:Selected;
-            chatSelected=!local;
-            localStatus.text=local?T(modelReady?K.Ready:K.NotReady):"";
+            chatSelected=settings.preferredAi=="chatgpt";ollamaSelected=settings.preferredAi=="ollama";
+            chatBox.color=chatSelected?Selected:NormalButton;ollamaBox.color=ollamaSelected?Selected:NormalButton;
+            localStatus.text=local?T(modelReady?K.Ready:K.NotReady):ollamaSelected?OllamaSummary():"";
             status.text=T(K.Disconnected);
             UpdateAccountStatus();
             translation.text=T(K.Translate)+": "+T(settings.automaticTranslation?K.On:K.Off);
         }
-        private void Update(){if(chatSelected&&Time.unscaledTime>=nextPoll){nextPoll=Time.unscaledTime+.5f;if(modelPage)UpdateModels();else UpdateAccountStatus();}}
+        private void Update()
+        {
+            if(Time.unscaledTime<nextPoll)return;
+            nextPoll=Time.unscaledTime+.5f;
+            if(ollamaPage)UpdateOllama();
+            else if(chatSelected){if(modelPage)UpdateModels();else UpdateAccountStatus();}
+            else if(ollamaSelected)localStatus.text=OllamaSummary();
+        }
+        private string OllamaSummary()
+        {
+            if(VitqraOllama.Status==VitqraOllama.State.Unconfigured)return T(K.OllamaSetup);
+            if(VitqraOllama.Status==VitqraOllama.State.Loading)return T(K.LoadingModels);
+            if(VitqraOllama.Status==VitqraOllama.State.Unavailable)return T(K.ConnectionFailed);
+            return (VitqraOllama.Selected==null?T(K.OllamaReview):VitqraOllama.Selected.name)+" · "+VitqraOllama.InstalledCount;
+        }
+        private void OpenOllama()
+        {
+            if(!ollamaSelected)return;
+            ollamaPage=true;
+            foreach(var obj in normalObjects)obj.SetActive(false);
+            foreach(var obj in ollamaObjects)obj.SetActive(true);
+            UpdateOllama();
+        }
+        private void CloseOllama()
+        {
+            ollamaPage=false;
+            foreach(var obj in ollamaObjects)obj.SetActive(false);
+            foreach(var obj in normalObjects)obj.SetActive(true);
+            UpdateAccountStatus();localStatus.text=OllamaSummary();
+        }
+        private void UpdateOllama()
+        {
+            ollamaState.text=VitqraOllama.Server+"\n"+OllamaSummary();
+            ollamaChoice.text=(VitqraOllama.Automatic?T(K.AutoModel)+": ":"")+
+                (VitqraOllama.Selected==null?T(K.OllamaReview):VitqraOllama.Selected.name);
+        }
         private void OpenModels()
         {
             if(!chatSelected)return;
@@ -140,7 +189,8 @@ namespace Vitqra
         private void UpdateAccountStatus()
         {
             if(signIn==null)return;
-            if(modelPage)return;
+            if(modelPage||ollamaPage)return;
+            localStatus.gameObject.SetActive(!chatSelected);
             chatCard.gameObject.SetActive(chatSelected);
             status.gameObject.SetActive(chatSelected);
             foreach(var t in new[]{signIn,signOut,usage,modelsLabel})t.gameObject.SetActive(chatSelected);
@@ -179,7 +229,9 @@ namespace Vitqra
             for(int i=0;i<targets.Count;i++)
             {
                 // Account actions are not hit targets while their group is collapsed.
-                if(modelPage!=(i>=normalTargets))continue;
+                if(ollamaPage){if(i<ollamaTargets)continue;}
+                else if(modelPage){if(i<normalTargets||i>=ollamaTargets)continue;}
+                else if(i>=normalTargets)continue;
                 if(!chatSelected&&i>=2&&i<=5)continue;
                 if(targets[i].Contains(new Vector2(local.x,local.y))){region=i+1;break;}
             }
@@ -187,7 +239,9 @@ namespace Vitqra
         }
         public override void InvokeAction(int region)
         {
-            if(modelPage!=(region>normalTargets))return;
+            if(ollamaPage){if(region<=ollamaTargets)return;}
+            else if(modelPage){if(region<=normalTargets||region>ollamaTargets)return;}
+            else if(region>normalTargets)return;
             if(!chatSelected&&region>=3&&region<=6)return;
             if(region>0&&region<=actions.Count)actions[region-1]?.Invoke();
         }

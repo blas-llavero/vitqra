@@ -23,3 +23,5 @@ Catalog lifecycle requirement: refresh configured and authorized providers autom
 Startup selection requirement: prefer current official research rankings intersected with each configured provider's eligible catalog. ChatGPT public-guidance parser and reviewed fallback implemented in source; live-format/device validation and other providers pending.
 
 v0.5.3c.1 development: bounded two-pass ChatGPT educational drafts in the automatic queue, explicit consent, common usage cap and provider-specific local reports. General external research, live validation and conversation integration pending.
+
+v0.5.3d development: Ollama private HTTPS catalog refresh, reviewed digest priority, provider settings and bounded educational drafts; live tests, dynamic capability ranking and general research pending. See [OLLAMA.md](OLLAMA.md).

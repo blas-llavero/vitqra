@@ -23,7 +23,7 @@ namespace Vitqra
             public string scope="unvalidated_research_hypothesis";
             public string id,url,language,modelSha256,sourceSha256,createdUtc,alternatives,critique,draftSha256;
             public string provider,modelSlug;
-            public string ModelIdentity=>version==2?"ChatGPT: "+modelSlug:"SHA-256 (model): "+modelSha256;
+            public string ModelIdentity=>version==2?"ChatGPT: "+modelSlug:version==3?"Ollama: "+modelSlug+" · manifest SHA-256: "+modelSha256:"SHA-256 (model): "+modelSha256;
         }
         public static string Instruction(string language,bool critique)
         {
@@ -51,7 +51,7 @@ namespace Vitqra
             string[] fields={draft.scope,draft.id,draft.url,draft.language,draft.modelSha256,draft.sourceSha256,
                 draft.createdUtc,draft.alternatives,draft.critique};
             var b=new StringBuilder();
-            if(draft.version==2)fields=fields.Concat(new[]{draft.provider,draft.modelSlug}).ToArray();
+            if(draft.version==2||draft.version==3)fields=fields.Concat(new[]{draft.provider,draft.modelSlug}).ToArray();
             foreach(string f in fields){if(f==null)throw new InvalidDataException();b.Append(f.Length.ToString(CultureInfo.InvariantCulture)).Append(':').Append(f);}
             return Hash(b.ToString());
         }
@@ -87,9 +87,9 @@ namespace Vitqra
         private static bool ValidModelIdentity(Draft d)
         {
             if(d.version==1)return VitqraLocalAi.ValidHash(d.modelSha256);
-            return d.version==2&&d.provider=="chatgpt"&&d.modelSha256==""&&
+            return (d.version==2&&d.provider=="chatgpt"&&d.modelSha256==""||d.version==3&&d.provider=="ollama"&&VitqraLocalAi.ValidHash(d.modelSha256))&&
                 !string.IsNullOrEmpty(d.modelSlug)&&d.modelSlug.Length<=128&&
-                d.modelSlug.All(c=>(c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||"._:-".Contains(c.ToString()));
+                d.modelSlug.All(c=>(c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||(d.version==3?"._:/-":"._:-").Contains(c.ToString()));
         }
         public static bool SupportsExternal(VitqraChallengeDirectory.Item item)
         {
@@ -122,6 +122,35 @@ namespace Vitqra
                     language=VitqraStrings.ResolveLanguage(language),sourceSha256=source.sha256,
                     createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),
                     alternatives=response.alternatives,critique=response.critique};
+                return SaveDraft(draftRoot,path,draft,token);
+            }
+            catch(Exception){return false;}
+        }
+        public static async Task<bool> GenerateOllama(string evidenceRoot,string draftRoot,
+            VitqraChallengeDirectory.Item item,string language,CancellationToken token)
+        {
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                if(!SupportsExternal(item)||!VitqraOllama.Ready)return false;
+                var m=Manifest(evidenceRoot,item);
+                var chosen=VitqraOllama.Selected;
+                if(m==null||chosen==null)return false;
+                string path=PathFor(draftRoot,item,language);
+                if(File.Exists(path))
+                {
+                    var previous=Load(evidenceRoot,draftRoot,item,language);
+                    return previous!=null&&previous.version==3&&previous.modelSlug==chosen.name&&previous.modelSha256==chosen.digest;
+                }
+                var source=m.assets.Single(a=>a.name=="source.html.txt");
+                var reply=await VitqraOllama.Research(item.id,language,token);
+                token.ThrowIfCancellationRequested();
+                if(reply==null||reply.model!=chosen.name||reply.digest!=chosen.digest)return false;
+                var current=Manifest(evidenceRoot,item);
+                if(current==null||!current.assets.Any(a=>a.name=="source.html.txt"&&a.sha256==source.sha256))return false;
+                var draft=new Draft{version=3,provider="ollama",modelSlug=reply.model,modelSha256=reply.digest,id=item.id,url=item.url,
+                    language=VitqraStrings.ResolveLanguage(language),sourceSha256=source.sha256,
+                    createdUtc=DateTime.UtcNow.ToString("o",CultureInfo.InvariantCulture),alternatives=reply.alternatives,critique=reply.critique};
                 return SaveDraft(draftRoot,path,draft,token);
             }
             catch(Exception){return false;}

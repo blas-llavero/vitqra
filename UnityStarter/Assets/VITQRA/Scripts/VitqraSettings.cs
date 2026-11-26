@@ -13,7 +13,7 @@ namespace Vitqra
         public string preferredAi = "local";
         public bool LocalAiSelected => preferredAi == "local";
         public void SelectAi(string value){preferredAi=NormalizeAi(value);}
-        public static string NormalizeAi(string value)=>value=="chatgpt"?"chatgpt":"local";
+        public static string NormalizeAi(string value)=>value=="chatgpt"||value=="ollama"?value:"local";
         public int avatarProfile = -1;
         public int dailyBudgetCents = 0;
         private const string Key = "vitqra.settings.v1";

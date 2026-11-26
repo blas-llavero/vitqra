@@ -11,6 +11,9 @@ namespace Vitqra
         [SerializeField] private Transform trackingSpace;
         [SerializeField] private string selfHostedSearchEndpoint="";
         [SerializeField] private bool allowPublicSearchTerms;
+        [SerializeField] private string ollamaServer="";
+        [SerializeField] private bool allowOwnedOllamaServer;
+        [SerializeField] private VitqraOllama.Approved[] ollamaReviewedModels=System.Array.Empty<VitqraOllama.Approved>();
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
         private VitqraSpatialPanel advice, notes, assistant, grabbed;
@@ -56,6 +59,8 @@ namespace Vitqra
             // Catalog metadata only, including previously authorized accounts
             // not currently selected for inference. No UI navigation required.
             VitqraChatAccount.InitializeCatalog();
+            VitqraOllama.Configure(ollamaServer,allowOwnedOllamaServer,ollamaReviewedModels);
+            _=VitqraOllama.Refresh();
             // A separate bounded, unauthenticated public guidance request.
             StartCoroutine(VitqraResearchModelGuidance.RefreshAtLaunch());
             var l = VitqraStrings.Get(settings.language);
@@ -87,7 +92,7 @@ namespace Vitqra
             localAi=GetComponent<VitqraLocalAi>();
             if(localAi!=null)localAi.Configure(conversation,settings.language,AddAssistantMessage);
             if(localAi!=null)localAi.SetProviderSelected(settings.LocalAiSelected);
-            research.ConfigureResearchAi(localAi,settings.LocalAiSelected);
+            research.ConfigureResearchAi(localAi,settings.LocalAiSelected,settings.preferredAi=="ollama");
             var speech = GetComponent<VitqraLocalVoice>();
             if(speech==null) speech=gameObject.AddComponent<VitqraLocalVoice>();
             speech.Configure(conversation, VitqraStrings.ResolveLanguage(settings.language));
@@ -122,8 +127,9 @@ namespace Vitqra
         private void SelectAi(string value)
         {
             if(settings.preferredAi==value)return;
+            if(value!="chatgpt")VitqraChatAccount.SetResearchConsent(false);
             settings.SelectAi(value);settings.Save();
-            research.ConfigureResearchAi(localAi,settings.LocalAiSelected);
+            research.ConfigureResearchAi(localAi,settings.LocalAiSelected,settings.preferredAi=="ollama");
             if(localAi!=null)localAi.SetProviderSelected(settings.LocalAiSelected);
             Refresh();
         }

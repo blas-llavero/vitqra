@@ -26,3 +26,7 @@ At each process launch, separately from the authorized account catalog, the Chat
 For Ollama, llama.cpp and future providers, startup selection must consider reviewed research capability, actual installed/authorized models, license, device memory and context support, not just parameter count, model age or catalog order. Where a trustworthy machine-readable recommendation is unavailable, use a maintained reviewed ranking and explicitly distinguish it from live guidance. No universal cross-provider score is claimed. Those adapters and their capability sources are pending. Preserve provider preference; never switch providers to find a stronger model without authorization. No automatic paid benchmarking. Re-evaluate when supported provider metadata changes, and never override an explicit manual choice.
 
 Tests: synthetic guide fixtures for exact and ambiguous matching, future labels, unavailable models, malformed input, duplicate rows, size bounds and fallback. Run VITQRA > Run Research Model Selection Checks. No Unity execution, live account or headset test performed.
+
+## Ollama development extension
+
+Ollama now refreshes a provisioned, authorized private HTTPS server catalog at workspace launch, resolves the highest reviewed installed digest, and supports bounded educational drafts. Dynamic capability rankings, runtime endpoint configuration and live verification are pending. See [OLLAMA.md](OLLAMA.md).
