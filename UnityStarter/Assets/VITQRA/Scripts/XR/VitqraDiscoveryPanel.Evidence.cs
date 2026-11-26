@@ -25,6 +25,16 @@ namespace Vitqra
         private VitqraLocalAi researchAi;
         private CancellationTokenSource draftCancel;
         private Task<bool> activeDraft;
+        private Task<bool> activePackage;
+        private CancellationTokenSource packageCancel;
+        private string PackageRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchPackages");
+        private readonly Dictionary<string,bool> packageStates=new Dictionary<string,bool>(StringComparer.Ordinal);
+        private async Task<bool> SavePackage(VitqraChallengeDirectory.Item item)
+        {
+            var token=new CancellationTokenSource();packageCancel=token;
+            try{return await VitqraResearchPackage.Save(PackageRoot,VitqraResearchPackage.Build(EvidenceRoot,ResultRoot,ReportRoot,DraftRoot,item,locale),token.Token);}
+            finally{if(ReferenceEquals(packageCancel,token))packageCancel=null;token.Dispose();}
+        }
         private string DraftRoot=>Path.Combine(Application.persistentDataPath,"VITQRA","ResearchDrafts");
         public void ConfigureResearchAi(VitqraLocalAi ai){researchAi=ai;}
         private async Task<bool> GenerateDraft(VitqraChallengeDirectory.Item item)
@@ -47,7 +57,8 @@ namespace Vitqra
             string key=EvidenceKey(item);
             string suffix=evidenceStates.TryGetValue(key,out var state)?" · "+T(state):"";
             if(reportStates.TryGetValue(key,out var saved))suffix+=" · "+T(saved?D.ReportSaved:D.ReportUnavailable);
-            return draftStates.TryGetValue(key,out var draft)?suffix+" · "+T(draft):suffix;
+            if(draftStates.TryGetValue(key,out var draft))suffix+=" · "+T(draft);
+            return packageStates.TryGetValue(key,out var ready)?suffix+" · "+T(ready?D.PackageSaved:D.PackageUnavailable):suffix;
         }
         private void QueueManualEvidence(VitqraChallengeDirectory.Item item)
         {
@@ -83,7 +94,7 @@ namespace Vitqra
         }
         private void UpdateEvidence()
         {
-            if((activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
+            if((activePackage!=null&&!activePackage.IsCompleted)||(activeDraft!=null&&!activeDraft.IsCompleted)||runPaused||runStopped||evidencePaused||evidenceBusy||Time.unscaledTime<evidenceNext||evidenceJobs>=VitqraEvidence.MaxJobs)return;
             VitqraChallengeDirectory.Item item=null;
             if(automatic)
             {
@@ -126,6 +137,13 @@ namespace Vitqra
                     draftStates[key]=activeDraft.Status==TaskStatus.RanToCompletion&&activeDraft.Result?D.DraftSaved:D.DraftUnavailable;
                     activeDraft=null;
                 }
+                if(VitqraResearchPackage.Available&&reportStates.TryGetValue(EvidenceKey(item),out var reportSaved)&&reportSaved)
+                {
+                    activePackage=SavePackage(item);
+                    while(!activePackage.IsCompleted)yield return null;
+                    packageStates[EvidenceKey(item)]=activePackage.Status==TaskStatus.RanToCompletion&&activePackage.Result;
+                    activePackage=null;
+                }
                 evidenceStates[EvidenceKey(item)]=state;
             }
             else evidenceStates[EvidenceKey(item)]=D.EvidenceFailed;
@@ -133,13 +151,14 @@ namespace Vitqra
         }
         private void CancelEvidence()
         {
+            if(packageCancel!=null)packageCancel.Cancel();
             if(draftCancel!=null)draftCancel.Cancel();
             if(evidenceRequest!=null)evidenceRequest.Abort();
             if(evidenceRoutine!=null)StopCoroutine(evidenceRoutine);
             evidenceRequest=null;evidenceRoutine=null;evidenceBusy=false;manualEvidence=null;
             var canceled=new List<string>();
             foreach(var pair in evidenceStates)if(pair.Value==D.EvidenceLoading)canceled.Add(pair.Key);
-            foreach(var key in canceled){evidenceStates.Remove(key);draftStates.Remove(key);}
+            foreach(var key in canceled){evidenceStates.Remove(key);draftStates.Remove(key);packageStates.Remove(key);}
             evidenceNext=Time.unscaledTime+2f;
         }
         private void OnApplicationPause(bool paused)

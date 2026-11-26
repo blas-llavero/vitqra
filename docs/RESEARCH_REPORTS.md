@@ -15,3 +15,7 @@ File size limit 64 KiB each; combined report store ceiling 8 MiB. Files are stag
 ## Validation
 
 Run VITQRA > Run Research Report Checks in Unity Editor for synthetic fixtures: HTML escaping, missing evidence, no fabricated result, sample verification, localized output, stable reuse and rejection of changed report files. These tests are supplied but have not been executed in Unity. Compile and test on Quest 3, including actual source retrieval, frame time for synchronous checks, detail controls, pagination, text clipping, RTL/fonts, quotas and interrupted storage. No APK or real scientific report is provided by this source commit. Existing dependency licenses and security restrictions remain unchanged; native dependency and model audits are still pending.
+
+## PDF and ZIP extension
+
+See [RESEARCH_PDF.md](RESEARCH_PDF.md) for the Android-only local PDF and archive source implementation and limitations.
