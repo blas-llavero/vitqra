@@ -10,6 +10,7 @@ namespace Vitqra
         public bool automaticTranslation = true;
         public string language = "device";
         public string provider = "local";
+        public int avatarProfile = -1;
         public int dailyBudgetCents = 0;
         private const string Key = "vitqra.settings.v1";
 

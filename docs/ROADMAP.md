@@ -2,7 +2,7 @@
 
 1. Source overlay, desktop preview, README, settings and notes (this package).
 2. Unity XR rig and passthrough via the Mixed Reality template; repositionable world-space panels and controller input source added in v0.2.0. Editor import, template configuration and physical Quest 3 tests remain pending.
-3. Localization and international font/RTL validation; avatars, local speech and hand gestures.
+3. v0.3.0: four selectable procedural avatar profiles, localized advice and optional XR Hands OK gesture source. Unity/device tests, international font/RTL validation, natural local speech, dictation and reviewed avatar models remain pending.
 4. Challenge and hackathon source adapters, browser and document import with provenance.
 5. Local AI adapter and budget enforcement; job checkpointing and research evidence review; optional commercial providers.
 6. Separate patient-service prototype only after privacy, security and clinical governance review.

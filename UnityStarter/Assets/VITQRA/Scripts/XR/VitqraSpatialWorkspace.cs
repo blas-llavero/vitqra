@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using K = Vitqra.VitqraAssistantStrings.Key;
 
 namespace Vitqra
 {
@@ -10,7 +11,11 @@ namespace Vitqra
         [SerializeField] private Transform trackingSpace;
         private readonly List<VitqraSpatialPanel> panels = new List<VitqraSpatialPanel>();
         private VitqraSettings settings;
-        private VitqraSpatialPanel research, advice, notes, configuration, grabbed;
+        private VitqraSpatialPanel research, advice, notes, configuration, assistant, grabbed;
+        private VitqraAvatarPreview avatar;
+        private bool reviewPending, reviewCompleted;
+        public bool ReviewPending => reviewPending;
+        public event System.Action<string, string> AdviceChanged;
         private Vector3 grabOffset;
         private bool previousGrip, previousTrigger, previousPrimary;
         private ulong activeDevice;
@@ -36,9 +41,16 @@ namespace Vitqra
             settings = VitqraSettings.Load();
             var l = VitqraStrings.Get(settings.language);
             research = AddPanel(l[7], Cyan, () => { topicIndex = (topicIndex + 1) % 5; Refresh(); });
-            advice = AddPanel("Smart Advice", Violet, () => { adviceIndex = (adviceIndex + 1) % 3; Refresh(); });
-            notes = AddPanel(l[10], Cyan, Refresh);
-            configuration = AddPanel(l[4], Violet, () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
+            advice = AddPanel(T(K.Advice), Violet, ReviewAction);
+            notes = AddPanel(T(K.Notes), Cyan, Refresh);
+            configuration = AddPanel(T(K.Settings), Violet, () => { settings.automaticResearch = !settings.automaticResearch; settings.Save(); Refresh(); });
+            assistant = AddPanel(T(K.Assistant), Violet, ChooseNextAvatar);
+            assistant.ReserveAvatarSpace();
+            avatar = assistant.gameObject.AddComponent<VitqraAvatarPreview>();
+            avatar.SetProfile(settings.avatarProfile);
+#if VITQRA_XR_HANDS
+            gameObject.AddComponent<VitqraOkGesture>().Configure(this);
+#endif
             foreach (var panel in panels) panel.gameObject.SetActive(false);
             Refresh();
         }
@@ -53,16 +65,53 @@ namespace Vitqra
             return panel;
         }
 
+        private string T(K key) => VitqraAssistantStrings.Get(settings.language, key);
+        private string Tip => T((K)((int)K.Tip1 + adviceIndex));
+
+        private void ChooseNextAvatar()
+        {
+            settings.avatarProfile = settings.avatarProfile >= 0 && settings.avatarProfile < 3 ? settings.avatarProfile + 1 : 0;
+            settings.Save();
+            avatar.SetProfile(settings.avatarProfile);
+            Refresh();
+        }
+
+        private void ReviewAction()
+        {
+            if (reviewPending) { ConfirmReview(); return; }
+            if (reviewCompleted)
+            {
+                reviewCompleted = false;
+                adviceIndex = (adviceIndex + 1) % 3;
+                Refresh();
+                AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
+                return;
+            }
+            reviewPending = true;
+            Refresh();
+        }
+
+        public void ConfirmReview()
+        {
+            if (!reviewPending) return;
+            reviewPending = false;
+            reviewCompleted = true;
+            Refresh();
+        }
+
         private void Refresh()
         {
             var l = VitqraStrings.Get(settings.language);
-            research.SetContent(l[14 + topicIndex] + "\n" + l[9], "Next topic");
-            string[] messages = { "Configure an AI provider before research.", "Use only verified scientific sources.", "AI hypotheses require scientific review." };
-            advice.SetContent(messages[adviceIndex], "Next tip");
+            research.SetContent(l[14 + topicIndex] + "\n" + l[9], T(K.NextTopic));
+            string status = reviewPending ? "\n" + T(K.PendingReview) : reviewCompleted ? "\n" + T(K.Reviewed) : "";
+            advice.SetContent(Tip + status, T(reviewPending ? K.ConfirmReview : reviewCompleted ? K.NextTip : K.ReviewTip));
             string note = PlayerPrefs.GetString("vitqra.preview.note", "");
             if (note.Length > 180) note = note.Substring(0,180) + "...";
-            notes.SetContent(string.IsNullOrWhiteSpace(note) ? "No sample note saved." : note, l[12]);
-            configuration.SetContent(settings.provider + "\n" + l[5] + "\n" + l[2] + ": " + (settings.automaticResearch ? "ON" : "OFF"), "Toggle automatic research");
+            notes.SetContent(string.IsNullOrWhiteSpace(note) ? T(K.NoNote) : note, l[12]);
+            configuration.SetContent(settings.provider + "\n" + l[5] + "\n" + l[2] + ": " + T(settings.automaticResearch ? K.On : K.Off), T(K.ToggleResearch));
+            int profile = settings.avatarProfile;
+            string profileName = profile >= 0 && profile <= 3 ? T((K)((int)K.Man + profile)) : T(K.ChooseAvatar);
+            assistant.SetContent(profileName + "\n" + T(K.NoSpeech), T(K.NextAvatar));
         }
 
         private void PlacePanels()
@@ -80,6 +129,7 @@ namespace Vitqra
             PlacePanel(notes, center, right, -columnOffset, lowerRow);
             PlacePanel(advice, center, right, columnOffset, upperRow);
             PlacePanel(configuration, center, right, columnOffset, lowerRow);
+            PlacePanel(assistant, center, right, columnOffset, 0.66f);
             initialized = true;
         }
 
@@ -113,6 +163,7 @@ namespace Vitqra
                 var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
                 if (!head.isValid || !head.TryGetFeatureValue(CommonUsages.isTracked, out bool tracked) || !tracked) return;
                 PlacePanels();
+                AdviceChanged?.Invoke(Tip, VitqraStrings.ResolveLanguage(settings.language));
             }
 
             var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);

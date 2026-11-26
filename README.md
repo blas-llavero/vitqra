@@ -2,7 +2,7 @@
 
 **Science without barriers.**
 
-VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 using Unity and OpenXR. Version 0.2.1 is a source-only desktop and spatial prototype, not an installable Quest application.
+VITQRA is an open-source research assistant project for mixed reality, intended to support scientific discovery, accessible collaboration and responsible global health research. It targets Meta Quest 3 using Unity and OpenXR. Version 0.3.0 is a source-only desktop and spatial prototype, not an installable Quest application.
 
 ## Installation location
 
@@ -41,7 +41,9 @@ No APK or public release is available at this milestone. Clone this repository o
 | AI providers and spending limits | Configuration only; no credentials or network calls |
 | World-space panels and controller movement | Source implemented; physical testing pending |
 | Quest passthrough and XR rig | Template setup documented; not verified |
-| Avatars, speech, gestures and browser | Planned |
+| Procedural avatar selection, localized tips and review confirmation | Source implemented; Unity/headset tests pending |
+| OK gesture with XR Hands | Optional source adapter; package/feature setup and device testing pending |
+| Natural speech, dictation and browser | Planned |
 | Research and hackathon discovery, data import and research pipeline | Planned |
 | Patient community and remote avatar presence | Planned; security and clinical governance gates apply |
 | About and Help videos, branding and store screenshots | Pending author review; no media distributed |
@@ -64,9 +66,9 @@ See [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [securi
 
 Own source code is licensed under Apache-2.0 (see LICENSE). Unity and Meta SDKs are separately licensed third-party dependencies and are not redistributed in this package. Contributions must not include patient records, secrets, or unapproved media. See THIRD_PARTY_NOTICES.md.
 
-## Mixed reality prototype (v0.2.1)
+## Mixed reality prototype (v0.3.0)
 
-Four independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right. Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial text localization is partial; no APK or verified headset build exists.
+Five independently movable world-space panels are provided as a Unity source overlay. The initial layout leaves the center open: Research Challenges and My Notes on the left, Smart Advice and AI Settings on the right, with Virtual Assistant above them. Panels face the user at placement; A/X restores the default layout relative to the current view. Sample actions and controller-based repositioning remain available. Use the Mixed Reality template and follow [Quest setup and physical test checklist](docs/QUEST_SETUP.md). The desktop preview remains available. Spatial labels are localized in ten languages; glyphs, RTL and layout are not verified. See [assistant setup](docs/ASSISTANT_SETUP.md) for the procedural avatar, tip review and optional OK gesture. No speech engine or APK is provided.
 
 ## Build from source
 

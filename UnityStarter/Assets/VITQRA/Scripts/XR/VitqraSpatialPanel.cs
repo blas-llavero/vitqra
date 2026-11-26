@@ -38,6 +38,12 @@ namespace Vitqra
             action.text = actionLabel;
         }
 
+        public void ReserveAvatarSpace()
+        {
+            body.rectTransform.anchoredPosition = new Vector2(94, 16);
+            body.rectTransform.sizeDelta = new Vector2(350, 170);
+        }
+
         public void Highlight(bool value) { if (background != null) background.color = value ? Hover : Normal; }
         public void InvokeAction() { activate?.Invoke(); }
 

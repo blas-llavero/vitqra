@@ -19,7 +19,7 @@ namespace Vitqra
             { "ar", new[] { "معاينة سطح المكتب — دون اتصال بالشبكة", "اللغة", "البحث التلقائي", "الترجمة التلقائية", "مزود الذكاء الاصطناعي", "غير متصل — ميزانية الدفع: 0", "حفظ الإعدادات", "تحديات البحث", "بحث", "البحث عبر الإنترنت غير متاح بعد.", "ملاحظات تجريبية — دون بيانات حساسة", "حفظ الملاحظة", "استرجاع الملاحظة", "حذف الملاحظة", "المعلوماتية الحيوية", "علوم النانو", "أبحاث السرطان", "طول العمر", "الهاكاثون" } },
             { "ja", new[] { "デスクトッププレビュー — ネットワーク接続なし", "言語", "自動研究", "自動翻訳", "AI プロバイダー", "未接続 — 有料予算：0", "設定を保存", "研究課題", "検索", "オンライン検索は未実装です。", "試用メモ — 機密情報なし", "メモを保存", "メモを読み込む", "メモを削除", "バイオインフォマティクス", "ナノ科学", "がん研究", "長寿", "ハッカソン" } }
         };
-        public static string[] Get(string language)
+        public static string ResolveLanguage(string language)
         {
             if (language == "device")
             {
@@ -37,7 +37,9 @@ namespace Vitqra
                     default: language = "en"; break;
                 }
             }
-            return language != null && Strings.TryGetValue(language, out var value) ? value : Strings["en"];
+            return language != null && Strings.ContainsKey(language) ? language : "en";
         }
+
+        public static string[] Get(string language) => Strings[ResolveLanguage(language)];
     }
 }
